@@ -16,7 +16,7 @@ intents=discord.Intents.all()
 
 bot = commands.Bot(command_prefix="!",help_command=None,intents=intents)
 
-def getjson(url='https://api.hearthstonejson.com/v1/latest/all/cards.json'):
+def getjson(url='://api.hearthstonejson.com/v1/latest/all/cards.json'):
     req = urllib.request.Request(url, headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)'})
     oper = urllib.request.urlopen(req)
     data = oper.read()
@@ -37,7 +37,7 @@ openjson()
 @bot.command()
 async def reloadjson(msg,url=['https://api.hearthstonejson.com/v1/latest/all/cards.json','https://api.hearthstonejson.com/v1/latest/all/mercenaries.json']):
     try:
-        f.close()
+        f1.close()
         os.remove('cards.json')
     except:
         pass
