@@ -1,0 +1,5 @@
+requests
+hearthstone
+hearthstone_data
+aiohttp>=3.6.0,<4
+flask
