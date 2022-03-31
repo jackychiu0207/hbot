@@ -12,7 +12,7 @@ app = Flask('')
 
 def home():
 
-    return "I'm alive"
+    return "run"
 
 
 
