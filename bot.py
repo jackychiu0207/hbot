@@ -25,9 +25,9 @@ def getjson(url='https://api.hearthstonejson.com/v1/latest/all/cards.json'):
     file.close()
 
 def openjson():
-    global cardlib,f
+    global cardlib,f1
     try:
-        with open('cards.json') as f:
+        with open('cards.json') as f1:
             cardlib = json.load(f)
     except:
         return False
