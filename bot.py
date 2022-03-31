@@ -16,24 +16,18 @@ intents=discord.Intents.all()
 
 bot = commands.Bot(command_prefix="!",help_command=None,intents=intents)
 
-def getjson(url=['https://api.hearthstonejson.com/v1/latest/all/cards.json','https://api.hearthstonejson.com/v1/latest/all/mercenaries.json']):
-    req = urllib.request.Request(url[0], headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)'})
+def getjson(url='https://api.hearthstonejson.com/v1/latest/all/cards.json'):
+    req = urllib.request.Request(url, headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)'})
     oper = urllib.request.urlopen(req)
     data = oper.read()
     file = open('cards.json','wb')
     file.write(data)
     file.close()
-    req = urllib.request.Request(url[1], headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)'})
-    oper = urllib.request.urlopen(req)
-    data = oper.read()
-    file = open('mercenaries.json','wb')
-    file.write(data)
-    file.close()
 
 def openjson():
-    global cardlib,f1
+    global cardlib,f
     try:
-        with open('cards.json') as f1:
+        with open('cards.json') as f:
             cardlib = json.load(f)
     except:
         return False
@@ -41,9 +35,9 @@ getjson()
 openjson()
 
 @bot.command()
-async def reloadjson(msg,url=['https://api.hearthstonejson.com/v1/latest/all/cards.json','https://api.hearthstonejson.com/v1/latest/all/mercenaries.json']):
+async def reloadjson(msg,url='https://api.hearthstonejson.com/v1/latest/all/cards.json'):
     try:
-        f1.close()
+        f.close()
         os.remove('cards.json')
     except:
         pass
