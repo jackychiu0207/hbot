@@ -23,6 +23,12 @@ def getjson(url=['https://api.hearthstonejson.com/v1/latest/all/cards.json','htt
     file = open('cards.json','wb')
     file.write(data)
     file.close()
+    req = urllib.request.Request(url[1], headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)'})
+    oper = urllib.request.urlopen(req)
+    data = oper.read()
+    file = open('mercenaries.json','wb')
+    file.write(data)
+    file.close()
 
 def openjson():
     global cardlib,f1
