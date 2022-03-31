@@ -35,7 +35,7 @@ getjson()
 openjson()
 
 @bot.command()
-async def reloadjson(msg,url=['https://api.hearthstonejson.com/v1/latest/all/cards.json','https://api.hearthstonejson.com/v1/latest/all/cards.json']):
+async def reloadjson(msg,url=['https://api.hearthstonejson.com/v1/latest/all/cards.json','https://api.hearthstonejson.com/v1/latest/all/mercenaries.json']):
     try:
         f.close()
         os.remove('cards.json')
