@@ -16,32 +16,44 @@ intents=discord.Intents.all()
 
 bot = commands.Bot(command_prefix="t!",help_command=None,intents=intents)
 
-def getjson(url='https://api.hearthstonejson.com/v1/latest/all/cards.json'):
+def getjson():
+    url='https://api.hearthstonejson.com/v1/latest/all/cards.json'
     req = urllib.request.Request(url, headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)'})
     oper = urllib.request.urlopen(req)
     data = oper.read()
     file = open('cards.json','wb')
     file.write(data)
     file.close()
+    url='https://api.hearthstonejson.com/v1/latest/all/mercenaries.json'
+    req = urllib.request.Request(url, headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)'})
+    oper = urllib.request.urlopen(req)
+    data = oper.read()
+    file = open('mercenaries.json','wb')
+    file.write(data)
+    file.close()
 
 def openjson():
-    global cardlib,f
+    global cardlib,cardlibm,f,fm
     try:
         with open('cards.json') as f:
             cardlib = json.load(f)
+        with open('mercenaries.json') as fm:
+            cardlibm = json.load(fm)
     except:
         return False
 getjson()
 openjson()
 
 @bot.command()
-async def reloadjson(msg,url='https://api.hearthstonejson.com/v1/latest/all/cards.json'):
+async def reloadjson(msg):
     try:
         f.close()
+        fm.close()
         os.remove('cards.json')
+        os.remove('mercenaries.json')
     except:
         pass
-    getjson(url=url)
+    getjson()
     if openjson() is not False:
         await msg.reply("完成")
     else:
@@ -54,6 +66,7 @@ async def help(msg):
     embed.add_field(name="t!id",value="使用方法:\"t!id dbfId或id 語言(選填)\"\n例子1(使用dbfId):`t!id 38833`\n例子2(使用id):`t!id OG_272`", inline=False)
     embed.add_field(name="t!card",value="使用方法:\"t!card 卡牌名稱 語言(選填)\"\n例子:`t!card 暮光召喚師`", inline=False)
     embed.add_field(name="t!deck",value="使用方法:\"t!deck 牌組代碼 牌組名稱(選填) \"\n例子1(無套牌名稱):\n`t!deck AAEBAaIHDpoC+AfpEZfBAt/jArvvAuvwAoSmA6rLA4/OA/bWA4PkA72ABJWfBAi0AcQB7QL1uwLi3QPn3QOS5AP+7gMA`\n例子2(有套牌名稱):\n`t!deck AAEBAaIHDpoC+AfpEZfBAt/jArvvAuvwAoSmA6rLA4/OA/bWA4PkA72ABJWfBAi0AcQB7QL1uwLi3QPn3QOS5AP+7gMA 無限潛行`", inline=False)
+    embed.add_field(name="t!mcard",value="使用方法:\"t!mcard 傭兵名稱 語言(選填)\"\n例子:`t!mcard 凱瑞爾`", inline=False)
     await msg.reply(embed=embed)
 
 
