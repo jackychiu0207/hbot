@@ -81,7 +81,6 @@ def change_text(text:str):
 @bot.command()
 async def stop(msg):
     await msg.reply("stop!")
-    os.system('python3 main.py')
     exit()
 
 #event
