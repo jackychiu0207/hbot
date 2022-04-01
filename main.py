@@ -14,7 +14,7 @@ from webserver import keep_alive
 intents=discord.Intents.all()
 
 
-bot = commands.Bot(command_prefix="!",help_command=None,intents=intents)
+bot = commands.Bot(command_prefix="t!",help_command=None,intents=intents)
 
 def getjson(url='https://api.hearthstonejson.com/v1/latest/all/cards.json'):
     req = urllib.request.Request(url, headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)'})
@@ -50,10 +50,10 @@ async def reloadjson(msg,url='https://api.hearthstonejson.com/v1/latest/all/card
 #help command
 @bot.command()
 async def help(msg):
-    embed = discord.Embed(title="指令列表",description="dbfId及id說明:dbfId為純數字、id為文字+數字。\n使用 **!card** 及 **!id** 指令會將dbfId及id寫在右下方，以逗號分隔;\n使用 **!deck** 指令則會將dbfId及id寫在卡片名稱後方括號內，以逗號分隔;\n在爐石戰記官網(hsreplay)的卡牌庫中點開一張牌後，網址會變為`https://playhearthstone.com/zh-tw/cards/...(https://hsreplay.net/cards/...)`，「...」中數字的部分即為dbfId。\n指令中語言參數皆為選填，常見zhTW(預設)、zhCN、enUS …\n",color=0xff0000)
-    embed.add_field(name="!id",value="使用方法:\"!id dbfId或id 語言(選填)\"\n例子1(使用dbfId):`!id 38833`\n例子2(使用id):`!id OG_272`", inline=False)
-    embed.add_field(name="!card",value="使用方法:\"!card 卡牌名稱 語言(選填)\"\n例子:`!card 暮光召喚師`", inline=False)
-    embed.add_field(name="!deck",value="使用方法:\"!deck 牌組代碼 牌組名稱(選填) \"\n例子1(無套牌名稱):`!deck AAEBAaIHDpoC+AfpEZfBAt/jArvvAuvwAoSmA6rLA4/OA/bWA4PkA72ABJWfBAi0AcQB7QL1uwLi3QPn3QOS5AP+7gMA`\n例子2(有套牌名稱):`!deck AAEBAaIHDpoC+AfpEZfBAt/jArvvAuvwAoSmA6rLA4/OA/bWA4PkA72ABJWfBAi0AcQB7QL1uwLi3QPn3QOS5AP+7gMA 無限潛行`", inline=False)
+    embed = discord.Embed(title="指令列表",description="dbfId及id說明:dbfId為純數字、id為文字+數字。\n使用 **t!card** 及 **t!id** 指令會將dbfId及id寫在右下方，以逗號分隔;\n使用 **!deck** 指令則會將dbfId及id寫在卡片名稱後方括號內，以逗號分隔;\n在爐石戰記官網(hsreplay)的卡牌庫中點開一張牌後，網址會變為`https://playhearthstone.com/zh-tw/cards/...(https://hsreplay.net/cards/...)`，「...」中數字的部分即為dbfId。\n指令中語言參數皆為選填，常見zhTW(預設)、zhCN、enUS …\n",color=0xff0000)
+    embed.add_field(name="t!id",value="使用方法:\"t!id dbfId或id 語言(選填)\"\n例子1(使用dbfId):`t!id 38833`\n例子2(使用id):`t!id OG_272`", inline=False)
+    embed.add_field(name="t!card",value="使用方法:\"t!card 卡牌名稱 語言(選填)\"\n例子:`t!card 暮光召喚師`", inline=False)
+    embed.add_field(name="t!deck",value="使用方法:\"t!deck 牌組代碼 牌組名稱(選填) \"\n例子1(無套牌名稱):`t!deck AAEBAaIHDpoC+AfpEZfBAt/jArvvAuvwAoSmA6rLA4/OA/bWA4PkA72ABJWfBAi0AcQB7QL1uwLi3QPn3QOS5AP+7gMA`\n例子2(有套牌名稱):`t!deck AAEBAaIHDpoC+AfpEZfBAt/jArvvAuvwAoSmA6rLA4/OA/bWA4PkA72ABJWfBAi0AcQB7QL1uwLi3QPn3QOS5AP+7gMA 無限潛行`", inline=False)
     await msg.reply(embed=embed)
 
 
@@ -97,7 +97,7 @@ async def on_ready():
 @bot.command()
 async def id(msg,cardid=None,lang="zhTW"):
     if cardid==None:
-        await msg.reply("該指令使用方法:\"!id dbfId或id 語言(選填)\"\n例子1(使用dbfId):`!id 38833`\n例子2(使用id):`!id OG_272`")
+        await msg.reply("該指令使用方法:\"t!id dbfId或id 語言(選填)\"\n例子1(使用dbfId):`t!id 38833`\n例子2(使用id):`t!id OG_272`")
     else:
         find=False
         if cardid.isdigit() is True:
@@ -144,7 +144,7 @@ async def id(msg,cardid=None,lang="zhTW"):
 @bot.command()
 async def card(msg,cardname=None,lang="zhTW"):
     if cardname==None:
-        await msg.reply("該指令使用方法:\"!card 卡牌名稱 語言(選填)\"\n例子:`!card 暮光召喚師`")
+        await msg.reply("該指令使用方法:\"t!card 卡牌名稱 語言(選填)\"\n例子:`t!card 暮光召喚師`")
     else:
         def embed(data:dict):
             title=data['name'][lang]
@@ -196,7 +196,7 @@ async def card(msg,cardname=None,lang="zhTW"):
             await msg.reply("由於數量過多，請更改關鍵字縮小範圍。",view=view)
         else:
             options=[]
-            options.append(SelectOption(label="全部發送到私人訊息",value="-1",description="可搭配 !id 指令"))
+            options.append(SelectOption(label="全部發送到私人訊息",value="-1",description="可搭配 t!id 指令"))
             for i,data in enumerate(find):
                 text=""
                 if 'text' in data:text=change_text(data["text"][lang]).replace("*","").replace("\n","").replace("****","** **").replace("[x]","")
@@ -219,7 +219,7 @@ async def card(msg,cardname=None,lang="zhTW"):
 @bot.command()
 async def deck(msg,deckcode=None,deckname=None,lang="zhTW"):
     if deckcode==None:
-        await msg.reply("該指令使用方法:\"!deck 牌組代碼 牌組名稱(選填) \"\n例子1(無套牌名稱):`!deck AAEBAaIHDpoC+AfpEZfBAt/jArvvAuvwAoSmA6rLA4/OA/bWA4PkA72ABJWfBAi0AcQB7QL1uwLi3QPn3QOS5AP+7gMA`\n例子2(有套牌名稱):`!deck AAEBAaIHDpoC+AfpEZfBAt/jArvvAuvwAoSmA6rLA4/OA/bWA4PkA72ABJWfBAi0AcQB7QL1uwLi3QPn3QOS5AP+7gMA 無限潛行`")
+        await msg.reply("該指令使用方法:\"t!deck 牌組代碼 牌組名稱(選填) \"\n例子1(無套牌名稱):`t!deck AAEBAaIHDpoC+AfpEZfBAt/jArvvAuvwAoSmA6rLA4/OA/bWA4PkA72ABJWfBAi0AcQB7QL1uwLi3QPn3QOS5AP+7gMA`\n例子2(有套牌名稱):`t!deck AAEBAaIHDpoC+AfpEZfBAt/jArvvAuvwAoSmA6rLA4/OA/bWA4PkA72ABJWfBAi0AcQB7QL1uwLi3QPn3QOS5AP+7gMA 無限潛行`")
     else:
         heroclass=""
         deck = Deck.from_deckstring(deckcode)

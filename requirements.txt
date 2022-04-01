@@ -2,3 +2,5 @@ requests
 hearthstone
 hearthstone_data
 flask
+wget
+aiohttp>=3.6.0,<4
