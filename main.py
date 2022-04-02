@@ -66,7 +66,7 @@ async def help(msg):
     embed.add_field(name="t!id",value="使用方法:\"t!id dbfId或id 語言(選填)\"\n例子1(使用dbfId):`t!id 38833`\n例子2(使用id):`t!id OG_272`", inline=False)
     embed.add_field(name="t!card",value="使用方法:\"t!card 卡牌名稱 語言(選填)\"\n例子:`t!card 暮光召喚師`", inline=False)
     embed.add_field(name="t!deck",value="使用方法:\"t!deck 牌組代碼 牌組名稱(選填) \"\n例子1(無套牌名稱):\n`t!deck AAEBAaIHDpoC+AfpEZfBAt/jArvvAuvwAoSmA6rLA4/OA/bWA4PkA72ABJWfBAi0AcQB7QL1uwLi3QPn3QOS5AP+7gMA`\n例子2(有套牌名稱):\n`t!deck AAEBAaIHDpoC+AfpEZfBAt/jArvvAuvwAoSmA6rLA4/OA/bWA4PkA72ABJWfBAi0AcQB7QL1uwLi3QPn3QOS5AP+7gMA 無限潛行`", inline=False)
-    embed.add_field(name="t!mcard",value="使用方法:\"t!mcard 傭兵名稱 語言(選填)\"\n例子:`t!mcard 凱瑞爾`", inline=False)
+    embed.add_field(name="t!mcard",value="使用方法:\"t!mcard 傭兵名稱 語言(選填)\"\n例子:`t!mcard 餅乾大廚`", inline=False)
     await msg.reply(embed=embed)
 
 
