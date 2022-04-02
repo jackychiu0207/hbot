@@ -232,7 +232,7 @@ async def card(msg,cardname=None,lang="zhTW"):
 @bot.command()
 async def merc(msg,cardname=None,lang="zhTW"):
     if cardname==None:
-        await msg.reply("該指令使用方法:\"t!merc 卡牌名稱 語言(選填)\"\n例子:`t!merc 餅乾大廚")
+        await msg.reply("該指令使用方法:\"t!merc 卡牌名稱 語言(選填)\"\n例子:`t!merc 餅乾大廚`")
     else:
         def embed(data:dict):
             title=data['name'][lang]
@@ -257,7 +257,7 @@ async def merc(msg,cardname=None,lang="zhTW"):
                                     for ownerdata in cardlib:
                                         if ownerdata["dbfId"]==h_data["defaultSkinDbfId"]:
                                             text+="此為 **"+ownerdata['name'][lang]+"**("+str(ownerdata['dbfId'])+","+str(ownerdata['id'])+") 的裝備。\n該裝備全部等級的dbfId:\n"
-                                            for otd in e_data:
+                                            for otd in e_data['tiers']:
                                                 text+="等級"+str(otd["tier"])+":"+str(otd["dbf_id"])+"\n"
             #elif "P" in data["id"]:
             #elif "H" in data["id"]:
