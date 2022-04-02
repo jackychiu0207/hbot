@@ -251,12 +251,14 @@ async def merc(msg,cardname=None,lang="zhTW"):
                 tier=int(data["id"][-1])
                 for h_data in cardlibm:
                     if "equipment" in h_data:
-                        for e_index,e_data in enumerate(h_data["equipment"]):
+                        for e_data in h_data["equipment"]:
                             if "tiers" in e_data:
                                 if e_data["tiers"][tier-1]["dbf_id"]==data["dbfId"]:
                                     for ownerdata in cardlib:
                                         if ownerdata["dbfId"]==h_data["defaultSkinDbfId"]:
-                                            text+="此為 **"+ownerdata['name'][lang]+"**("+str(ownerdata['dbfId'])+","+str(ownerdata['id'])+") 的裝備。\n該裝備的全部等級:\n"
+                                            text+="此為 **"+ownerdata['name'][lang]+"**("+str(ownerdata['dbfId'])+","+str(ownerdata['id'])+") 的裝備。\n該裝備全部等級的dbfId:\n"
+                                            for otd in e_data:
+                                                text+="等級"+otd["tier"]+":"otd["dbf_id"]+"\n"
             #elif "P" in data["id"]:
             #elif "H" in data["id"]:
 
