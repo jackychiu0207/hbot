@@ -4,3 +4,4 @@ hearthstone_data
 flask
 wget
 PyGithub
+python-dateutil>=2.2
