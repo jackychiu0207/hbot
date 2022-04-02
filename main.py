@@ -258,7 +258,7 @@ async def merc(msg,cardname=None,lang="zhTW"):
                                         if ownerdata["dbfId"]==h_data["defaultSkinDbfId"]:
                                             text+="此為 **"+ownerdata['name'][lang]+"**("+str(ownerdata['dbfId'])+","+str(ownerdata['id'])+") 的裝備。\n該裝備全部等級的dbfId:\n"
                                             for otd in e_data:
-                                                text+="等級"+otd["tier"]+":"+otd["dbf_id"]+"\n"
+                                                text+="等級"+str(otd["tier"])+":"+str(otd["dbf_id"])+"\n"
             #elif "P" in data["id"]:
             #elif "H" in data["id"]:
 
