@@ -80,10 +80,9 @@ def get_token():
     return token
 
 def change_text(text:str):
-    text=text.replace('<b>','**')
-    text=text.replace('</b>','**')
-    text=text.replace('<i>','*')
-    text=text.replace('</i>','*')
+    tlist=[['<b>','**'],['</b>','**'],['<i>','*'],['</i>','*'],["。","。\n"],['****',""]]
+    for txt in tlist:
+        if txt[0] in text:text=text.replace(txt[0],txt[1])
     return(text)
 
 
@@ -126,7 +125,7 @@ async def id(msg,cardid=None,lang="zhTW"):
             title=data['name'][lang]
             text=""
             if 'text' in data:text+=change_text(data["text"][lang])+"\n"
-            if 'flavor' in data:text=change_text(data['flavor'][lang])
+            if 'flavor' in data:text+=change_text(data['flavor'][lang])
             imgurl=f"https://art.hearthstonejson.com/v1/render/latest/{lang}/512x/"+data["id"]+".png"
             cardview=f"https://playhearthstone.com/cards/"+str(data["dbfId"])
             if data["set"]=="BATTLEGROUNDS":
