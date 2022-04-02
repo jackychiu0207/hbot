@@ -142,6 +142,7 @@ async def id(msg,cardid=None,lang="zhTW"):
                     else:
                         imgurl=json.loads(requests.request('GET',url).text)['battlegrounds']['image']
                 except:pass
+            elif data["set"]=="LETTUCE":cardview=f"https://playhearthstone.com/zh-tw/mercenaries/"+str(data["dbfId"])
             if requests.request('GET',imgurl).status_code==404:
                 imgurl=f"https://art.hearthstonejson.com/v1/512x/"+data["id"]+".jpg"
                 if requests.request('GET',imgurl).status_code==404:
@@ -178,6 +179,7 @@ async def card(msg,cardname=None,lang="zhTW"):
                     else:
                         imgurl=json.loads(requests.request('GET',url).text)['battlegrounds']['image']
                 except:pass
+            elif data["set"]=="LETTUCE":cardview=f"https://playhearthstone.com/zh-tw/mercenaries/"+str(data["dbfId"])
             if requests.request('GET',imgurl).status_code==404:
                 imgurl=f"https://art.hearthstonejson.com/v1/256x/"+data["id"]+".jpg"
                 if requests.request('GET',imgurl).status_code==404:
