@@ -252,10 +252,11 @@ async def merc(msg,cardname=None,lang="zhTW"):
                 for h_data in cardlibm:
                     if "equipment" in h_data:
                         for e_index,e_data in enumerate(h_data["equipment"]):
-                            if e_data["tires"][tier]["dbf_id"]==data["dbfId"]:
-                                for ownerdata in cardlib:
-                                    if ownerdata["dbfId"]==h_data["defaultSkinDbfId"]:
-                                        text+="此為 **"+ownerdata['name'][lang]+"**("+ownerdata['dbfId']+","+ownerdata['id']+") 的裝備。\n該裝備的全部等級:\n"
+                            if "tires" in e_data:
+                                if e_data["tires"][tier]["dbf_id"]==data["dbfId"]:
+                                    for ownerdata in cardlib:
+                                        if ownerdata["dbfId"]==h_data["defaultSkinDbfId"]:
+                                            text+="此為 **"+ownerdata['name'][lang]+"**("+ownerdata['dbfId']+","+ownerdata['id']+") 的裝備。\n該裝備的全部等級:\n"
             #elif "P" in data["id"]:
             #elif "H" in data["id"]:
 
@@ -265,8 +266,8 @@ async def merc(msg,cardname=None,lang="zhTW"):
             return embed
         find=[]
         for data in cardlib:
-            if "type" in data:
-                if data["type"]!="ENCHANTMENT":
+            if "type" in data and "set" in data:
+                if data["type"]!="ENCHANTMENT" and data["set"]=="LETTUCE":
                     if cardname in data["name"][lang]:find.append(data)
                     elif 'text' in data:
                         if cardname in data["text"][lang].replace("\n",""):find.append(data)
