@@ -306,10 +306,27 @@ async def merc(msg,cardname=None,lang="zhTW"):
                                                             button.callback=button_callback
                                                             view.add_item(button)
                                                             break
-            #elif data["type"]=="MINION":
-            #    for h_data in cardlibm:
-            #        if data["dbfId"] in h_data["skinDbfIds"]:
-            #            text+=
+            elif data["type"]=="MINION":
+                for h_data in cardlibm:
+                    if data["dbfId"] in h_data["skinDbfIds"]:
+                        if "equipment" in h_data:
+                            if len(h_data["equipment"])>=1:
+                                text+="該傭兵所有裝備dbfId:"
+                                for i,e_data in enumerate(h_data["equipment"]):
+                                    for tiers in e_data["tiers"]:
+                                        for c_data in cardlib:
+                                            if tiers["dbf_id"] == c_data["dbfId"]:
+                                                text+=f"裝備{str(i)}等級{tiers['tier']}({c_data['name']},{c_data['dbfId']},{c_data['id']})"
+                        if "specializations" in h_data:
+                            if len(h_data["specializations"])>0:
+                                if "abilities" in h_data["specializations"][0]:
+                                    for i,p_data in enumerate(h_data["specializations"][0]["abilities"]):
+                                        if "tiers" in p_data: 
+                                            for tiers in p_data["tiers"]:
+                                                for c_data in cardlib:
+                                                    if tiers["dbf_id"] == c_data["dbfId"]:
+                                                        text+=f"技能{str(i)}等級{tiers['tier']}({c_data['name']},{c_data['dbfId']},{c_data['id']})"
+                                        
 
             embed = discord.Embed(title=title,url=cardview,description=text, color=0xff0000)
             embed.set_image(url=imgurl)
