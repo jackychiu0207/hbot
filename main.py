@@ -129,6 +129,7 @@ def embed_m(data:dict,lang):
                 embed,view=embed_m(data,lang)
                 await interaction.response.edit_message(embed=embed,view=view)
     if data["cost"]==0 and data["type"]=="LETTUCE_ABILITY" and "hideCost" in data:
+        run=False
         for h_data in cardlibm:
             if "equipment" in h_data:
                 for e_data in h_data["equipment"]:
@@ -136,7 +137,7 @@ def embed_m(data:dict,lang):
                         for e in e_data["tiers"]:
                             if e["dbf_id"]==data["dbfId"]:
                                 for ownerdata in cardlib:
-                                    if ownerdata["dbfId"]==h_data["defaultSkinDbfId"]:
+                                    if ownerdata["dbfId"]==h_data["defaultSkinDbfId"] and run is False:
                                         text+="此為 **"+ownerdata['name'][lang]+"**("+str(ownerdata['dbfId'])+","+str(ownerdata['id'])+") 的裝備。\n"
                                         if len(e_data['tiers'])>1:text+="該裝備其他等級的dbfId:\n"
                                         for otd in e_data['tiers']:
@@ -147,8 +148,10 @@ def embed_m(data:dict,lang):
                                                 view.add_item(button)
                                         button=Button(style=ButtonStyle.success,label="查看傭兵",custom_id=str(ownerdata['dbfId']))
                                         button.callback=button_callback
-                                        view.add_item(button) 
+                                        view.add_item(button)
+                                        run=True 
     elif data["cost"]!=0 and data["type"]=="LETTUCE_ABILITY":
+        run=False
         for h_data in cardlibm:
             if "specializations" in h_data:
                 if len(h_data["specializations"])>0:
@@ -158,7 +161,7 @@ def embed_m(data:dict,lang):
                                 for p in p_data["tiers"]:
                                     if p["dbf_id"]==data["dbfId"]:
                                         for ownerdata in cardlib:
-                                            if ownerdata["dbfId"]==h_data["defaultSkinDbfId"]:
+                                            if ownerdata["dbfId"]==h_data["defaultSkinDbfId"] and run is False:
                                                 text+="此為 **"+ownerdata['name'][lang]+"**("+str(ownerdata['dbfId'])+","+str(ownerdata['id'])+") 的技能。\n"
                                                 if len(p_data['tiers'])>1:text+="該技能其他等級的dbfId:\n"
                                                 for otd in p_data['tiers']:
@@ -170,6 +173,7 @@ def embed_m(data:dict,lang):
                                                 button=Button(style=ButtonStyle.success,label="查看傭兵",custom_id=str(ownerdata['dbfId']))
                                                 button.callback=button_callback
                                                 view.add_item(button)
+                                                run=True
     elif data["type"]=="MINION":
         for h_data in cardlibm:
             if data["dbfId"] in h_data["skinDbfIds"]:
@@ -463,4 +467,3 @@ DCTOKEN=os.environ['DISCORD_BOT_SECRET']
 if __name__=="__main__":
     keep_alive()
     bot.run(DCTOKEN)
-
