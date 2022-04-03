@@ -182,27 +182,27 @@ def embed_m(data:dict):
     elif data["type"]=="MINION":
         for h_data in cardlibm:
             if data["dbfId"] in h_data["skinDbfIds"]:
-                        text+="(下方可選擇查看造型、裝備、技能)\n"
-                        if "skinDbfIds" in h_data:
-                            skins=[]
-                            for i,skin in enumerate(h_data["skinDbfIds"],1):
-                                skins.append(SelectOption(label=f"造型{i}",value=str(skin),description=skin))
-                            select_s=Select(placeholder="選擇要查看的造型",options=skins,min_values=1,max_values=1)
-                            select_s.callback=select_callback
-                            view.add_item(select_s)
-                        if "equipment" in h_data:
-                            if len(h_data["equipment"])>=1:
-                                options_e=[]
-                                text+="**該傭兵所有裝備:**\n"
-                                for i,e_data in enumerate(h_data["equipment"],1):
-                                    for tiers in e_data["tiers"]:
-                                        for c_data in cardlib:
-                                            if tiers["dbf_id"] == c_data["dbfId"]:
-                                                text+=f"裝備{str(i)}等級{tiers['tier']}({c_data['name'][lang]},{c_data['dbfId']})\n"
-                                                options_e.append(SelectOption(label=f"{c_data['name'][lang]}({c_data['dbfId']},{c_data['id']})\n",value=str(c_data['dbfId']),description=f"裝備{str(i)}等級{tiers['tier']}"))
-                                select_e=Select(placeholder="選擇要查看的裝備",options=options_e,min_values=1,max_values=1)
-                                select_e.callback=select_callback
-                                view.add_item(select_e)
+                text+="(下方可選擇查看造型、裝備、技能)\n"
+                if "skinDbfIds" in h_data:
+                    skins=[]
+                    for i,skin in enumerate(h_data["skinDbfIds"],1):
+                        skins.append(SelectOption(label=f"造型{i}",value=str(skin),description=skin))
+                    select_s=Select(placeholder="選擇要查看的造型",options=skins,min_values=1,max_values=1)
+                    select_s.callback=select_callback
+                    view.add_item(select_s)
+                if "equipment" in h_data:
+                    if len(h_data["equipment"])>=1:
+                        options_e=[]
+                        text+="**該傭兵所有裝備:**\n"
+                        for i,e_data in enumerate(h_data["equipment"],1):
+                            for tiers in e_data["tiers"]:
+                                for c_data in cardlib:
+                                    if tiers["dbf_id"] == c_data["dbfId"]:
+                                        text+=f"裝備{str(i)}等級{tiers['tier']}({c_data['name'][lang]},{c_data['dbfId']})\n"
+                                        options_e.append(SelectOption(label=f"{c_data['name'][lang]}({c_data['dbfId']},{c_data['id']})\n",value=str(c_data['dbfId']),description=f"裝備{str(i)}等級{tiers['tier']}"))
+                        select_e=Select(placeholder="選擇要查看的裝備",options=options_e,min_values=1,max_values=1)
+                        select_e.callback=select_callback
+                        view.add_item(select_e)
                         if "specializations" in h_data:
                             if len(h_data["specializations"])>0:
                                 if "abilities" in h_data["specializations"][0]:
