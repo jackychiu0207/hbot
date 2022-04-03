@@ -262,7 +262,7 @@ async def merc(msg,cardname=None,lang="zhTW"):
                                             async def button_callback(interaction):
                                                 for data in cardlib:
                                                     if data["dbfId"]==int(dict(interaction.data)['custom_id']):
-                                                        embed,view=embed_m(int(dict(interaction.data)['custom_id'][0]))
+                                                        embed,view=embed_m(data)
                                                         await interaction.response.edit_message(embed=embed,view=view)
                                                         break
                                             for otd in e_data['tiers']:
