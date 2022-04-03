@@ -1,4 +1,4 @@
-#2022/4/3 21:55
+#2022/4/3 17:34
 import discord
 from discord.ext import commands
 from discord.ui import Button,View,Select
@@ -105,6 +105,7 @@ async def on_ready():
 
 #cmds
 def embed_m(data:dict,lang):
+    view=View()
     title=data['name'][lang]
     text=""
     if 'text' in data:text+=change_text(data["text"][lang])+"\n"
@@ -122,32 +123,33 @@ def embed_m(data:dict,lang):
             if data["dbfId"]==int(dict(interaction.data)['values'][0]):
                 embed,view=embed_m(data,lang)
                 await interaction.response.edit_message(embed=embed,view=view)
-    async def button_callback(interaction):
-        for data in cardlib:
-            if data["dbfId"]==int(dict(interaction.data)['custom_id']):
-                embed,view=embed_m(data,lang)
-                await interaction.response.edit_message(embed=embed,view=view)
-                break
     if data["cost"]==0 and data["type"]=="LETTUCE_ABILITY" and "hideCost" in data:
         for h_data in cardlibm:
             if "equipment" in h_data:
                 for e_data in h_data["equipment"]:
                     if "tiers" in e_data:
                         for e in e_data["tiers"]:
-                            if e["dbf_id"]!=data["dbfId"]:
-                                view=View()
-                                text+="等級"+str(e["tier"])+":"+str(e["dbf_id"])+"\n"
-                                button=Button(style=ButtonStyle.gray,label="查看等級"+str(e["tier"]),custom_id=str(e["dbf_id"]))
-                                button.callback=button_callback
-                                view.add_item(button)
+                            if e["dbf_id"]==data["dbfId"]:
                                 for ownerdata in cardlib:
                                     if ownerdata["dbfId"]==h_data["defaultSkinDbfId"]:
                                         text+="此為 **"+ownerdata['name'][lang]+"**("+str(ownerdata['dbfId'])+","+str(ownerdata['id'])+") 的裝備。\n"
                                         if len(e_data['tiers'])>1:text+="該裝備其他等級的dbfId:\n"
-                                        button=Button(style=ButtonStyle.success,label="查看傭兵",custom_id=str(ownerdata['dbfId']))
-                                        button.callback=button_callback
-                                        view.add_item(button)
-                                        break
+                                        async def button_callback(interaction):
+                                            for data in cardlib:
+                                                if data["dbfId"]==int(dict(interaction.data)['custom_id']):
+                                                    embed,view=embed_m(data,lang)
+                                                    await interaction.response.edit_message(embed=embed,view=view)
+                                                    break
+                        for otd in e_data['tiers']:
+                            if otd["dbf_id"]!=data["dbfId"]:
+                                text+="等級"+str(otd["tier"])+":"+str(otd["dbf_id"])+"\n"
+                                button=Button(style=ButtonStyle.gray,label="查看等級"+str(otd["tier"]),custom_id=str(otd["dbf_id"]))
+                                button.callback=button_callback
+                                view.add_item(button)
+                        button=Button(style=ButtonStyle.success,label="查看傭兵",custom_id=str(ownerdata['dbfId']))
+                        button.callback=button_callback
+                        view.add_item(button)
+                        break                
     elif data["cost"]!=0 and data["type"]=="LETTUCE_ABILITY":
         for h_data in cardlibm:
             if "specializations" in h_data:
@@ -156,25 +158,31 @@ def embed_m(data:dict,lang):
                         for p_data in h_data["specializations"][0]["abilities"]:
                             if "tiers" in p_data:
                                 for p in p_data["tiers"]:
-                                    if p["dbf_id"]!=data["dbfId"]:
-                                        view=View()
-                                        text+="等級"+str(p["tier"])+":"+str(p["dbf_id"])+"\n"
-                                        button=Button(style=ButtonStyle.gray,label="查看等級"+str(p["tier"]),custom_id=str(p["dbf_id"]))
-                                        button.callback=button_callback
-                                        view.add_item(button)
+                                    if p["dbf_id"]==data["dbfId"]:
                                         for ownerdata in cardlib:
                                             if ownerdata["dbfId"]==h_data["defaultSkinDbfId"]:
                                                 text+="此為 **"+ownerdata['name'][lang]+"**("+str(ownerdata['dbfId'])+","+str(ownerdata['id'])+") 的技能。\n"
                                                 if len(p_data['tiers'])>1:text+="該技能其他等級的dbfId:\n"
-                                                button=Button(style=ButtonStyle.success,label="查看傭兵",custom_id=str(ownerdata['dbfId']))
-                                                button.callback=button_callback
-                                                view.add_item(button)
-                                                break
+                                                async def button_callback(interaction):
+                                                    for data in cardlib:
+                                                        if data["dbfId"]==int(dict(interaction.data)['custom_id']):
+                                                            embed,view=embed_m(data,lang)
+                                                            await interaction.response.edit_message(embed=embed,view=view)
+                                                            break
+                                for otd in p_data['tiers']:
+                                    if otd["dbf_id"]!=data["dbfId"]:
+                                        text+="等級"+str(otd["tier"])+":"+str(otd["dbf_id"])+"\n"
+                                        button=Button(style=ButtonStyle.gray,label="查看等級"+str(otd["tier"]),custom_id=str(otd["dbf_id"]))
+                                        button.callback=button_callback
+                                        view.add_item(button)
+                                button=Button(style=ButtonStyle.success,label="查看傭兵",custom_id=str(ownerdata['dbfId']))
+                                button.callback=button_callback
+                                view.add_item(button)
+                                break
     elif data["type"]=="MINION":
         for h_data in cardlibm:
             if data["dbfId"] in h_data["skinDbfIds"]:
                 text+="(下方可選擇查看造型、裝備、技能)\n"
-                view=View()
                 if "skinDbfIds" in h_data:
                     skins=[]
                     for i,skin in enumerate(h_data["skinDbfIds"],1):
