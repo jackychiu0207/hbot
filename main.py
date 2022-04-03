@@ -145,10 +145,10 @@ def embed_m(data:dict,lang):
                                     if ownerdata["dbfId"]==h_data["defaultSkinDbfId"]:
                                         text+="此為 **"+ownerdata['name'][lang]+"**("+str(ownerdata['dbfId'])+","+str(ownerdata['id'])+") 的裝備。\n"
                                         if len(e_data['tiers'])>1:text+="該裝備其他等級的dbfId:\n"
-                        button=Button(style=ButtonStyle.success,label="查看傭兵",custom_id=str(ownerdata['dbfId']))
-                        button.callback=button_callback
-                        view.add_item(button)
-                        break
+                                        button=Button(style=ButtonStyle.success,label="查看傭兵",custom_id=str(ownerdata['dbfId']))
+                                        button.callback=button_callback
+                                        view.add_item(button)
+                                        break
     elif data["cost"]!=0 and data["type"]=="LETTUCE_ABILITY":
         for h_data in cardlibm:
             if "specializations" in h_data:
@@ -167,10 +167,10 @@ def embed_m(data:dict,lang):
                                             if ownerdata["dbfId"]==h_data["defaultSkinDbfId"]:
                                                 text+="此為 **"+ownerdata['name'][lang]+"**("+str(ownerdata['dbfId'])+","+str(ownerdata['id'])+") 的技能。\n"
                                                 if len(p_data['tiers'])>1:text+="該技能其他等級的dbfId:\n"
-                                button=Button(style=ButtonStyle.success,label="查看傭兵",custom_id=str(ownerdata['dbfId']))
-                                button.callback=button_callback
-                                view.add_item(button)
-                                break
+                                                button=Button(style=ButtonStyle.success,label="查看傭兵",custom_id=str(ownerdata['dbfId']))
+                                                button.callback=button_callback
+                                                view.add_item(button)
+                                                break
     elif data["type"]=="MINION":
         for h_data in cardlibm:
             if data["dbfId"] in h_data["skinDbfIds"]:
