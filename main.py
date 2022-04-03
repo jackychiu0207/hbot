@@ -303,7 +303,9 @@ async def merc(msg,cardname=None,lang="zhTW"):
                     elif 'text' in data:
                         if cardname in data["text"][lang].replace("\n",""):find.append(data)
         if len(find)==0:await msg.reply("查無卡牌！")
-        elif len(find)==1:await msg.reply(embed=embed_m(find[0]))
+        elif len(find)==1:
+            embed,view=embed_m(find[0])
+            await msg.reply(embed=embed,view=view)
         elif len(find)>24:
             async def button_callback(interaction):
                 await interaction.response.edit_message(content="已發送至私人訊息",view=None)
