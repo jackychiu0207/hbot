@@ -1,4 +1,4 @@
-#2022/4/3 16:14
+#2022/4/3 16:18
 import discord
 from discord.ext import commands
 from discord.ui import Button,View,Select
@@ -319,7 +319,7 @@ async def merc(msg,cardname=None,lang="zhTW"):
                             skins=[]
                             for i,skin in enumerate(h_data["skinDbfIds"],1):
                                 skins.append(SelectOption(label=f"造型{i}",value=str(skin),description=skin))
-                            select_s=Select(placeholder="選擇要查看的造型",options=options_p,min_values=1,max_values=1)
+                            select_s=Select(placeholder="選擇要查看的造型",options=skins,min_values=1,max_values=1)
                             select_s.callback=select_callback
                             view.add_item(select_s)
                         if "equipment" in h_data:
