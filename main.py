@@ -368,7 +368,8 @@ async def merc(msg,cardname=None,lang="zhTW"):
             async def button_callback(interaction):
                 await interaction.response.edit_message(content="已發送至私人訊息",view=None)
                 for data in find:
-                        await msg.author.send(embed=embed_m(data,lang))
+                        embed,view=embed_m(data,lang)
+                        await msg.author.send(embed=embed,view=view)
             button=Button(style=ButtonStyle.success,label="發送所有卡牌至私人訊息")
             button.callback=button_callback
             view=View()
