@@ -314,7 +314,7 @@ async def merc(msg,cardname=None,lang="zhTW"):
             elif data["type"]=="MINION":
                 for h_data in cardlibm:
                     if data["dbfId"] in h_data["skinDbfIds"]:
-                        text+="(下方可選擇查看造型、裝備、技能)"
+                        text+="(下方可選擇查看造型、裝備、技能)\n"
                         if "skinDbfIds" in h_data:
                             skins=[]
                             for i,skin in enumerate(h_data["skinDbfIds"],1):
