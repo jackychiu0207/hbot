@@ -1,4 +1,4 @@
-#2022/4/3 16:18
+#2022/4/3 17:34
 import discord
 from discord.ext import commands
 from discord.ui import Button,View,Select
@@ -325,7 +325,7 @@ async def merc(msg,cardname=None,lang="zhTW"):
                         if "equipment" in h_data:
                             if len(h_data["equipment"])>=1:
                                 options_e=[]
-                                text+="**該傭兵所有裝備dbfId:**\n"
+                                text+="**該傭兵所有裝備:**\n"
                                 for i,e_data in enumerate(h_data["equipment"],1):
                                     for tiers in e_data["tiers"]:
                                         for c_data in cardlib:
@@ -340,7 +340,7 @@ async def merc(msg,cardname=None,lang="zhTW"):
                                 if "abilities" in h_data["specializations"][0]:
                                     if len(h_data["equipment"])>=1:
                                         options_p=[]
-                                        text+="**該傭兵所有技能dbfId:**\n"
+                                        text+="**該傭兵所有技能:**\n"
                                         for i,p_data in enumerate(h_data["specializations"][0]["abilities"],1):
                                             if "tiers" in p_data: 
                                                 for tiers in p_data["tiers"]:
