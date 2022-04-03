@@ -235,7 +235,8 @@ async def merc(msg,cardname=None,lang="zhTW"):
     if cardname==None:
         await msg.reply("該指令使用方法:\"t!merc 卡牌名稱 語言(選填)\"\n例子:`t!merc 餅乾大廚`")
     else:
-        def embed(data:dict):
+        def embed_m(data:dict):
+            view=View()
             title=data['name'][lang]
             text=""
             if 'text' in data:text+=change_text(data["text"][lang])+"\n"
@@ -258,8 +259,18 @@ async def merc(msg,cardname=None,lang="zhTW"):
                                     for ownerdata in cardlib:
                                         if ownerdata["dbfId"]==h_data["defaultSkinDbfId"]:
                                             text+="此為 **"+ownerdata['name'][lang]+"**("+str(ownerdata['dbfId'])+","+str(ownerdata['id'])+") 的裝備。\n該裝備全部等級的dbfId:\n"
+                                            async def button_callback(interaction):
+                                                for data in cardlib:
+                                                    await msg.reply(dict(interaction.data))
+                                                    if data["dbfId"]==int(dict(interaction.data)['custom_id'][0]):
+                                                        embed,view=embed_m(int(dict(interaction.data)['custom_id'][0]))
+                                                        await interaction.response.edit_message(embed=embed,view=view)
+                                                        break
                                             for otd in e_data['tiers']:
                                                 text+="等級"+str(otd["tier"])+":"+str(otd["dbf_id"])+"\n"
+                                                button=Button(style=ButtonStyle.success,label="查看等級"+str(otd["tier"]),custom_id=str(otd["dbf_id"]))
+                                                button.callback=button_callback
+                                                view.add_item(button)
                                             break
             elif data["cost"]!=0 and data["type"]=="LETTUCE_ABILITY":
                 tier=int(data["id"][-1])
@@ -277,11 +288,14 @@ async def merc(msg,cardname=None,lang="zhTW"):
                                                             text+="等級"+str(otd["tier"])+":"+str(otd["dbf_id"])+"\n"
                                                         break
             #elif data["type"]=="MINION":
+            #    for h_data in cardlibm:
+            #        if data["dbfId"] in h_data["skinDbfIds"]:
+            #            text+=
 
             embed = discord.Embed(title=title,url=cardview,description=text, color=0xff0000)
             embed.set_image(url=imgurl)
             embed.set_footer(text=str(data["dbfId"])+","+data["id"])
-            return embed
+            return embed,view
         find=[]
         for data in cardlib:
             if "type" in data and "set" in data:
@@ -290,12 +304,12 @@ async def merc(msg,cardname=None,lang="zhTW"):
                     elif 'text' in data:
                         if cardname in data["text"][lang].replace("\n",""):find.append(data)
         if len(find)==0:await msg.reply("查無卡牌！")
-        elif len(find)==1:await msg.reply(embed=embed(find[0]))
+        elif len(find)==1:await msg.reply(embed=embed_m(find[0]))
         elif len(find)>24:
             async def button_callback(interaction):
-              await interaction.response.edit_message(content="已發送至私人訊息",view=None)
-              for data in find:
-                        await msg.author.send(embed=embed(data))
+                await interaction.response.edit_message(content="已發送至私人訊息",view=None)
+                for data in find:
+                        await msg.author.send(embed=embed_m(data))
             button=Button(style=ButtonStyle.success,label="發送所有卡牌至私人訊息")
             button.callback=button_callback
             view=View()
@@ -314,9 +328,11 @@ async def merc(msg,cardname=None,lang="zhTW"):
                 if int(dict(interaction.data)['values'][0])==-1:
                     await interaction.response.edit_message(content="已發送至私人訊息",view=None)
                     for data in find:
-                        await msg.author.send(embed=embed(data))
+                        embed,view=embed_m(data)
+                        await msg.author.send(embed=embed,view=view)
                 else:
-                    await interaction.response.edit_message(content="",embed=embed(find[int(dict(interaction.data)['values'][0])]),view=None)
+                    embed,view=embed_m(find[int(dict(interaction.data)['values'][0])])
+                    await interaction.response.edit_message(content="",embed=embed,view=view)
             select.callback=select_callback
             view=View()
             view.add_item(select)
