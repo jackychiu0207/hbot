@@ -104,7 +104,7 @@ async def on_ready():
 
 
 #cmds
-def embed_m(data:dict):
+def embed_m(data:dict,lang):
     view=View()
     title=data['name'][lang]
     text=""
@@ -121,7 +121,7 @@ def embed_m(data:dict):
     async def select_callback(interaction):
         for data in cardlib:
             if data["dbfId"]==int(dict(interaction.data)['values'][0]):
-                embed,view=embed_m(data)
+                embed,view=embed_m(data,lang)
                 await interaction.response.edit_message(embed=embed,view=view)
     if data["cost"]==0 and data["type"]=="LETTUCE_ABILITY" and "hideCost" in data:
         for h_data in cardlibm:
@@ -137,7 +137,7 @@ def embed_m(data:dict):
                                         async def button_callback(interaction):
                                             for data in cardlib:
                                                 if data["dbfId"]==int(dict(interaction.data)['custom_id']):
-                                                    embed,view=embed_m(data)
+                                                    embed,view=embed_m(data,lang)
                                                     await interaction.response.edit_message(embed=embed,view=view)
                                                     break
                                         for otd in e_data['tiers']:
@@ -149,7 +149,7 @@ def embed_m(data:dict):
                                         button=Button(style=ButtonStyle.success,label="查看傭兵",custom_id=str(ownerdata['dbfId']))
                                         button.callback=button_callback
                                         view.add_item(button)
-                                                break
+                                        break
     elif data["cost"]!=0 and data["type"]=="LETTUCE_ABILITY":
         for h_data in cardlibm:
             if "specializations" in h_data:
@@ -166,7 +166,7 @@ def embed_m(data:dict):
                                                 async def button_callback(interaction):
                                                     for data in cardlib:
                                                         if data["dbfId"]==int(dict(interaction.data)['custom_id']):
-                                                            embed,view=embed_m(data)
+                                                            embed,view=embed_m(data,lang)
                                                             await interaction.response.edit_message(embed=embed,view=view)
                                                             break
                                                 for otd in p_data['tiers']:
@@ -216,13 +216,13 @@ def embed_m(data:dict):
                                                         if tiers["dbf_id"] == c_data["dbfId"]:
                                                             text+=f"技能{str(i)}等級{tiers['tier']}({c_data['name'][lang]},{c_data['dbfId']})\n"
                                                             options_p.append(SelectOption(label=f"{c_data['name'][lang]}({c_data['dbfId']},{c_data['id']})\n",value=str(c_data['dbfId']),description=f"技能{str(i)}等級{tiers['tier']}"))
-                                select_p=Select(placeholder="選擇要查看的技能",options=options_p,min_values=1,max_values=1)
-                                select_p.callback=select_callback
-                                view.add_item(select_p)
-            embed = discord.Embed(title=title,url=cardview,description=text, color=0xff0000)
-            embed.set_image(url=imgurl)
-            embed.set_footer(text=str(data["dbfId"])+","+data["id"])
-            return embed,view
+                                        select_p=Select(placeholder="選擇要查看的技能",options=options_p,min_values=1,max_values=1)
+                                        select_p.callback=select_callback
+                                        view.add_item(select_p)
+    embed = discord.Embed(title=title,url=cardview,description=text, color=0xff0000)
+    embed.set_image(url=imgurl)
+    embed.set_footer(text=str(data["dbfId"])+","+data["id"])
+    return embed,view
 
 @bot.command()
 async def id(msg,cardid=None,lang="zhTW"):
@@ -260,8 +260,9 @@ async def id(msg,cardid=None,lang="zhTW"):
                     else:
                         imgurl=json.loads(requests.request('GET',url).text)['battlegrounds']['image']
                 except:pass
-            elif data["set"]=="LETTUCE":cardview=f"https://playhearthstone.com/zh-tw/mercenaries/"+str(data["dbfId"])
-                embed,view=embed_m(data)
+            elif data["set"]=="LETTUCE":
+                cardview=f"https://playhearthstone.com/zh-tw/mercenaries/"+str(data["dbfId"])
+                embed,view=embed_m(data,lang)
                 await msg.reply(embed=embed,view=view)
                 return
             if requests.request('GET',imgurl).status_code==404:
@@ -366,13 +367,13 @@ async def merc(msg,cardname=None,lang="zhTW"):
                         if cardname in data["text"][lang].replace("\n",""):find.append(data)
         if len(find)==0:await msg.reply("查無卡牌！")
         elif len(find)==1:
-            embed,view=embed_m(find[0])
+            embed,view=embed_m(find[0],lang)
             await msg.reply(embed=embed,view=view)
         elif len(find)>24:
             async def button_callback(interaction):
                 await interaction.response.edit_message(content="已發送至私人訊息",view=None)
                 for data in find:
-                        await msg.author.send(embed=embed_m(data))
+                        await msg.author.send(embed=embed_m(data,lang))
             button=Button(style=ButtonStyle.success,label="發送所有卡牌至私人訊息")
             button.callback=button_callback
             view=View()
@@ -391,10 +392,10 @@ async def merc(msg,cardname=None,lang="zhTW"):
                 if int(dict(interaction.data)['values'][0])==-1:
                     await interaction.response.edit_message(content="已發送至私人訊息",view=None)
                     for data in find:
-                        embed,view=embed_m(data)
+                        embed,view=embed_m(data,lang)
                         await msg.author.send(embed=embed,view=view)
                 else:
-                    embed,view=embed_m(find[int(dict(interaction.data)['values'][0])])
+                    embed,view=embed_m(find[int(dict(interaction.data)['values'][0])],lang)
                     await interaction.response.edit_message(content="",embed=embed,view=view)
             select.callback=select_callback
             view=View()
