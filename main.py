@@ -1,4 +1,4 @@
-#2022/4/3 20:56
+#2022/4/3 21:18
 import discord
 from discord.ext import commands
 from discord.ui import Button,View,Select
@@ -129,6 +129,11 @@ def embed_m(data:dict,lang):
                 for e_data in h_data["equipment"]:
                     if "tiers" in e_data:
                         for e in e_data["tiers"]:
+                            if e["dbf_id"]!=data["dbfId"]:
+                                text+="等級"+str(e["tier"])+":"+str(e["dbf_id"])+"\n"
+                                button=Button(style=ButtonStyle.gray,label="查看等級"+str(p["tier"]),custom_id=str(p["dbf_id"]))
+                                button.callback=button_callback
+                                view.add_item(button)
                             if e["dbf_id"]==data["dbfId"]:
                                 for ownerdata in cardlib:
                                     if ownerdata["dbfId"]==h_data["defaultSkinDbfId"]:
@@ -145,13 +150,12 @@ def embed_m(data:dict,lang):
                                             if otd["dbf_id"]!=data["dbfId"] and str(otd["dbf_id"]) not in custom_id:
                                                 text+="等級"+str(otd["tier"])+":"+str(otd["dbf_id"])+"\n"
                                                 button=Button(style=ButtonStyle.gray,label="查看等級"+str(otd["tier"]),custom_id=str(otd["dbf_id"]))
-                                                custom_id.append(button.custom_id)
                                                 button.callback=button_callback
                                                 view.add_item(button)
-                                        button=Button(style=ButtonStyle.success,label="查看傭兵",custom_id=str(ownerdata['dbfId']))
-                                        button.callback=button_callback
-                                        view.add_item(button)
-                                        break
+                        button=Button(style=ButtonStyle.success,label="查看傭兵",custom_id=str(ownerdata['dbfId']))
+                        button.callback=button_callback
+                        view.add_item(button)
+                        break
     elif data["cost"]!=0 and data["type"]=="LETTUCE_ABILITY":
         for h_data in cardlibm:
             if "specializations" in h_data:
@@ -160,6 +164,11 @@ def embed_m(data:dict,lang):
                         for p_data in h_data["specializations"][0]["abilities"]:
                             if "tiers" in p_data:
                                 for p in p_data["tiers"]:
+                                    if p["dbf_id"]!=data["dbfId"]:
+                                        text+="等級"+str(p["tier"])+":"+str(p["dbf_id"])+"\n"
+                                        button=Button(style=ButtonStyle.gray,label="查看等級"+str(p["tier"]),custom_id=str(p["dbf_id"]))
+                                        button.callback=button_callback
+                                        view.add_item(button)
                                     if p["dbf_id"]==data["dbfId"]:
                                         for ownerdata in cardlib:
                                             if ownerdata["dbfId"]==h_data["defaultSkinDbfId"]:
@@ -171,18 +180,10 @@ def embed_m(data:dict,lang):
                                                             embed,view=embed_m(data,lang)
                                                             await interaction.response.edit_message(embed=embed,view=view)
                                                             break
-                                                custom_id=[]
-                                                for otd in p_data['tiers']:
-                                                    if otd["dbf_id"]!=data["dbfId"] and str(otd["dbf_id"]) not in custom_id:
-                                                        text+="等級"+str(otd["tier"])+":"+str(otd["dbf_id"])+"\n"
-                                                        button=Button(style=ButtonStyle.gray,label="查看等級"+str(otd["tier"]),custom_id=str(otd["dbf_id"]))
-                                                        custom_id.append(button.custom_id)
-                                                        button.callback=button_callback
-                                                        view.add_item(button)
-                                                button=Button(style=ButtonStyle.success,label="查看傭兵",custom_id=str(ownerdata['dbfId']))
-                                                button.callback=button_callback
-                                                view.add_item(button)
-                                                break
+                                button=Button(style=ButtonStyle.success,label="查看傭兵",custom_id=str(ownerdata['dbfId']))
+                                button.callback=button_callback
+                                view.add_item(button)
+                                break
     elif data["type"]=="MINION":
         for h_data in cardlibm:
             if data["dbfId"] in h_data["skinDbfIds"]:
