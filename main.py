@@ -247,8 +247,8 @@ async def merc(msg,cardname=None,lang="zhTW"):
                 if requests.request('GET',imgurl).status_code==404:
                     imgurl="https://cdn.discordapp.com/attachments/913009861967626310/935811318768885810/PlaceholderCard.png"
                     text+="\n※此卡牌確實存在於爐石戰記中的某個角落，但沒有任何圖片"
-            #傭兵子父卡牌功能，類型E為裝備、P為技能、H為傭兵
-            if "E" in data["id"]:
+            #傭兵子父卡牌功能
+            if data["cost"]==0 and data["type"]=="LETTUCE_ABILITY" and "hideCost" in data:
                 tier=int(data["id"][-1])
                 for h_data in cardlibm:
                     if "equipment" in h_data:
@@ -261,7 +261,7 @@ async def merc(msg,cardname=None,lang="zhTW"):
                                             for otd in e_data['tiers']:
                                                 text+="等級"+str(otd["tier"])+":"+str(otd["dbf_id"])+"\n"
                                             break
-            elif "P" in data["id"]:
+            elif data["cost"]!=0 and data["type"]=="LETTUCE_ABILITY":
                 tier=int(data["id"][-1])
                 for h_data in cardlibm:
                     if "specializations" in h_data:
@@ -276,7 +276,7 @@ async def merc(msg,cardname=None,lang="zhTW"):
                                                         for otd in p_data['tiers']:
                                                             text+="等級"+str(otd["tier"])+":"+str(otd["dbf_id"])+"\n"
                                                         break
-            #elif "H" in data["id"]:
+            #elif data["type"]=="MINION":
 
             embed = discord.Embed(title=title,url=cardview,description=text, color=0xff0000)
             embed.set_image(url=imgurl)
