@@ -1,4 +1,4 @@
-#2022/4/3 21:48
+#2022/4/3 21:55
 import discord
 from discord.ext import commands
 from discord.ui import Button,View,Select
@@ -105,7 +105,6 @@ async def on_ready():
 
 #cmds
 def embed_m(data:dict,lang):
-    view=View()
     title=data['name'][lang]
     text=""
     if 'text' in data:text+=change_text(data["text"][lang])+"\n"
@@ -136,6 +135,7 @@ def embed_m(data:dict,lang):
                     if "tiers" in e_data:
                         for e in e_data["tiers"]:
                             if e["dbf_id"]!=data["dbfId"]:
+                                view=View()
                                 text+="等級"+str(e["tier"])+":"+str(e["dbf_id"])+"\n"
                                 button=Button(style=ButtonStyle.gray,label="查看等級"+str(e["tier"]),custom_id=str(e["dbf_id"]))
                                 button.callback=button_callback
@@ -157,6 +157,7 @@ def embed_m(data:dict,lang):
                             if "tiers" in p_data:
                                 for p in p_data["tiers"]:
                                     if p["dbf_id"]!=data["dbfId"]:
+                                        view=View()
                                         text+="等級"+str(p["tier"])+":"+str(p["dbf_id"])+"\n"
                                         button=Button(style=ButtonStyle.gray,label="查看等級"+str(p["tier"]),custom_id=str(p["dbf_id"]))
                                         button.callback=button_callback
@@ -173,6 +174,7 @@ def embed_m(data:dict,lang):
         for h_data in cardlibm:
             if data["dbfId"] in h_data["skinDbfIds"]:
                 text+="(下方可選擇查看造型、裝備、技能)\n"
+                view=View()
                 if "skinDbfIds" in h_data:
                     skins=[]
                     for i,skin in enumerate(h_data["skinDbfIds"],1):
