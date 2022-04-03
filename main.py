@@ -264,7 +264,7 @@ async def merc(msg,cardname=None,lang="zhTW"):
             elif "P" in data["id"]:
                 tier=int(data["id"][-1])
                 for h_data in cardlibm:
-                    for p_data in h_data["specializations"]["abilities"]:
+                    for p_data in h_data["specializations"][1]["abilities"]:
                         if "tiers" in p_data and len(p_data["tiers"])>tier-1:
                             if p_data["tiers"][tier-1]["dbf_id"]==data["dbfId"]:
                                 for ownerdata in cardlib:
