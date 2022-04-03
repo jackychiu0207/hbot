@@ -1,4 +1,4 @@
-#2022/4/3 21:28
+#2022/4/3 21:48
 import discord
 from discord.ext import commands
 from discord.ui import Button,View,Select
@@ -137,10 +137,9 @@ def embed_m(data:dict,lang):
                         for e in e_data["tiers"]:
                             if e["dbf_id"]!=data["dbfId"]:
                                 text+="等級"+str(e["tier"])+":"+str(e["dbf_id"])+"\n"
-                                button=Button(style=ButtonStyle.gray,label="查看等級"+str(p["tier"]),custom_id=str(p["dbf_id"]))
+                                button=Button(style=ButtonStyle.gray,label="查看等級"+str(e["tier"]),custom_id=str(e["dbf_id"]))
                                 button.callback=button_callback
                                 view.add_item(button)
-                            if e["dbf_id"]==data["dbfId"]:
                                 for ownerdata in cardlib:
                                     if ownerdata["dbfId"]==h_data["defaultSkinDbfId"]:
                                         text+="此為 **"+ownerdata['name'][lang]+"**("+str(ownerdata['dbfId'])+","+str(ownerdata['id'])+") 的裝備。\n"
@@ -162,7 +161,6 @@ def embed_m(data:dict,lang):
                                         button=Button(style=ButtonStyle.gray,label="查看等級"+str(p["tier"]),custom_id=str(p["dbf_id"]))
                                         button.callback=button_callback
                                         view.add_item(button)
-                                    if p["dbf_id"]==data["dbfId"]:
                                         for ownerdata in cardlib:
                                             if ownerdata["dbfId"]==h_data["defaultSkinDbfId"]:
                                                 text+="此為 **"+ownerdata['name'][lang]+"**("+str(ownerdata['dbfId'])+","+str(ownerdata['id'])+") 的技能。\n"
