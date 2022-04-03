@@ -213,6 +213,7 @@ async def card(msg,cardname=None,lang="zhTW"):
             for i,data in enumerate(find):
                 text=""
                 if 'text' in data:text=change_text(data["text"][lang]).replace("*","").replace("\n","").replace("[x]","")
+                if len(text)>95:text=text[0:94]+"..."
                 options.append(SelectOption(label=f'{data["name"][lang]}({data["dbfId"]},{data["id"]})',value=str(i),description=text))
             select=Select(min_values=1,max_values=1,options=options)
             async def select_callback(interaction):
@@ -302,7 +303,8 @@ async def merc(msg,cardname=None,lang="zhTW"):
             options.append(SelectOption(label="全部發送到私人訊息",value="-1",description="可搭配 t!id 指令"))
             for i,data in enumerate(find):
                 text=""
-                if 'text' in data:text=change_text(data["text"][lang]).replace("*","").replace("\n","").replace("[x]","")
+                if 'text' in data:text=change_text(data["text"][lang]).replace("*","").replace("[x]","")
+                if len(text)>95:text=text[0:94]+"..."
                 options.append(SelectOption(label=f'{data["name"][lang]}({data["dbfId"]},{data["id"]})',value=str(i),description=text))
             select=Select(min_values=1,max_values=1,options=options)
             async def select_callback(interaction):
