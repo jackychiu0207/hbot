@@ -1,1 +1,1 @@
-爐石python discord bot，寫的有點雜，請見諒
+爐石python discord bot
