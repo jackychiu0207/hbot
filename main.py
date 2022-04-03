@@ -261,8 +261,7 @@ async def merc(msg,cardname=None,lang="zhTW"):
                                             text+="此為 **"+ownerdata['name'][lang]+"**("+str(ownerdata['dbfId'])+","+str(ownerdata['id'])+") 的裝備。\n該裝備全部等級的dbfId:\n"
                                             async def button_callback(interaction):
                                                 for data in cardlib:
-                                                    await msg.reply(dict(interaction.data))
-                                                    if data["dbfId"]==int(dict(interaction.data)['custom_id'][0]):
+                                                    if data["dbfId"]==int(dict(interaction.data)['custom_id']):
                                                         embed,view=embed_m(int(dict(interaction.data)['custom_id'][0]))
                                                         await interaction.response.edit_message(embed=embed,view=view)
                                                         break
