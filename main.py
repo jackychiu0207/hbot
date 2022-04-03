@@ -259,7 +259,19 @@ async def merc(msg,cardname=None,lang="zhTW"):
                                             text+="此為 **"+ownerdata['name'][lang]+"**("+str(ownerdata['dbfId'])+","+str(ownerdata['id'])+") 的裝備。\n該裝備全部等級的dbfId:\n"
                                             for otd in e_data['tiers']:
                                                 text+="等級"+str(otd["tier"])+":"+str(otd["dbf_id"])+"\n"
-            #elif "P" in data["id"]:
+                                            break
+            elif "P" in data["id"]:
+                tier=int(data["id"][-1])
+                for h_data in cardlibm:
+                    for p_data in h_data["specializations"]["abilities"]:
+                        if "tiers" in p_data and len(p_data["tiers"])>tier-1:
+                            if p_data["tiers"][tier-1]["dbf_id"]==data["dbfId"]:
+                                for ownerdata in cardlib:
+                                        if ownerdata["dbfId"]==h_data["defaultSkinDbfId"]:
+                                            text+="此為 **"+ownerdata['name'][lang]+"**("+str(ownerdata['dbfId'])+","+str(ownerdata['id'])+") 的技能。\n該技能全部等級的dbfId:\n"
+                                            for otd in p_data['tiers']:
+                                                text+="等級"+str(otd["tier"])+":"+str(otd["dbf_id"])+"\n"
+                                            break
             #elif "H" in data["id"]:
 
             embed = discord.Embed(title=title,url=cardview,description=text, color=0xff0000)
