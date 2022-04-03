@@ -1,4 +1,4 @@
-#2022/4/3 14:12
+#2022/4/3 15:22
 import discord
 from discord.ext import commands
 from discord.ui import Button,View,Select
@@ -316,7 +316,7 @@ async def merc(msg,cardname=None,lang="zhTW"):
                                     for tiers in e_data["tiers"]:
                                         for c_data in cardlib:
                                             if tiers["dbf_id"] == c_data["dbfId"]:
-                                                text+=f"裝備{str(i)}等級{tiers['tier']}({c_data[lang]['name']},{c_data['dbfId']})"
+                                                text+=f"裝備{str(i)}等級{tiers['tier']}({c_data['name'][lang]},{c_data['dbfId']})"
                         if "specializations" in h_data:
                             if len(h_data["specializations"])>0:
                                 if "abilities" in h_data["specializations"][0]:
@@ -327,7 +327,7 @@ async def merc(msg,cardname=None,lang="zhTW"):
                                                 for tiers in p_data["tiers"]:
                                                     for c_data in cardlib:
                                                         if tiers["dbf_id"] == c_data["dbfId"]:
-                                                            text+=f"技能{str(i)}等級{tiers['tier']}({c_data[lang]['name']},{c_data['dbfId']})"
+                                                            text+=f"技能{str(i)}等級{tiers['tier']}({c_data['name'][lang]},{c_data['dbfId']})"
                                         
 
             embed = discord.Embed(title=title,url=cardview,description=text, color=0xff0000)
