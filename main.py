@@ -1,4 +1,4 @@
-#2022/4/3 15:45
+#2022/4/3 16:14
 import discord
 from discord.ext import commands
 from discord.ui import Button,View,Select
@@ -250,6 +250,11 @@ async def merc(msg,cardname=None,lang="zhTW"):
                     imgurl="https://cdn.discordapp.com/attachments/913009861967626310/935811318768885810/PlaceholderCard.png"
                     text+="\n※此卡牌確實存在於爐石戰記中的某個角落，但沒有任何圖片"
             #傭兵子父卡牌功能
+            async def select_callback(interaction):
+                for data in cardlib:
+                    if data["dbfId"]==int(dict(interaction.data)['values'][0]):
+                        embed,view=embed_m(data)
+                        await interaction.response.edit_message(embed=embed,view=view)
             if data["cost"]==0 and data["type"]=="LETTUCE_ABILITY" and "hideCost" in data:
                 for h_data in cardlibm:
                     if "equipment" in h_data:
@@ -309,22 +314,33 @@ async def merc(msg,cardname=None,lang="zhTW"):
             elif data["type"]=="MINION":
                 for h_data in cardlibm:
                     if data["dbfId"] in h_data["skinDbfIds"]:
+                        text+="(下方可選擇查看造型、裝備、技能)"
+                        if "skinDbfIds" in h_data:
+                            skins=[]
+                            for i,skin in enumerate(h_data["skinDbfIds"],1):
+                                skins.append(SelectOption(label=f"造型{i}",value=str(skin),description=skin))
+                            select_s=Select(placeholder="選擇要查看的造型",options=options_p,min_values=1,max_values=1)
+                            select_s.callback=select_callback
+                            view.add_item(select_s)
                         if "equipment" in h_data:
                             if len(h_data["equipment"])>=1:
                                 options_e=[]
-                                text+="該傭兵所有裝備dbfId:\n"
+                                text+="**該傭兵所有裝備dbfId:**\n"
                                 for i,e_data in enumerate(h_data["equipment"],1):
                                     for tiers in e_data["tiers"]:
                                         for c_data in cardlib:
                                             if tiers["dbf_id"] == c_data["dbfId"]:
                                                 text+=f"裝備{str(i)}等級{tiers['tier']}({c_data['name'][lang]},{c_data['dbfId']})\n"
                                                 options_e.append(SelectOption(label=f"{c_data['name'][lang]}({c_data['dbfId']},{c_data['id']})\n",value=str(c_data['dbfId']),description=f"裝備{str(i)}等級{tiers['tier']}"))
+                                select_e=Select(placeholder="選擇要查看的裝備",options=options_e,min_values=1,max_values=1)
+                                select_e.callback=select_callback
+                                view.add_item(select_e)
                         if "specializations" in h_data:
                             if len(h_data["specializations"])>0:
                                 if "abilities" in h_data["specializations"][0]:
                                     if len(h_data["equipment"])>=1:
                                         options_p=[]
-                                        text+="該傭兵所有技能dbfId:\n"
+                                        text+="**該傭兵所有技能dbfId:**\n"
                                         for i,p_data in enumerate(h_data["specializations"][0]["abilities"],1):
                                             if "tiers" in p_data: 
                                                 for tiers in p_data["tiers"]:
@@ -332,18 +348,17 @@ async def merc(msg,cardname=None,lang="zhTW"):
                                                         if tiers["dbf_id"] == c_data["dbfId"]:
                                                             text+=f"技能{str(i)}等級{tiers['tier']}({c_data['name'][lang]},{c_data['dbfId']})\n"
                                                             options_p.append(SelectOption(label=f"{c_data['name'][lang]}({c_data['dbfId']},{c_data['id']})\n",value=str(c_data['dbfId']),description=f"技能{str(i)}等級{tiers['tier']}"))
-                        text+="(下方可選擇查看技能及裝備)"
-                        async def select_callback(interaction):
-                            for data in cardlib:
-                                if data["dbfId"]==int(dict(interaction.data)['values'][0]):
-                                    embed,view=embed_m(data)
-                                    await interaction.response.edit_message(embed=embed,view=view)
-                        select_e=Select(placeholder="選擇要查看的裝備",options=options_e,min_values=1,max_values=1)
-                        select_p=Select(placeholder="選擇要查看的技能",options=options_p,min_values=1,max_values=1)
-                        select_e.callback=select_callback
-                        select_p.callback=select_callback
-                        view.add_item(select_e)
-                        view.add_item(select_p)
+                                select_p=Select(placeholder="選擇要查看的技能",options=options_p,min_values=1,max_values=1)
+                                select_p.callback=select_callback
+                                view.add_item(select_p)
+                        
+
+                        
+                        
+                        
+                        
+                        
+                        
                                         
 
             embed = discord.Embed(title=title,url=cardview,description=text, color=0xff0000)
