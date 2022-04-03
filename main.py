@@ -1,4 +1,4 @@
-#2022/4/3 14:51
+#2022/4/3 15:14
 import discord
 from discord.ext import commands
 from discord.ui import Button,View,Select
@@ -270,7 +270,7 @@ async def merc(msg,cardname=None,lang="zhTW"):
                                                 for otd in e_data['tiers']:
                                                     if otd["dbf_id"]!=data["dbfId"]:
                                                         text+="等級"+str(otd["tier"])+":"+str(otd["dbf_id"])+"\n"
-                                                        button=Button(style=ButtonStyle.success,label="查看等級"+str(otd["tier"]),custom_id=str(otd["dbf_id"]))
+                                                        button=Button(style=ButtonStyle.gray,label="查看等級"+str(otd["tier"]),custom_id=str(otd["dbf_id"]))
                                                         button.callback=button_callback
                                                         view.add_item(button)
                                                 button=Button(style=ButtonStyle.success,label="查看傭兵",custom_id=str(ownerdata['dbfId']))
@@ -328,6 +328,8 @@ async def merc(msg,cardname=None,lang="zhTW"):
                                                     for c_data in cardlib:
                                                         if tiers["dbf_id"] == c_data["dbfId"]:
                                                             text+=f"{c_data['name']}:{c_data['dbfId']}"
+                        break
+                print(text)
                                         
 
             embed = discord.Embed(title=title,url=cardview,description=text, color=0xff0000)
