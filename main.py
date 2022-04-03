@@ -1,4 +1,4 @@
-#2022/4/3 17:34
+#2022/4/3 20:56
 import discord
 from discord.ext import commands
 from discord.ui import Button,View,Select
@@ -140,10 +140,12 @@ def embed_m(data:dict,lang):
                                                     embed,view=embed_m(data,lang)
                                                     await interaction.response.edit_message(embed=embed,view=view)
                                                     break
+                                        custom_id=[]
                                         for otd in e_data['tiers']:
-                                            if otd["dbf_id"]!=data["dbfId"]:
+                                            if otd["dbf_id"]!=data["dbfId"] and str(otd["dbf_id"]) not in custom_id:
                                                 text+="等級"+str(otd["tier"])+":"+str(otd["dbf_id"])+"\n"
                                                 button=Button(style=ButtonStyle.gray,label="查看等級"+str(otd["tier"]),custom_id=str(otd["dbf_id"]))
+                                                custom_id.append(button.custom_id)
                                                 button.callback=button_callback
                                                 view.add_item(button)
                                         button=Button(style=ButtonStyle.success,label="查看傭兵",custom_id=str(ownerdata['dbfId']))
@@ -169,10 +171,12 @@ def embed_m(data:dict,lang):
                                                             embed,view=embed_m(data,lang)
                                                             await interaction.response.edit_message(embed=embed,view=view)
                                                             break
+                                                custom_id=[]
                                                 for otd in p_data['tiers']:
-                                                    if otd["dbf_id"]!=data["dbfId"]:
+                                                    if otd["dbf_id"]!=data["dbfId"] and str(otd["dbf_id"]) not in custom_id:
                                                         text+="等級"+str(otd["tier"])+":"+str(otd["dbf_id"])+"\n"
                                                         button=Button(style=ButtonStyle.gray,label="查看等級"+str(otd["tier"]),custom_id=str(otd["dbf_id"]))
+                                                        custom_id.append(button.custom_id)
                                                         button.callback=button_callback
                                                         view.add_item(button)
                                                 button=Button(style=ButtonStyle.success,label="查看傭兵",custom_id=str(ownerdata['dbfId']))
