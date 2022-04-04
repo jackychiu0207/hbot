@@ -301,7 +301,7 @@ def embed_m(data:dict,lang):
                                                     for c_data in cardlib:
                                                         if tiers["dbf_id"] == c_data["dbfId"]:
                                                              if tiers['tier']==1:text+=f"技能{str(i)}等級1:{c_data['name'][lang]}({c_data['dbfId']})\n"
-                                                            options_p.append(SelectOption(label=f"{c_data['name'][lang]}(技能{str(i)}等級{tiers['tier']})\n",value=str(c_data['dbfId']),description=change_text(c_data['text']).replace('*','').replace('\n','')))
+                                                             options_p.append(SelectOption(label=f"{c_data['name'][lang]}(技能{str(i)}等級{tiers['tier']})\n",value=str(c_data['dbfId']),description=change_text(c_data['text']).replace('*','').replace('\n','')))
                                         select_p=Select(placeholder="選擇要查看的技能",options=options_p,min_values=1,max_values=1)
                                         select_p.callback=select_new_embed
                                         view.add_item(select_p)
