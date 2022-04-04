@@ -216,7 +216,7 @@ def embed_m(data:dict,lang):
                 embed,view=embed_m(data,lang)
                 await interaction.response.edit_message(embed=embed,view=view)
     if data["type"]=="LETTUCE_ABILITY":
-        if data["cost"]==0 or "E" in data["id"]:
+        if data["cost"]==0:
             run=False
             for h_data in cardlibm:
                 if "equipment" in h_data:
@@ -239,7 +239,7 @@ def embed_m(data:dict,lang):
                                             button.callback=button_new_embed
                                             view.add_item(button)
                                             run=True 
-        elif data["cost"]!=0 or "P" in data["id"]:
+        elif data["cost"]!=0:
             run=False
             for h_data in cardlibm:
                 if "specializations" in h_data:
@@ -266,7 +266,7 @@ def embed_m(data:dict,lang):
                                                     button.callback=button_new_embed
                                                     view.add_item(button)
                                                     run=True
-    elif data["type"]=="MINION" or "H" in data["id"]:
+    elif data["type"]=="MINION":
         for h_data in cardlibm:
             if data["dbfId"] in h_data["skinDbfIds"]:
                 text+="(下方可選擇查看造型、裝備、技能)\n"
