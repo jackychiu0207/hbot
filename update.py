@@ -1,6 +1,5 @@
 import os
 import wget
-os.system("kill 1")
 try:
     os.remove('main.py')
     os.remove('requirements.txt')
