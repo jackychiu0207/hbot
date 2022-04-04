@@ -285,7 +285,7 @@ def embed_m(data:dict,lang):
                                 for c_data in cardlib:
                                     if tiers["dbf_id"] == c_data["dbfId"]:
                                         if tiers['tier']==1:text+=f"裝備{str(i)}等級1:{c_data['name'][lang]}({c_data['dbfId']})\n"
-                                        options_e.append(SelectOption(label=f"{c_data['name'][lang]}({c_data['dbfId']},{c_data['id']})\n",value=str(c_data['dbfId']),description=f"裝備{str(i)}等級{tiers['tier']}"))
+                                        options_e.append(SelectOption(label=f"{c_data['name'][lang]}(裝備{str(i)}等級{tiers['tier']})\n",value=str(c_data['dbfId']),description=change_text(c_data['text']).replace('*','').replace('\n','')))
                         select_e=Select(placeholder="選擇要查看的裝備",options=options_e,min_values=1,max_values=1)
                         select_e.callback=select_new_embed
                         view.add_item(select_e)
