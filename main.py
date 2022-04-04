@@ -1,4 +1,4 @@
-#2022/4/3 17:34
+#2022/4/4 12:30
 import discord
 from discord.ext import commands
 from discord.ui import Button,View,Select
@@ -63,8 +63,8 @@ async def reloadjson(msg):
 #help command
 @bot.command()
 async def help(msg):
-    embed = discord.Embed(title="指令列表",description="dbfId及id說明:dbfId為純數字、id為文字+數字。\n使用 使用多數指令會將dbfId及id寫在左下方，以逗號分隔;\n**t!deck** 指令則會將dbfId及id寫在卡片名稱後方括號內，以逗號分隔;\n在爐石戰記官網(hsreplay)的卡牌庫中點開一張牌後，網址會變為`https://playhearthstone.com/zh-tw/cards/...(https://hsreplay.net/cards/...)`，「...」中數字的部分即為dbfId。\n指令中語言參數皆為選填，常見zhTW(預設)、zhCN、enUS …\n",color=0xff0000)
-    embed.add_field(name="t!id",value="使用方法:\"t!id dbfId或id 語言(選填)\"\n例子1(使用dbfId):`t!id 38833`\n例子2(使用id):`t!id OG_272`", inline=False)
+    embed = discord.Embed(title="指令列表",description="指令中語言參數皆為選填，常見zhTW(預設)、zhCN、enUS …\n",color=0xff0000)
+    embed.add_field(name="t!id",value="使用方法:\"t!id dbfId或id 語言(選填)\"\n例子1(使用dbfId):`t!id 38833`\n例子2(使用id):`t!id OG_272`\n\n", inline=False)
     embed.add_field(name="t!card",value="使用方法:\"t!card 卡牌名稱 語言(選填)\"\n例子:`t!card 暮光召喚師`", inline=False)
     embed.add_field(name="t!deck",value="使用方法:\"t!deck 牌組代碼 牌組名稱(選填) \"\n例子1(無套牌名稱):\n`t!deck AAEBAaIHDpoC+AfpEZfBAt/jArvvAuvwAoSmA6rLA4/OA/bWA4PkA72ABJWfBAi0AcQB7QL1uwLi3QPn3QOS5AP+7gMA`\n例子2(有套牌名稱):\n`t!deck AAEBAaIHDpoC+AfpEZfBAt/jArvvAuvwAoSmA6rLA4/OA/bWA4PkA72ABJWfBAi0AcQB7QL1uwLi3QPn3QOS5AP+7gMA 無限潛行`", inline=False)
     embed.add_field(name="t!merc",value="使用方法:\"t!merc 傭兵、裝備、技能名稱 語言(選填)\"\n例子1(傭兵):`t!merc 餅乾大廚`\n例子2(裝備):`t!merc 養好的鍋子`\n例子3(技能):`t!merc 魚肉大餐`", inline=False)
@@ -104,6 +104,71 @@ async def on_ready():
 
 
 #cmds
+def embed_n(data:dict,lang):
+    title=data['name'][lang]
+    text=""
+    if 'text' in data:text+=change_text(data["text"][lang])+"\n"
+    elif 'flavor' in data:text+=change_text(data['flavor'][lang])
+    imgurl=f"https://art.hearthstonejson.com/v1/render/latest/{lang}/512x/"+data["id"]+".png"
+    cardview=f"https://playhearthstone.com/cards/"+str(data["dbfId"])
+    if requests.request('GET',imgurl).status_code==404:
+        imgurl=f"https://art.hearthstonejson.com/v1/256x/"+data["id"]+".jpg"
+        if requests.request('GET',imgurl).status_code==404:
+            imgurl="https://cdn.discordapp.com/attachments/913009861967626310/935811318768885810/PlaceholderCard.png"
+            text+="\n※此卡牌確實存在於爐石戰記中的某個角落，但沒有任何圖片"
+    embed = discord.Embed(title=title,url=cardview,description=text, color=0xff0000)
+    embed.set_image(url=imgurl)
+    embed.set_footer(text=str(data["dbfId"])+","+data["id"])
+    return embed
+def embed_bg(data:dict,lang):
+    async def select_new_embed(interaction):
+        for data in cardlib:
+            if data["dbfId"]==int(dict(interaction.data)['values'][0]):
+                embed,view=embed_bg(data,lang)
+                await interaction.response.edit_message(embed=embed,view=view)
+    async def button_new_embed(interaction):
+        for data in cardlib:
+            if data["dbfId"]==int(dict(interaction.data)['custom_id']):
+                embed,view=embed_bg(data,lang)
+                await interaction.response.edit_message(embed=embed,view=view)
+    view=View()
+    title=data['name'][lang]
+    text=""
+    if 'text' in data:text+=change_text(data["text"][lang])+"\n"
+    elif 'flavor' in data:text+=change_text(data['flavor'][lang])
+    cardview=f"https://playhearthstone.com/battlegrounds/"+str(data["dbfId"])
+    token=get_token()
+    bzlang=lang[0:2]+"_"+lang[2:4]
+    url=f'https://tw.api.blizzard.com/hearthstone/cards/{data["dbfId"]}?locale={bzlang}&gameMode=battlegrounds&access_token={token}'
+    if data["type"]=="HERO":
+        if 'battlegroundsBuddyDbfId' in data:
+            text+="\n夥伴dbfId:"+str(data['battlegroundsBuddyDbfId'])
+            button=Button(style=ButtonStyle.success,label="查看夥伴",custom_id=str(data['battlegroundsBuddyDbfId']))
+            button.callback=button_new_embed
+            view.add_item(button)
+    elif data["type"]=="MINION":
+        if "battlegroundsPremiumDbfId" in data:
+            imgurl=json.loads(requests.request('GET',url).text)['battlegrounds']['image']
+            text+="\n金卡dbfId:"+str(data['battlegroundsPremiumDbfId'])
+            button=Button(style=ButtonStyle.success,label="查看金卡",custom_id=str(data['battlegroundsPremiumDbfId']))
+            button.callback=button_new_embed
+            view.add_item(button)
+        elif "battlegroundsNormalDbfId" in data:
+            imgurl=json.loads(requests.request('GET',url).text)['battlegrounds']['imageGold']
+            text+="\n普卡dbfId:"+str(data['battlegroundsNormalDbfId'])
+            button=Button(style=ButtonStyle.success,label="查看普卡",custom_id=str(data['battlegroundsNormalDbfId']))
+            button.callback=button_new_embed
+            view.add_item(button)
+    if requests.request('GET',imgurl).status_code==404:
+        imgurl=f"https://art.hearthstonejson.com/v1/256x/"+data["id"]+".jpg"
+        if requests.request('GET',imgurl).status_code==404:
+            imgurl="https://cdn.discordapp.com/attachments/913009861967626310/935811318768885810/PlaceholderCard.png"
+            text+="\n※此卡牌確實存在於爐石戰記中的某個角落，但沒有任何圖片"
+    embed = discord.Embed(title=title,url=cardview,description=text, color=0xff0000)
+    embed.set_image(url=imgurl)
+    embed.set_footer(text=str(data["dbfId"])+","+data["id"])
+    return embed,view
+
 def embed_m(data:dict,lang):
     view=View()
     title=data['name'][lang]
@@ -117,18 +182,18 @@ def embed_m(data:dict,lang):
         if requests.request('GET',imgurl).status_code==404:
             imgurl="https://cdn.discordapp.com/attachments/913009861967626310/935811318768885810/PlaceholderCard.png"
             text+="\n※此卡牌確實存在於爐石戰記中的某個角落，但沒有任何圖片"
-            #傭兵子父卡牌功能
-    async def select_callback(interaction):
+    #傭兵子父卡牌功能
+    async def select_new_embed(interaction):
         for data in cardlib:
             if data["dbfId"]==int(dict(interaction.data)['values'][0]):
                 embed,view=embed_m(data,lang)
                 await interaction.response.edit_message(embed=embed,view=view)
-    async def button_callback(interaction):
+    async def button_new_embed(interaction):
         for data in cardlib:
             if data["dbfId"]==int(dict(interaction.data)['custom_id']):
                 embed,view=embed_m(data,lang)
                 await interaction.response.edit_message(embed=embed,view=view)
-    if data["cost"]==0 and data["type"]=="LETTUCE_ABILITY" and "hideCost" in data:
+    if data["cost"]==0 and data["type"]=="LETTUCE_ABILITY":
         run=False
         for h_data in cardlibm:
             if "equipment" in h_data:
@@ -144,10 +209,10 @@ def embed_m(data:dict,lang):
                                             if otd["dbf_id"]!=data["dbfId"]:
                                                 text+="等級"+str(otd["tier"])+":"+str(otd["dbf_id"])+"\n"
                                                 button=Button(style=ButtonStyle.gray,label="查看等級"+str(otd["tier"]),custom_id=str(otd["dbf_id"]))
-                                                button.callback=button_callback
+                                                button.callback=button_new_embed
                                                 view.add_item(button)
                                         button=Button(style=ButtonStyle.success,label="查看傭兵",custom_id=str(ownerdata['dbfId']))
-                                        button.callback=button_callback
+                                        button.callback=button_new_embed
                                         view.add_item(button)
                                         run=True 
     elif data["cost"]!=0 and data["type"]=="LETTUCE_ABILITY":
@@ -168,10 +233,10 @@ def embed_m(data:dict,lang):
                                                     if otd["dbf_id"]!=data["dbfId"]:
                                                         text+="等級"+str(otd["tier"])+":"+str(otd["dbf_id"])+"\n"
                                                         button=Button(style=ButtonStyle.gray,label="查看等級"+str(otd["tier"]),custom_id=str(otd["dbf_id"]))
-                                                        button.callback=button_callback
+                                                        button.callback=button_new_embed
                                                         view.add_item(button)
                                                 button=Button(style=ButtonStyle.success,label="查看傭兵",custom_id=str(ownerdata['dbfId']))
-                                                button.callback=button_callback
+                                                button.callback=button_new_embed
                                                 view.add_item(button)
                                                 run=True
     elif data["type"]=="MINION":
@@ -183,7 +248,7 @@ def embed_m(data:dict,lang):
                     for i,skin in enumerate(h_data["skinDbfIds"],1):
                         skins.append(SelectOption(label=f"造型{i}",value=str(skin),description=skin))
                     select_s=Select(placeholder="選擇要查看的造型",options=skins,min_values=1,max_values=1)
-                    select_s.callback=select_callback
+                    select_s.callback=select_new_embed
                     view.add_item(select_s)
                 if "equipment" in h_data:
                     if len(h_data["equipment"])>=1:
@@ -196,7 +261,7 @@ def embed_m(data:dict,lang):
                                         text+=f"裝備{str(i)}等級{tiers['tier']}({c_data['name'][lang]},{c_data['dbfId']})\n"
                                         options_e.append(SelectOption(label=f"{c_data['name'][lang]}({c_data['dbfId']},{c_data['id']})\n",value=str(c_data['dbfId']),description=f"裝備{str(i)}等級{tiers['tier']}"))
                         select_e=Select(placeholder="選擇要查看的裝備",options=options_e,min_values=1,max_values=1)
-                        select_e.callback=select_callback
+                        select_e.callback=select_new_embed
                         view.add_item(select_e)
                         if "specializations" in h_data:
                             if len(h_data["specializations"])>0:
@@ -212,7 +277,7 @@ def embed_m(data:dict,lang):
                                                             text+=f"技能{str(i)}等級{tiers['tier']}({c_data['name'][lang]},{c_data['dbfId']})\n"
                                                             options_p.append(SelectOption(label=f"{c_data['name'][lang]}({c_data['dbfId']},{c_data['id']})\n",value=str(c_data['dbfId']),description=f"技能{str(i)}等級{tiers['tier']}"))
                                         select_p=Select(placeholder="選擇要查看的技能",options=options_p,min_values=1,max_values=1)
-                                        select_p.callback=select_callback
+                                        select_p.callback=select_new_embed
                                         view.add_item(select_p)
     embed = discord.Embed(title=title,url=cardview,description=text, color=0xff0000)
     embed.set_image(url=imgurl)
@@ -236,39 +301,13 @@ async def id(msg,cardid=None,lang="zhTW"):
                     find=True
                     break
         if find is True:
-            title=data['name'][lang]
-            text=""
-            if 'text' in data:text+=change_text(data["text"][lang])+"\n"
-            if 'flavor' in data:text+=change_text(data['flavor'][lang])
-            imgurl=f"https://art.hearthstonejson.com/v1/render/latest/{lang}/512x/"+data["id"]+".png"
-            cardview=f"https://playhearthstone.com/cards/"+str(data["dbfId"])
-            if data["set"]=="BATTLEGROUNDS":
-                token=get_token()
-                bzlang=lang[0:2]+"_"+lang[2:4]
-                url=f'https://tw.api.blizzard.com/hearthstone/cards/{data["dbfId"]}?locale={bzlang}&gameMode=battlegrounds&access_token={token}'
-                cardview=f"https://playhearthstone.com/battlegrounds/"+str(data["dbfId"])
-                if 'battlegroundsBuddyDbfId' in data:
-                    text+="\n夥伴dbfId:"+str(data['battlegroundsBuddyDbfId'])
-                try:
-                    if "battlegroundsNormalDbfId" in data:
-                        imgurl=json.loads(requests.request('GET',url).text)['battlegrounds']['imageGold']
-                    else:
-                        imgurl=json.loads(requests.request('GET',url).text)['battlegrounds']['image']
-                except:pass
-            elif data["set"]=="LETTUCE":
-                cardview=f"https://playhearthstone.com/zh-tw/mercenaries/"+str(data["dbfId"])
+            if data["set"]=="LETTUCE":
                 embed,view=embed_m(data,lang)
                 await msg.reply(embed=embed,view=view)
-                return
-            if requests.request('GET',imgurl).status_code==404:
-                imgurl=f"https://art.hearthstonejson.com/v1/512x/"+data["id"]+".jpg"
-                if requests.request('GET',imgurl).status_code==404:
-                    imgurl="https://cdn.discordapp.com/attachments/913009861967626310/935811318768885810/PlaceholderCard.png"
-                    text+="\n※此卡牌確實存在於爐石戰記中的某個角落，但沒有任何圖片"
-            embed = discord.Embed(title=title,url=cardview,description=text, color=0xff0000)
-            embed.set_image(url=imgurl)
-            embed.set_footer(text=str(data["dbfId"])+","+data["id"])
-            await msg.reply(embed=embed)
+            elif data["set"]=="BATTLEGROUNDS":
+                embed,view=embed_bg(data,lang)
+                await msg.reply(embed=embed,view=view)
+            else:await msg.reply(embed=embed_n(data,lang))
         else:await msg.reply("查無此卡!")
 
 @bot.command()
@@ -276,36 +315,6 @@ async def card(msg,cardname=None,lang="zhTW"):
     if cardname==None:
         await msg.reply("該指令使用方法:\"t!card 卡牌名稱 語言(選填)\"\n例子:`t!card 暮光召喚師`")
     else:
-        def embed(data:dict):
-            title=data['name'][lang]
-            text=""
-            if 'text' in data:text+=change_text(data["text"][lang])+"\n"
-            elif 'flavor' in data:text+=change_text(data['flavor'][lang])
-            imgurl=f"https://art.hearthstonejson.com/v1/render/latest/{lang}/512x/"+data["id"]+".png"
-            cardview=f"https://playhearthstone.com/cards/"+str(data["dbfId"])
-            if data["set"]=="BATTLEGROUNDS":
-                cardview=f"https://playhearthstone.com/battlegrounds/"+str(data["dbfId"])
-                token=get_token()
-                bzlang=lang[0:2]+"_"+lang[2:4]
-                url=f'https://tw.api.blizzard.com/hearthstone/cards/{data["dbfId"]}?locale={bzlang}&gameMode=battlegrounds&access_token={token}'
-                if 'battlegroundsBuddyDbfId' in data:
-                    text+="\n夥伴dbfId:"+str(data['battlegroundsBuddyDbfId'])
-                try:  
-                    if "battlegroundsNormalDbfId" in data:
-                        imgurl=json.loads(requests.request('GET',url).text)['battlegrounds']['imageGold']
-                    else:
-                        imgurl=json.loads(requests.request('GET',url).text)['battlegrounds']['image']
-                except:pass
-            elif data["set"]=="LETTUCE":cardview=f"https://playhearthstone.com/zh-tw/mercenaries/"+str(data["dbfId"])
-            if requests.request('GET',imgurl).status_code==404:
-                imgurl=f"https://art.hearthstonejson.com/v1/256x/"+data["id"]+".jpg"
-                if requests.request('GET',imgurl).status_code==404:
-                    imgurl="https://cdn.discordapp.com/attachments/913009861967626310/935811318768885810/PlaceholderCard.png"
-                    text+="\n※此卡牌確實存在於爐石戰記中的某個角落，但沒有任何圖片"
-            embed = discord.Embed(title=title,url=cardview,description=text, color=0xff0000)
-            embed.set_image(url=imgurl)
-            embed.set_footer(text=str(data["dbfId"])+","+data["id"])
-            return embed
         find=[]
         for data in cardlib:
             if "type" in data:
@@ -314,14 +323,21 @@ async def card(msg,cardname=None,lang="zhTW"):
                     elif 'text' in data:
                         if cardname in data["text"][lang].replace("\n",""):find.append(data)
         if len(find)==0:await msg.reply("查無卡牌！")
-        elif len(find)==1:await msg.reply(embed=embed(find[0]))
+        elif len(find)==1:
+            if find[0]["set"]=="LETTUCE":
+                embed,view=embed_m(find[0],lang)
+                await msg.reply(embed=embed,view=view)
+            elif find[0]["set"]=="BATTLEGROUNDS":
+                embed,view=embed_bg(find[0],lang)
+                await msg.reply(embed=embed,view=view)
+            else:await msg.reply(embed=embed_n(find[0],lang))
         elif len(find)>24:
-            async def button_callback(interaction):
+            async def callback_allcards(interaction):
               await interaction.response.edit_message(content="已發送至私人訊息",view=None)
               for data in find:
-                        await msg.author.send(embed=embed(data))
+                        await msg.author.send(embed=embed_n(data,lang))
             button=Button(style=ButtonStyle.success,label="發送所有卡牌至私人訊息")
-            button.callback=button_callback
+            button.callback=callback_allcards
             view=View()
             view.add_item(button)
             await msg.reply("由於數量過多，請更改關鍵字縮小範圍。",view=view)
@@ -338,9 +354,9 @@ async def card(msg,cardname=None,lang="zhTW"):
                 if int(dict(interaction.data)['values'][0])==-1:
                     await interaction.response.edit_message(content="已發送至私人訊息",view=None)
                     for data in find:
-                        await msg.author.send(embed=embed(data))
+                        await msg.author.send(embed=embed_n(data,lang))
                 else:
-                    await interaction.response.edit_message(content="",embed=embed(find[int(dict(interaction.data)['values'][0])]),view=None)
+                    await interaction.response.edit_message(content="",embed=embed_n(find[int(dict(interaction.data)['values'][0])],lang),view=None)
             select.callback=select_callback
             view=View()
             view.add_item(select)
@@ -365,13 +381,13 @@ async def merc(msg,cardname=None,lang="zhTW"):
             embed,view=embed_m(find[0],lang)
             await msg.reply(embed=embed,view=view)
         elif len(find)>24:
-            async def button_callback(interaction):
+            async def callback_allcards(interaction):
                 await interaction.response.edit_message(content="已發送至私人訊息",view=None)
                 for data in find:
                         embed,view=embed_m(data,lang)
                         await msg.author.send(embed=embed,view=view)
             button=Button(style=ButtonStyle.success,label="發送所有卡牌至私人訊息")
-            button.callback=button_callback
+            button.callback=callback_allcards
             view=View()
             view.add_item(button)
             await msg.reply("由於數量過多，請更改關鍵字縮小範圍。",view=view)
