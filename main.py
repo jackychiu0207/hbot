@@ -136,12 +136,14 @@ def embed_bg(data:dict,lang):
     text=""
     if 'text' in data:text+=change_text(data["text"][lang])+"\n"
     elif 'flavor' in data:text+=change_text(data['flavor'][lang])
+    imgurl=f"https://art.hearthstonejson.com/v1/render/latest/{lang}/512x/"+data["id"]+".png"
     cardview=f"https://playhearthstone.com/battlegrounds/"+str(data["dbfId"])
     token=get_token()
     bzlang=lang[0:2]+"_"+lang[2:4]
     url=f'https://tw.api.blizzard.com/hearthstone/cards/{data["dbfId"]}?locale={bzlang}&gameMode=battlegrounds&access_token={token}'
     if data["type"]=="HERO":
         if 'battlegroundsBuddyDbfId' in data:
+            imgurl=json.loads(requests.request('GET',url).text)['battlegrounds']['image']
             text+="\n夥伴dbfId:"+str(data['battlegroundsBuddyDbfId'])
             button=Button(style=ButtonStyle.success,label="查看夥伴",custom_id=str(data['battlegroundsBuddyDbfId']))
             button.callback=button_new_embed
@@ -159,6 +161,22 @@ def embed_bg(data:dict,lang):
             button=Button(style=ButtonStyle.success,label="查看普卡",custom_id=str(data['battlegroundsNormalDbfId']))
             button.callback=button_new_embed
             view.add_item(button)
+        if "isBattlegroundsBuddy" in data:
+            for hero in cardlib:
+                if 'battlegroundsBuddyDbfId' in hero:
+                    if hero['battlegroundsBuddyDbfId']==data["dbfId"]:
+                        text+="\n夥伴dbfId:"+str(hero["dbfId"])
+                        button=Button(style=ButtonStyle.success,label="查看夥伴",custom_id=str(hero["dbfId"]))
+                        button.callback=button_new_embed
+                        view.add_item(button)
+                    if "battlegroundsNormalDbfId" in data:
+                        if hero['battlegroundsBuddyDbfId']==data["battlegroundsNormalDbfId"]:
+                            text+="\n夥伴dbfId:"+str(hero["dbfId"])
+                            button=Button(style=ButtonStyle.success,label="查看夥伴",custom_id=str(hero["dbfId"]))
+                            button.callback=button_new_embed
+                            view.add_item(button)
+
+
     if requests.request('GET',imgurl).status_code==404:
         imgurl=f"https://art.hearthstonejson.com/v1/256x/"+data["id"]+".jpg"
         if requests.request('GET',imgurl).status_code==404:
@@ -335,7 +353,13 @@ async def card(msg,cardname=None,lang="zhTW"):
             async def callback_allcards(interaction):
               await interaction.response.edit_message(content="已發送至私人訊息",view=None)
               for data in find:
-                        await msg.author.send(embed=embed_n(data,lang))
+                    if data["set"]=="LETTUCE":
+                        embed,view=embed_m(data,lang)
+                        await msg.reply(embed=embed,view=view)
+                    elif data["set"]=="BATTLEGROUNDS":
+                        embed,view=embed_bg(data,lang)
+                        await msg.reply(embed=embed,view=view)
+                    else:await msg.reply(embed=embed_n(data,lang))
             button=Button(style=ButtonStyle.success,label="發送所有卡牌至私人訊息")
             button.callback=callback_allcards
             view=View()
@@ -354,9 +378,21 @@ async def card(msg,cardname=None,lang="zhTW"):
                 if int(dict(interaction.data)['values'][0])==-1:
                     await interaction.response.edit_message(content="已發送至私人訊息",view=None)
                     for data in find:
-                        await msg.author.send(embed=embed_n(data,lang))
+                        if data["set"]=="LETTUCE":
+                            embed,view=embed_m(data,lang)
+                            await msg.reply(embed=embed,view=view)
+                        elif data["set"]=="BATTLEGROUNDS":
+                            embed,view=embed_bg(data,lang)
+                            await msg.reply(embed=embed,view=view)
+                        else:await msg.reply(embed=embed_n(data,lang))
                 else:
-                    await interaction.response.edit_message(content="",embed=embed_n(find[int(dict(interaction.data)['values'][0])],lang),view=None)
+                    if find[int(dict(interaction.data)['values'][0])]["set"]=="LETTUCE":
+                        embed,view=embed_m(find[int(dict(interaction.data)['values'][0])],lang)
+                        await interaction.response.edit_message(content="",embed=embed,view=view)
+                    elif find[int(dict(interaction.data)['values'][0])]["set"]=="BATTLEGROUNDS":
+                        embed,view=embed_bg(find[int(dict(interaction.data)['values'][0])],lang)
+                        await interaction.response.edit_message(content="",embed=embed,view=view)
+                    else:await interaction.response.edit_message(content="",embed=embed_n(find[int(dict(interaction.data)['values'][0])],lang))
             select.callback=select_callback
             view=View()
             view.add_item(select)
