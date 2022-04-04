@@ -1,4 +1,9 @@
-#2022/4/4 15:15
+'''
+Date: 2022-04-02 14:19:50
+LastEditors: Jacky0207
+LastEditTime: 2022-04-04 21:21:18
+FilePath: \hbot\main.py
+'''
 import discord
 from discord.ext import commands
 from discord.ui import Button,View,Select
@@ -11,6 +16,7 @@ from hearthstone.enums import FormatType
 import urllib.request
 import os
 from webserver import keep_alive
+
 
 intents=discord.Intents.all()
 
@@ -108,7 +114,7 @@ async def on_ready():
 def embed_n(data:dict,lang):
     title=data['name'][lang]
     text=""
-    if 'text' in data:text+=change_text(data["text"][lang])+"\n"
+    if 'text' in data:text+=change_text(data["text"][lang])+"\n\n"
     if 'flavor' in data:text+=change_text(data['flavor'][lang])
     imgurl=f"https://art.hearthstonejson.com/v1/render/latest/{lang}/512x/"+data["id"]+".png"
     cardview=f"https://playhearthstone.com/cards/"+str(data["dbfId"])
@@ -122,11 +128,11 @@ def embed_n(data:dict,lang):
     embed.set_footer(text=str(data["dbfId"])+","+data["id"])
     return embed
 def embed_bg(data:dict,lang):
-    async def select_new_embed(interaction):
-        for data in cardlib:
-            if data["dbfId"]==int(dict(interaction.data)['values'][0]):
-                embed,view=embed_bg(data,lang)
-                await interaction.response.edit_message(embed=embed,view=view)
+#    async def select_new_embed(interaction):
+#        for data in cardlib:
+#            if data["dbfId"]==int(dict(interaction.data)['values'][0]):
+#                embed,view=embed_bg(data,lang)
+#                await interaction.response.edit_message(embed=embed,view=view)
     async def button_new_embed(interaction):
         for data in cardlib:
             if data["dbfId"]==int(dict(interaction.data)['custom_id']):
@@ -135,8 +141,6 @@ def embed_bg(data:dict,lang):
     view=View()
     title=data['name'][lang]
     text=""
-    if 'text' in data:text+=change_text(data["text"][lang])+"\n"
-    if 'flavor' in data:text+=change_text(data['flavor'][lang])
     imgurl=f"https://art.hearthstonejson.com/v1/render/latest/{lang}/512x/"+data["id"]+".png"
     cardview=f"https://playhearthstone.com/battlegrounds/"+str(data["dbfId"])
     token=get_token()
@@ -150,6 +154,9 @@ def embed_bg(data:dict,lang):
             button.callback=button_new_embed
             view.add_item(button)
     elif data["type"]=="MINION":
+        if "techLevel" in data:text+=f"旅店等級{data['techLevel']}"
+        if "health" and "attack" in data:f"體質:{data['health']}/{data['health']}"
+        if 'text' in data:text+="\n"+change_text(data["text"][lang])+"\n"
         if "battlegroundsPremiumDbfId" in data:
             imgurl=json.loads(requests.request('GET',url).text)['battlegrounds']['image']
             text+="\n金卡dbfId:"+str(data['battlegroundsPremiumDbfId'])
@@ -176,8 +183,6 @@ def embed_bg(data:dict,lang):
                             button=Button(style=ButtonStyle.success,label="查看夥伴",custom_id=str(hero["dbfId"]))
                             button.callback=button_new_embed
                             view.add_item(button)
-
-
     if requests.request('GET',imgurl).status_code==404:
         imgurl=f"https://art.hearthstonejson.com/v1/256x/"+data["id"]+".jpg"
         if requests.request('GET',imgurl).status_code==404:
@@ -192,8 +197,6 @@ def embed_m(data:dict,lang):
     view=View()
     title=data['name'][lang]
     text=""
-    if 'text' in data:text+=change_text(data["text"][lang])+"\n"
-    if 'flavor' in data:text+=change_text(data['flavor'][lang])+"\n"
     imgurl=f"https://art.hearthstonejson.com/v1/render/latest/{lang}/512x/"+data["id"]+".png"
     cardview=f"https://playhearthstone.com/zh-tw/mercenaries/"+str(data["dbfId"])
     if requests.request('GET',imgurl).status_code==404:
@@ -222,8 +225,9 @@ def embed_m(data:dict,lang):
                             if e["dbf_id"]==data["dbfId"]:
                                 for ownerdata in cardlib:
                                     if ownerdata["dbfId"]==h_data["defaultSkinDbfId"] and run is False:
+                                        if 'text' in data:text+=change_text(data["text"][lang])+"\n"
                                         text+="此為 **"+ownerdata['name'][lang]+"**("+str(ownerdata['dbfId'])+","+str(ownerdata['id'])+") 的裝備。\n"
-                                        if len(e_data['tiers'])>1:text+="該裝備其他等級的dbfId:\n"
+                                        if len(e_data['tiers'])>1:text+="\n該裝備其他等級的dbfId:\n"
                                         for otd in e_data['tiers']:
                                             if otd["dbf_id"]!=data["dbfId"]:
                                                 text+="等級"+str(otd["tier"])+":"+str(otd["dbf_id"])+"\n"
@@ -246,8 +250,11 @@ def embed_m(data:dict,lang):
                                     if p["dbf_id"]==data["dbfId"]:
                                         for ownerdata in cardlib:
                                             if ownerdata["dbfId"]==h_data["defaultSkinDbfId"] and run is False:
-                                                text+="此為 **"+ownerdata['name'][lang]+"**("+str(ownerdata['dbfId'])+","+str(ownerdata['id'])+") 的技能。\n"
-                                                if len(p_data['tiers'])>1:text+="該技能其他等級的dbfId:\n"
+                                                if "cost" in data:text+="速度:"+str(data['cost'])
+                                                if "mercenariesAbilityCooldown" in data:text+=" 冷卻時間:"+str(data['mercenariesAbilityCooldown'])
+                                                if 'text' in data:text+="\n"+change_text(data["text"][lang])+"\n"
+                                                text+="\n此為 **"+ownerdata['name'][lang]+"**("+str(ownerdata['dbfId'])+","+str(ownerdata['id'])+") 的技能。\n"
+                                                if len(p_data['tiers'])>1:text+="\n該技能其他等級的dbfId:\n"
                                                 for otd in p_data['tiers']:
                                                     if otd["dbf_id"]!=data["dbfId"]:
                                                         text+="等級"+str(otd["tier"])+":"+str(otd["dbf_id"])+"\n"
