@@ -286,7 +286,7 @@ def embed_m(data:dict,lang):
                                     if tiers["dbf_id"] == c_data["dbfId"]:
                                         if tiers['tier']==1:text+=f"裝備{str(i)}等級1:{c_data['name'][lang]}({c_data['dbfId']})\n"
                                         d=change_text(c_data['text'][lang]).replace('*','').replace('\n','')
-                                             if len(d)>80:d=d[0:75]+"..."
+                                        if len(d)>80:d=d[0:75]+"..."
                                         options_e.append(SelectOption(label=f"{c_data['name'][lang]}(裝備{str(i)}等級{tiers['tier']})\n",value=str(c_data['dbfId']),description=d'
                         select_e=Select(placeholder="選擇要查看的裝備",options=options_e,min_values=1,max_values=1)
                         select_e.callback=select_new_embed
