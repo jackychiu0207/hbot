@@ -279,12 +279,12 @@ def embed_m(data:dict,lang):
                 if "equipment" in h_data:
                     if len(h_data["equipment"])>=1:
                         options_e=[]
-                        text+="**該傭兵所有裝備:**\n"
+                        text+="**該傭兵裝備:**\n"
                         for i,e_data in enumerate(h_data["equipment"],1):
                             for tiers in e_data["tiers"]:
                                 for c_data in cardlib:
                                     if tiers["dbf_id"] == c_data["dbfId"]:
-                                        text+=f"裝備{str(i)}等級{tiers['tier']}({c_data['name'][lang]},{c_data['dbfId']})\n"
+                                        if tiers['tier']==1:text+=f"裝備{str(i)}等級1:{c_data['name'][lang]}({c_data['dbfId']})\n"
                                         options_e.append(SelectOption(label=f"{c_data['name'][lang]}({c_data['dbfId']},{c_data['id']})\n",value=str(c_data['dbfId']),description=f"裝備{str(i)}等級{tiers['tier']}"))
                         select_e=Select(placeholder="選擇要查看的裝備",options=options_e,min_values=1,max_values=1)
                         select_e.callback=select_new_embed
@@ -294,7 +294,7 @@ def embed_m(data:dict,lang):
                                 if "abilities" in h_data["specializations"][0]:
                                     if len(h_data["equipment"])>=1:
                                         options_p=[]
-                                        text+="**該傭兵所有技能:**\n"
+                                        text+="**該傭兵技能:**\n"
                                         for i,p_data in enumerate(h_data["specializations"][0]["abilities"],1):
                                             if "tiers" in p_data: 
                                                 for tiers in p_data["tiers"]:
