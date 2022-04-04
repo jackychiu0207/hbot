@@ -116,7 +116,7 @@ def embed_n(data:dict,lang):
     text=""
     if 'text' in data:text+=change_text(data["text"][lang])+"\n\n"
     if 'flavor' in data:text+=change_text(data['flavor'][lang])
-    imgurl=f"https://art.hearthstonejson.com/v1/render/latest/{lang}/orig/"+data["id"]+".png"
+    imgurl=f"https://art.hearthstonejson.com/v1/render/latest/{lang}/512x/"+data["id"]+".png"
     cardview=f"https://playhearthstone.com/cards/"+str(data["dbfId"])
     if requests.request('GET',imgurl).status_code==404:
         imgurl=f"https://art.hearthstonejson.com/v1/256x/"+data["id"]+".jpg"
@@ -141,7 +141,7 @@ def embed_bg(data:dict,lang):
     view=View()
     title=data['name'][lang]
     text=""
-    imgurl=f"https://art.hearthstonejson.com/v1/render/latest/{lang}/orig/"+data["id"]+".png"
+    imgurl=f"https://art.hearthstonejson.com/v1/render/latest/{lang}/512x/"+data["id"]+".png"
     cardview=f"https://playhearthstone.com/battlegrounds/"+str(data["dbfId"])
     token=get_token()
     bzlang=lang[0:2]+"_"+lang[2:4]
@@ -197,7 +197,7 @@ def embed_m(data:dict,lang):
     view=View()
     title=data['name'][lang]
     text=""
-    imgurl=f"https://art.hearthstonejson.com/v1/render/latest/{lang}/orig/"+data["id"]+".png"
+    imgurl=f"https://art.hearthstonejson.com/v1/render/latest/{lang}/512x/"+data["id"]+".png"
     cardview=f"https://playhearthstone.com/zh-tw/mercenaries/"+str(data["dbfId"])
     if requests.request('GET',imgurl).status_code==404:
         imgurl=f"https://art.hearthstonejson.com/v1/256x/"+data["id"]+".jpg"
