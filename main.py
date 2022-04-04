@@ -309,6 +309,104 @@ def embed_m(data:dict,lang):
                                         select_p=Select(placeholder="選擇要查看的技能",options=options_p,min_values=1,max_values=1)
                                         select_p.callback=select_new_embed
                                         view.add_item(select_p)
+    else:
+        try:
+            run=False
+            for h_data in cardlibm:
+                if "equipment" in h_data:
+                    for e_data in h_data["equipment"]:
+                        if "tiers" in e_data:
+                            for e in e_data["tiers"]:
+                                if e["dbf_id"]==data["dbfId"]:
+                                    for ownerdata in cardlib:
+                                        if ownerdata["dbfId"]==h_data["defaultSkinDbfId"] and run is False:
+                                            if 'text' in data:text+=change_text(data["text"][lang])+"\n"
+                                            text+="此為 **"+ownerdata['name'][lang]+"**("+str(ownerdata['dbfId'])+","+str(ownerdata['id'])+") 的裝備。\n"
+                                            if len(e_data['tiers'])>1:text+="\n該裝備其他等級的dbfId:\n"
+                                            for otd in e_data['tiers']:
+                                                if otd["dbf_id"]!=data["dbfId"]:
+                                                    text+="等級"+str(otd["tier"])+":"+str(otd["dbf_id"])+"\n"
+                                                    button=Button(style=ButtonStyle.gray,label="查看等級"+str(otd["tier"]),custom_id=str(otd["dbf_id"]))
+                                                    button.callback=button_new_embed
+                                                    view.add_item(button)
+                                            button=Button(style=ButtonStyle.success,label="查看傭兵",custom_id=str(ownerdata['dbfId']))
+                                            button.callback=button_new_embed
+                                            view.add_item(button)
+                                            run=True 
+        except:
+            try:
+                run=False
+                for h_data in cardlibm:
+                    if "specializations" in h_data:
+                        if len(h_data["specializations"])>0:
+                            if "abilities" in h_data["specializations"][0]:
+                                for p_data in h_data["specializations"][0]["abilities"]:
+                                    if "tiers" in p_data:
+                                        for p in p_data["tiers"]:
+                                            if p["dbf_id"]==data["dbfId"]:
+                                                for ownerdata in cardlib:
+                                                    if ownerdata["dbfId"]==h_data["defaultSkinDbfId"] and run is False:
+                                                        if "cost" in data:text+="速度:"+str(data['cost'])
+                                                        if "mercenariesAbilityCooldown" in data:text+=" 冷卻時間:"+str(data['mercenariesAbilityCooldown'])
+                                                        if 'text' in data:text+="\n"+change_text(data["text"][lang])+"\n"
+                                                        text+="\n此為 **"+ownerdata['name'][lang]+"**("+str(ownerdata['dbfId'])+","+str(ownerdata['id'])+") 的技能。\n"
+                                                        if len(p_data['tiers'])>1:text+="\n該技能其他等級的dbfId:\n"
+                                                        for otd in p_data['tiers']:
+                                                            if otd["dbf_id"]!=data["dbfId"]:
+                                                                text+="等級"+str(otd["tier"])+":"+str(otd["dbf_id"])+"\n"
+                                                                button=Button(style=ButtonStyle.gray,label="查看等級"+str(otd["tier"]),custom_id=str(otd["dbf_id"]))
+                                                                button.callback=button_new_embed
+                                                                view.add_item(button)
+                                                        button=Button(style=ButtonStyle.success,label="查看傭兵",custom_id=str(ownerdata['dbfId']))
+                                                        button.callback=button_new_embed
+                                                        view.add_item(button)
+                                                        run=True
+            except:
+                try:
+                    for h_data in cardlibm:
+                        if data["dbfId"] in h_data["skinDbfIds"]:
+                            text+="(下方可選擇查看造型、裝備、技能)\n"
+                            if "skinDbfIds" in h_data:
+                                skins=[]
+                                for i,skin in enumerate(h_data["skinDbfIds"],1):
+                                    skins.append(SelectOption(label=f"造型{i}",value=str(skin),description=skin))
+                                select_s=Select(placeholder="選擇要查看的造型",options=skins,min_values=1,max_values=1)
+                                select_s.callback=select_new_embed
+                                view.add_item(select_s)
+                            if "equipment" in h_data:
+                                if len(h_data["equipment"])>=1:
+                                    options_e=[]
+                                    text+="**該傭兵裝備:**\n"
+                                    for i,e_data in enumerate(h_data["equipment"],1):
+                                        for tiers in e_data["tiers"]:
+                                            for c_data in cardlib:
+                                                if tiers["dbf_id"] == c_data["dbfId"]:
+                                                    if tiers['tier']==1:text+=f"裝備{str(i)}等級1:{c_data['name'][lang]}({c_data['dbfId']})\n"
+                                                    d=change_text(c_data['text'][lang]).replace('*','').replace('\n','')
+                                                    if len(d)>80:d=d[0:75]+"..."
+                                                    options_e.append(SelectOption(label=f"{c_data['name'][lang]}(裝備{str(i)}等級{tiers['tier']})\n",value=str(c_data['dbfId']),description=d))
+                                    select_e=Select(placeholder="選擇要查看的裝備",options=options_e,min_values=1,max_values=1)
+                                    select_e.callback=select_new_embed
+                                    view.add_item(select_e)
+                                    if "specializations" in h_data:
+                                        if len(h_data["specializations"])>0:
+                                            if "abilities" in h_data["specializations"][0]:
+                                                if len(h_data["equipment"])>=1:
+                                                    options_p=[]
+                                                    text+="**該傭兵技能:**\n"
+                                                    for i,p_data in enumerate(h_data["specializations"][0]["abilities"],1):
+                                                        if "tiers" in p_data: 
+                                                            for tiers in p_data["tiers"]:
+                                                                for c_data in cardlib:
+                                                                    if tiers["dbf_id"] == c_data["dbfId"]:
+                                                                         if tiers['tier']==1:text+=f"技能{str(i)}等級1:{c_data['name'][lang]}({c_data['dbfId']})\n"
+                                                                         d=change_text(c_data['text'][lang]).replace('*','').replace('\n','')
+                                                                         if len(d)>80:d=d[0:75]+"..."
+                                                                         options_p.append(SelectOption(label=f"{c_data['name'][lang]}(技能{str(i)}等級{tiers['tier']})\n",value=str(c_data['dbfId']),description=d))
+                                                    select_p=Select(placeholder="選擇要查看的技能",options=options_p,min_values=1,max_values=1)
+                                                    select_p.callback=select_new_embed
+                                                    view.add_item(select_p)
+                except:pass
     embed = discord.Embed(title=title,url=cardview,description=text, color=0xff0000)
     embed.set_image(url=imgurl)
     embed.set_footer(text=str(data["dbfId"])+","+data["id"])
