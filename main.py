@@ -310,6 +310,8 @@ def embed_m(data:dict,lang):
                                         select_p=Select(placeholder="選擇要查看的技能",options=options_p,min_values=1,max_values=1)
                                         select_p.callback=select_new_embed
                                         view.add_item(select_p)
+    else:
+        text=change_text(data["text"][lang]).replace("*","")
     embed = discord.Embed(title=title,url=cardview,description=text, color=0xff0000)
     embed.set_image(url=imgurl)
     embed.set_footer(text=str(data["dbfId"])+","+data["id"])
