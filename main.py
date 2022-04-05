@@ -574,7 +574,7 @@ async def deck(msg,deckcode=None,deckname=None,lang="zhTW"):
                 elif data["rarity"]=="RARE":cost+=100*data["count"]
                 elif data["rarity"]=="EPIC":cost+=400*data["count"]
                 elif data["rarity"]=="LEGENDARY":cost+=1600*data["count"]
-        if deckname=None:title=msg.author.name+" 的套牌"
+        if deckname is None:title=msg.author.name+" 的套牌"
         else:title=deckname
         embed=discord.Embed(title=title, description=f'{mode} 職業:{heroclass}(英雄:{deckhero})\n共{str(count)}張牌\n\n'+txt,url=f'https://playhearthstone.com/zh-tw/deckbuilder?deckcode={deckcode}',color=0xff0000)
         embed.set_thumbnail(url="https://art.hearthstonejson.com/v1/orig/"+heroID+".png")
