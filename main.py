@@ -97,7 +97,7 @@ def change_text(text:str):
     tlist=[['\n',''],['<b>','**'],['</b>','**'],['<i>','*'],['</i>','*'],["。","。\n"],['****',""],['[x]','']]
     for txt in tlist:
         if txt[0] in text:text=text.replace(txt[0],txt[1])
-    return(text)
+    return text
 
 
 
