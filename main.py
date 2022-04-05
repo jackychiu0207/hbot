@@ -37,12 +37,11 @@ def getjson():
     file.close()
 
 def openjson():
-    global cardlib,cardlibm,f,fm
+    global cardlib,,group
     try:
-        with open('cards.json') as f:
-            cardlib = json.load(f)
-        with open('mercenaries.json') as fm:
-            cardlibm = json.load(fm)
+        cardlib=json.load(open('cards.json'))
+        cardlibm=json.load(open('mercenaries.json'))
+        group=json.load(open('group.json'))
     except:
         return False
 getjson()
