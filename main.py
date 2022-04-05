@@ -1,9 +1,3 @@
-'''
-Date: 2022-04-02 14:19:50
-LastEditors: Jacky0207
-LastEditTime: 2022-04-04 21:21:18
-FilePath: \hbot\main.py
-'''
 import discord
 from discord.ext import commands
 from discord.ui import Button,View,Select
@@ -22,6 +16,9 @@ intents=discord.Intents.all()
 
 
 bot = commands.Bot(command_prefix="t!",help_command=None,intents=intents)
+
+
+classdict={"DEATHKNIGHT":"死亡騎士","DEMONHUNTER":"惡魔獵人","DREAM":"伊瑟拉","DRUID":"德魯伊","HUNTER":"獵人","INVALID":"未知/不適用職業","MAGE":"法師","NEUTRAL":"中立","PALADIN":"聖騎士","PRIEST":"牧師","ROGUE": 7,"SHAMAN":"薩滿","WARLOCK":"術士","WARRIOR":"戰士","WHIZBANG":"威茲幫"}
 
 def getjson():
     url='https://api.hearthstonejson.com/v1/latest/all/cards.json'
@@ -527,64 +524,74 @@ async def bg(msg,cardname=None,lang="zhTW"):
             view.add_item(select)
             await msg.reply("選擇你想找的卡牌",view=view)
 
+def deck_embed(msg,deckcode,deckname,lang,m):
+    heroclass=""
+    deck = Deck.from_deckstring(deckcode)
+    if deck.format==FormatType.FT_WILD:mode="開放模式(wild)"
+    elif deck.format==FormatType.FT_STANDARD:mode="標準模式(standard)"
+    elif deck.format==FormatType.FT_CLASSIC:mode="經典模式(classic)"
+    else: mode="其他模式(other)"
+    unfind=deck.cards.copy()
+    find=[]
+    deckhero=""
+    heroID=""
+    for data in cardlib:
+        if deckhero=="" and deck.heroes[0]==data["dbfId"]:
+            deckhero=data["name"][lang]
+            heroID=data["id"]
+            heroclass=classdict[data['cardClass']]
+        for i,cardid in enumerate(unfind):
+            if cardid[0]==data["dbfId"]:
+                card=data.copy()
+                card.update({"count":cardid[1]})
+                find.append(card)
+                del unfind[i]
+                break
+    txt=""
+    count=0
+    cost=0
+    find.sort(key=lambda x:x["cost"])
+    for data in find:
+        if m==0:
+            txt+=str(data["count"]) +" × " +"("+str(data["cost"])+") "+ data["name"][lang]+"\n"
+        elif m==1:
+            txt+=str(data["count"]) +" × " +"("+str(data["cost"])+") **"+ data["name"][lang]+ "** (" + str(data["dbfId"])+","+data["id"]+")\n"
+        count+=data["count"]
+        if "CORE"!=data["set"] and "rarity" in data:
+            if data["rarity"]=="COMMON":cost+=40*data["count"]
+            elif data["rarity"]=="RARE":cost+=100*data["count"]
+            elif data["rarity"]=="EPIC":cost+=400*data["count"]
+            elif data["rarity"]=="LEGENDARY":cost+=1600*data["count"]
+    if deckname is None:title=msg.author.name+" 的套牌"
+    else:title=deckname
+    embed=discord.Embed(title=title, description=f'{mode} 職業:{heroclass}(英雄:{deckhero})\n共{str(count)}張牌\n\n'+txt,url=f'https://playhearthstone.com/zh-tw/deckbuilder?deckcode={deckcode}',color=0xff0000)
+    embed.set_thumbnail(url="https://art.hearthstonejson.com/v1/orig/"+heroID+".png")
+    embed.set_footer(text="所需魔塵:"+str(cost))
+    async def advanced(interaction):
+        if dict(interaction.data)['custom_id']=="0":
+            embed,view=deck_embed(msg,deckcode,deckname,lang,1)
+            await interaction.response.edit_message(embed=embed,view=view)
+        elif dict(interaction.data)['custom_id']=="1":
+            embed,view=deck_embed(msg,deckcode,deckname,lang,0)
+            await interaction.response.edit_message(embed=embed,view=view)
+    view=View()
+    if m==0:
+        button=Button(style=ButtonStyle.red,label="顯示進階資訊",custom_id="0")
+    elif m==1:
+        button=Button(style=ButtonStyle.green,label="隱藏進階資訊",custom_id="1")
+    button.callback=advanced
+    view.add_item(button)
 
+    return embed,view
+    
 
 @bot.command()
 async def deck(msg,deckcode=None,deckname=None,lang="zhTW"):
     if deckcode==None:
         await msg.reply("該指令使用方法:\"t!deck 牌組代碼 牌組名稱(選填) \"\n例子1(無套牌名稱):\n`t!deck AAEBAaIHDpoC+AfpEZfBAt/jArvvAuvwAoSmA6rLA4/OA/bWA4PkA72ABJWfBAi0AcQB7QL1uwLi3QPn3QOS5AP+7gMA`\n例子2(有套牌名稱):\n`t!deck AAEBAaIHDpoC+AfpEZfBAt/jArvvAuvwAoSmA6rLA4/OA/bWA4PkA72ABJWfBAi0AcQB7QL1uwLi3QPn3QOS5AP+7gMA 無限潛行`")
     else:
-        heroclass=""
-        deck = Deck.from_deckstring(deckcode)
-        if deck.format==FormatType.FT_WILD:mode="開放模式(wild)"
-        elif deck.format==FormatType.FT_STANDARD:mode="標準模式(standard)"
-        elif deck.format==FormatType.FT_CLASSIC:mode="經典模式(classic)"
-        else: mode="其他模式(other)"
-        unfind=deck.cards.copy()
-        find=[]
-        deckhero=""
-        heroID=""
-        for data in cardlib:
-            if deckhero=="" and deck.heroes[0]==data["dbfId"]:
-                deckhero=data["name"][lang]
-                heroID=data["id"]
-                if heroID[5:7]=="01":heroclass="戰士"
-                elif heroID[5:7]=="02":heroclass="薩滿"
-                elif heroID[5:7]=="03":heroclass="盜賊"
-                elif heroID[5:7]=="04":heroclass="聖騎士"
-                elif heroID[5:7]=="05":heroclass="獵人"
-                elif heroID[5:7]=="06":heroclass="德魯伊"
-                elif heroID[5:7]=="07":heroclass="術士"
-                elif heroID[5:7]=="08":heroclass="法師"
-                elif heroID[5:7]=="09":heroclass="牧師"
-                elif heroID[5:7]=="10":heroclass="惡魔獵人"
-                else:heroclass="未知"
-
-            for i,cardid in enumerate(unfind):
-                if cardid[0]==data["dbfId"]:
-                    card=data.copy()
-                    card.update({"count":cardid[1]})
-                    find.append(card)
-                    del unfind[i]
-                    break
-        txt=""
-        count=0
-        cost=0
-        find.sort(key=lambda x:x["cost"])
-        for data in find:
-            txt+=str(data["count"]) +"×" +"("+str(data["cost"])+")**"+ data["name"][lang]+ "**(" + str(data["dbfId"])+","+data["id"]+")\n"
-            count+=data["count"]
-            if "CORE"!=data["set"] and "rarity" in data:
-                if data["rarity"]=="COMMON":cost+=40*data["count"]
-                elif data["rarity"]=="RARE":cost+=100*data["count"]
-                elif data["rarity"]=="EPIC":cost+=400*data["count"]
-                elif data["rarity"]=="LEGENDARY":cost+=1600*data["count"]
-        if deckname is None:title=msg.author.name+" 的套牌"
-        else:title=deckname
-        embed=discord.Embed(title=title, description=f'{mode} 職業:{heroclass}(英雄:{deckhero})\n共{str(count)}張牌\n\n'+txt,url=f'https://playhearthstone.com/zh-tw/deckbuilder?deckcode={deckcode}',color=0xff0000)
-        embed.set_thumbnail(url="https://art.hearthstonejson.com/v1/orig/"+heroID+".png")
-        embed.set_footer(text="所需塵魔:"+str(cost))
-        await msg.reply(embed=embed)
+        embed,view=deck_embed(msg,deckcode,deckname,lang,0)
+        await msg.reply(embed=embed,view=view)
         if deckname!=None:
             await msg.reply(f"###{deckname}\n{deckcode}\n# 若要使用此套牌，請先複製此訊息，然後在爐石戰記中建立一副新的套牌")
         else:
