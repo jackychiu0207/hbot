@@ -85,7 +85,7 @@ def get_token():
     return token
 
 def change_text(text:str):
-    tlist=[['\n',''],['<b>','**'],['</b>','**'],['<i>','*'],['</i>','*'],["。","。\n"],['****',""]]
+    tlist=[['\n',''],['<b>','**'],['</b>','**'],['<i>','*'],['</i>','*'],["。","。\n"],['****',""],['[x]','']]
     for txt in tlist:
         if txt[0] in text:text=text.replace(txt[0],txt[1])
     return(text)
@@ -358,6 +358,9 @@ async def card(msg,cardname=None,lang="zhTW"):
             if "type" in data:
                 if data["type"]!="ENCHANTMENT":
                     if cardname in data["name"][lang]:find.append(data)
+                    elif cardname in group:
+                        if group[cardname] in data["name"][lang]:
+                            find.append(data)
                     elif 'text' in data:
                         if cardname in data["text"][lang].replace("\n",""):find.append(data)
         if len(find)==0:await msg.reply("查無卡牌！")
@@ -431,6 +434,9 @@ async def merc(msg,cardname=None,lang="zhTW"):
             if "type" in data and "set" in data:
                 if data["type"]!="ENCHANTMENT" and data["set"]=="LETTUCE":
                     if cardname in data["name"][lang]:find.append(data)
+                    elif cardname in group:
+                        if group[cardname] in data["name"][lang]:
+                            find.append(data)
                     elif 'text' in data:
                         if cardname in data["text"][lang].replace("\n",""):find.append(data)
         if len(find)==0:await msg.reply("查無卡牌！")
@@ -483,6 +489,9 @@ async def bg(msg,cardname=None,lang="zhTW"):
                 if data["type"]!="ENCHANTMENT":
                     if "isBattlegroundsPoolMinion" in data or data["set"]=="BATTLEGROUNDS":
                         if cardname in data["name"][lang]:find.append(data)
+                        elif cardname in group:
+                            if group[cardname] in data["name"][lang]:
+                                find.append(data)
                         elif 'text' in data:
                             if cardname in data["text"][lang].replace("\n",""):find.append(data)
         if len(find)==0:await msg.reply("查無卡牌！")
