@@ -108,6 +108,10 @@ async def stop(msg):
 async def on_ready():
     print('BOT IS ONLINE!')
     await bot.change_presence(status=discord.Status.online, activity=discord.Game("召喚惡魔!"))
+    
+@bot.event
+async def on_command_error(ctx,error):
+    await ctx.message.reply("錯誤:\n`"+error+"`\n請檢查指令是否輸入錯誤！")
 
 
 #cmds
