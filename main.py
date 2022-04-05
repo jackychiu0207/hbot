@@ -111,7 +111,7 @@ async def on_ready():
     
 @bot.event
 async def on_command_error(ctx,error):
-    await ctx.message.reply("錯誤:\n`"+error+"`\n請檢查指令是否輸入錯誤！")
+    await ctx.message.reply("錯誤:\n`"+str(error)+"`\n請檢查指令是否輸入錯誤！")
 
 
 #cmds
@@ -221,7 +221,7 @@ def embed_m(data:dict,lang):
                 await interaction.response.edit_message(embed=embed,view=view)
     if data["type"]=="LETTUCE_ABILITY":
         if data["cost"]==0:
-            text+=change_text(data["text"][lang])+"\n"
+            if text in data:text+=change_text(data["text"][lang])+"\n"
             run=False
             for h_data in cardlibm:
                 if "equipment" in h_data:
@@ -246,7 +246,7 @@ def embed_m(data:dict,lang):
         elif data["cost"]!=0:
             if "cost" in data:text+="速度:"+str(data['cost'])
             if "mercenariesAbilityCooldown" in data:text+=" 冷卻時間:"+str(data['mercenariesAbilityCooldown'])
-            text+="\n"+change_text(data["text"][lang])+"\n"
+            if text in data:text+="\n"+change_text(data["text"][lang])+"\n"
             run=False
             for h_data in cardlibm:
                 if "specializations" in h_data:
@@ -270,7 +270,8 @@ def embed_m(data:dict,lang):
                                                     button.callback=button_new_embed
                                                     view.add_item(button)
                                                     run=True
-        else:text+=change_text(data['text'][lang])
+        else:
+            if text in data:text+=change_text(data['text'][lang])
     elif data["type"]=="MINION":
         change_text(data['text'][lang])
         for h_data in cardlibm:
