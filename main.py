@@ -217,6 +217,7 @@ def embed_m(data:dict,lang):
                 await interaction.response.edit_message(embed=embed,view=view)
     if data["type"]=="LETTUCE_ABILITY":
         if data["cost"]==0:
+            if 'text' in data:text+=change_text(data["text"][lang])+"\n"
             run=False
             for h_data in cardlibm:
                 if "equipment" in h_data:
@@ -226,7 +227,6 @@ def embed_m(data:dict,lang):
                                 if e["dbf_id"]==data["dbfId"]:
                                     for ownerdata in cardlib:
                                         if ownerdata["dbfId"]==h_data["defaultSkinDbfId"] and run is False:
-                                            if 'text' in data:text+=change_text(data["text"][lang])+"\n"
                                             text+="此為 **"+ownerdata['name'][lang]+"**("+str(ownerdata['dbfId'])+","+str(ownerdata['id'])+") 的裝備。\n"
                                             if len(e_data['tiers'])>1:text+="\n該裝備其他等級的dbfId:\n"
                                             for otd in e_data['tiers']:
@@ -240,6 +240,9 @@ def embed_m(data:dict,lang):
                                             view.add_item(button)
                                             run=True 
         elif data["cost"]!=0:
+            if "cost" in data:text+="速度:"+str(data['cost'])
+            if "mercenariesAbilityCooldown" in data:text+=" 冷卻時間:"+str(data['mercenariesAbilityCooldown'])
+            if 'text' in data:text+="\n"+change_text(data["text"][lang])+"\n"
             run=False
             for h_data in cardlibm:
                 if "specializations" in h_data:
@@ -251,9 +254,6 @@ def embed_m(data:dict,lang):
                                         if p["dbf_id"]==data["dbfId"]:
                                             for ownerdata in cardlib:
                                                 if ownerdata["dbfId"]==h_data["defaultSkinDbfId"] and run is False:
-                                                    if "cost" in data:text+="速度:"+str(data['cost'])
-                                                    if "mercenariesAbilityCooldown" in data:text+=" 冷卻時間:"+str(data['mercenariesAbilityCooldown'])
-                                                    if 'text' in data:text+="\n"+change_text(data["text"][lang])+"\n"
                                                     text+="\n此為 **"+ownerdata['name'][lang]+"**("+str(ownerdata['dbfId'])+","+str(ownerdata['id'])+") 的技能。\n"
                                                     if len(p_data['tiers'])>1:text+="\n該技能其他等級的dbfId:\n"
                                                     for otd in p_data['tiers']:
