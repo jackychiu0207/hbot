@@ -217,7 +217,7 @@ def embed_m(data:dict,lang):
                 await interaction.response.edit_message(embed=embed,view=view)
     if data["type"]=="LETTUCE_ABILITY":
         if data["cost"]==0:
-            if 'text' in data:text+=change_text(data["text"][lang])+"\n"
+            text+=change_text(data["text"][lang])+"\n"
             run=False
             for h_data in cardlibm:
                 if "equipment" in h_data:
@@ -242,7 +242,7 @@ def embed_m(data:dict,lang):
         elif data["cost"]!=0:
             if "cost" in data:text+="速度:"+str(data['cost'])
             if "mercenariesAbilityCooldown" in data:text+=" 冷卻時間:"+str(data['mercenariesAbilityCooldown'])
-            if 'text' in data:text+="\n"+change_text(data["text"][lang])+"\n"
+            text+="\n"+change_text(data["text"][lang])+"\n"
             run=False
             for h_data in cardlibm:
                 if "specializations" in h_data:
@@ -266,8 +266,9 @@ def embed_m(data:dict,lang):
                                                     button.callback=button_new_embed
                                                     view.add_item(button)
                                                     run=True
+        else:text+=change_text(data['text'][lang])
     elif data["type"]=="MINION":
-        if 'text' in data:change_text(data['text'][lang])
+        change_text(data['text'][lang])
         for h_data in cardlibm:
             if data["dbfId"] in h_data["skinDbfIds"]:
                 text+="(下方可選擇查看造型、裝備、技能)\n"
@@ -312,7 +313,7 @@ def embed_m(data:dict,lang):
                                         select_p.callback=select_new_embed
                                         view.add_item(select_p)
     else:
-        text=change_text(data["text"][lang]).replace("*","")
+        text=change_text(data["text"][lang])
     embed = discord.Embed(title=title,url=cardview,description=text, color=0xff0000)
     embed.set_image(url=imgurl)
     embed.set_footer(text=str(data["dbfId"])+","+data["id"])
