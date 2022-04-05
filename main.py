@@ -273,7 +273,7 @@ def embed_m(data:dict,lang):
         else:
             if text in data:text+=change_text(data['text'][lang])
     elif data["type"]=="MINION":
-        change_text(data['text'][lang])
+        if 'text' in data:change_text(data['text'][lang])
         for h_data in cardlibm:
             if data["dbfId"] in h_data["skinDbfIds"]:
                 text+="(下方可選擇查看造型、裝備、技能)\n"
