@@ -402,11 +402,11 @@ async def card(msg,cardname=None,lang="zhTW"):
                     for data in find:
                         if data["set"]=="LETTUCE":
                             embed,view=embed_m(data,lang)
-                            await msg.reply(embed=embed,view=view)
+                            await msg.author.send(embed=embed,view=view)
                         elif data["set"]=="BATTLEGROUNDS":
                             embed,view=embed_bg(data,lang)
-                            await msg.reply(embed=embed,view=view)
-                        else:await msg.reply(embed=embed_n(data,lang))
+                            await msg.author.send(embed=embed,view=view)
+                        else:await msg.author.send(embed=embed_n(data,lang))
                 else:
                     if find[int(dict(interaction.data)['values'][0])]["set"]=="LETTUCE":
                         embed,view=embed_m(find[int(dict(interaction.data)['values'][0])],lang)
