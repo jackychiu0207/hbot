@@ -44,7 +44,7 @@ def getjson():
     file.close()
 
 def openjson():
-    global cardlib,,group
+    global cardlib,cardlibm,group
     try:
         cardlib=json.load(open('cards.json'))
         cardlibm=json.load(open('mercenaries.json'))
@@ -57,8 +57,9 @@ openjson()
 @bot.command()
 async def reloadjson(msg):
     try:
-        f.close()
-        fm.close()
+        cardlibm.close()
+        cardlib.close()
+        group.close()
         os.remove('cards.json')
         os.remove('mercenaries.json')
         os.remove('group.json')
