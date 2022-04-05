@@ -35,6 +35,13 @@ def getjson():
     file = open('mercenaries.json','wb')
     file.write(data)
     file.close()
+    url='https://raw.githubusercontent.com/jackychiu0207/hbot/main/group.json'
+    req = urllib.request.Request(url, headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)'})
+    oper = urllib.request.urlopen(req)
+    data = oper.read()
+    file = open('group.json','wb')
+    file.write(data)
+    file.close()
 
 def openjson():
     global cardlib,,group
@@ -54,6 +61,7 @@ async def reloadjson(msg):
         fm.close()
         os.remove('cards.json')
         os.remove('mercenaries.json')
+        os.remove('group.json')
     except:
         pass
     getjson()
