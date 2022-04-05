@@ -221,7 +221,7 @@ def embed_m(data:dict,lang):
                 await interaction.response.edit_message(embed=embed,view=view)
     if data["type"]=="LETTUCE_ABILITY":
         if data["cost"]==0:
-            if text in data:text+=change_text(data["text"][lang])+"\n"
+            if 'text' in data:text+=change_text(data["text"][lang])+"\n"
             run=False
             for h_data in cardlibm:
                 if "equipment" in h_data:
