@@ -267,6 +267,7 @@ def embed_m(data:dict,lang):
                                                     view.add_item(button)
                                                     run=True
     elif data["type"]=="MINION":
+        if 'text' in data:change_text(data['text'][lang])
         for h_data in cardlibm:
             if data["dbfId"] in h_data["skinDbfIds"]:
                 text+="(下方可選擇查看造型、裝備、技能)\n"
