@@ -308,7 +308,7 @@ def embed_m(data:dict,lang):
                         if "specializations" in h_data:
                             if len(h_data["specializations"])>0:
                                 if "abilities" in h_data["specializations"][0]:
-                                    if len(h_data["equipment"])>=1:
+                                    if len(h_data["specializations"][0]["abilities"])>=1:
                                         options_p=[]
                                         text+="**該傭兵技能:**\n"
                                         for i,p_data in enumerate(h_data["specializations"][0]["abilities"],1):
