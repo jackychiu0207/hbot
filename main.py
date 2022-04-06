@@ -387,11 +387,11 @@ async def card(msg,cardname=None,lang="zhTW"):
               for data in find:
                     if data["set"]=="LETTUCE":
                         embed,view=embed_m(data,lang)
-                        await msg.reply(embed=embed,view=view)
+                        await msg.author.send(embed=embed,view=view)
                     elif data["set"]=="BATTLEGROUNDS":
                         embed,view=embed_bg(data,lang)
-                        await msg.reply(embed=embed,view=view)
-                    else:await msg.reply(embed=embed_n(data,lang))
+                        await msg.author.send(embed=embed,view=view)
+                    else:await msg.author.send(embed=embed_n(data,lang))
             button=Button(style=ButtonStyle.success,label="發送所有卡牌至私人訊息")
             button.callback=callback_allcards
             view=View()
