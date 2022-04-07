@@ -117,7 +117,9 @@ async def help(msg):
     embed.add_field(name="t!bg",value="空格請用下滑線\'_\'代替\n使用方法:\"t!bg 戰場卡牌 語言(選填)\"\n例子:`t!bg 餅乾大廚`", inline=False)
     embed.add_field(name="t!deck",value="使用方法:\"t!deck 牌組代碼 牌組名稱(選填) \"\n例子1(無套牌名稱):\n`t!deck AAEBAaIHDpoC+AfpEZfBAt/jArvvAuvwAoSmA6rLA4/OA/bWA4PkA72ABJWfBAi0AcQB7QL1uwLi3QPn3QOS5AP+7gMA`\n例子2(有套牌名稱):\n`t!deck AAEBAaIHDpoC+AfpEZfBAt/jArvvAuvwAoSmA6rLA4/OA/bWA4PkA72ABJWfBAi0AcQB7QL1uwLi3QPn3QOS5AP+7gMA 無限潛行`", inline=False)
     embed.add_field(name="t!reloadjson",value="直接輸入，機器人會更新資料庫。當找不到覺得存在的卡牌時，可以使用此指令。")
+    embed.add_field(name="t!proxy",value="直接輸入，機器人會更新ip。平常請誤使用，直到指令不生效")
     embed.add_field(name="t!stop",value="直接輸入，機器人會直接停止。只有在緊急狀況才可使用，勿隨意使用")
+    
     await msg.reply(embed=embed)
 
 
@@ -155,14 +157,7 @@ async def on_ready():
 @bot.event
 async def on_command_error(ctx,error):
     await ctx.message.reply("錯誤:\n`"+str(error)+"`\n請檢查指令是否輸入錯誤！")
-global command_count
-command_count=0
-@bot.event
-async def on_command_completion(ctx):
-    command_count+=1
-    if command_count==50:
-        proxy()
-        command_count=0
+
 
 
 #cmds
@@ -659,6 +654,9 @@ async def deck(msg,deckcode=None,deckname=None,lang="zhTW"):
         else:
             await msg.reply(f"{deckcode}\n# 若要使用此套牌，請先複製此訊息，然後在爐石戰記中建立一副新的套牌")
 
+@bot.command()
+async def proxy():
+  proxy()
 
 
 
