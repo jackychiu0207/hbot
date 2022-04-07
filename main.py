@@ -1,9 +1,40 @@
+#proxy
+
+import requests
+import re
+import random
+ 
+def proxy(): 
+    response = requests.get("https://www.sslproxies.org/")
+    
+    proxy_ips = re.findall('\d+\.\d+\.\d+\.\d+:\d+', response.text)
+    
+    valid_ips = []
+    for ip in proxy_ips:
+        try:
+            result = requests.get('https://ip.seeip.org/jsonip?',
+    			       proxies={'http': ip, 'https': ip},
+    			       timeout=5)
+            valid_ips.append(ip)
+        except:
+            pass
+    global proxy_list
+    proxy_list=[]
+    for ip in valid_ips:
+        proxy_list.append(ip)
+proxy()
+
+def get_proxies():
+    proxy_ip = random.choice(proxy_list)
+    proxies={'http': f'{proxy_ip}', 'https': f'{proxy_ip}'}
+    return proxies
+
+#bot
 import discord
 from discord.ext import commands
 from discord.ui import Button,View,Select
 from discord import SelectOption
 from discord import ButtonStyle
-import requests
 import json
 from hearthstone.deckstrings import Deck
 from hearthstone.enums import FormatType
@@ -16,7 +47,7 @@ intents=discord.Intents.all()
 
 
 bot = commands.Bot(command_prefix="t!",help_command=None,intents=intents)
-
+command_count=0
 
 classdict={"DEATHKNIGHT":"死亡騎士","DEMONHUNTER":"惡魔獵人","DREAM":"伊瑟拉","DRUID":"德魯伊","HUNTER":"獵人","INVALID":"未知/不適用職業","MAGE":"法師","NEUTRAL":"中立","PALADIN":"聖騎士","PRIEST":"牧師","ROGUE": 7,"SHAMAN":"薩滿","WARLOCK":"術士","WARRIOR":"戰士","WHIZBANG":"威茲幫"}
 
@@ -119,6 +150,13 @@ async def on_ready():
 @bot.event
 async def on_command_error(ctx,error):
     await ctx.message.reply("錯誤:\n`"+str(error)+"`\n請檢查指令是否輸入錯誤！")
+
+@bot.event
+async def on_command_completion(ctx):
+    command_count+=1
+    if command_count==50:
+        proxy()
+        command_count=0
 
 
 #cmds
