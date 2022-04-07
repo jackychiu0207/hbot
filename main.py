@@ -4,7 +4,7 @@ import requests
 import re
 import random
  
- def get_proxies():
+def get_proxies():
     try:
       proxy_ip = random.choice(proxy_list)
       proxies={'http': f'{proxy_ip}', 'https': f'{proxy_ip}'}
@@ -21,7 +21,7 @@ def proxy():
         try:
             result = requests.get('https://ip.seeip.org/jsonip?',
     			       proxies={'http': ip, 'https': ip},
-    			       timeout=5)
+    			       timeout=3)
             valid_ips.append(ip)
         except:
             pass
@@ -51,7 +51,8 @@ intents=discord.Intents.all()
 
 
 bot = commands.Bot(command_prefix="t!",help_command=None,intents=intents)
-command_count=0
+
+env=json.load(open('.env'))
 
 classdict={"DEATHKNIGHT":"死亡騎士","DEMONHUNTER":"惡魔獵人","DREAM":"伊瑟拉","DRUID":"德魯伊","HUNTER":"獵人","INVALID":"未知/不適用職業","MAGE":"法師","NEUTRAL":"中立","PALADIN":"聖騎士","PRIEST":"牧師","ROGUE": 7,"SHAMAN":"薩滿","WARLOCK":"術士","WARRIOR":"戰士","WHIZBANG":"威茲幫"}
 
@@ -71,7 +72,7 @@ def getjson():
     file.write(data)
     file.close()
     url='https://raw.githubusercontent.com/jackychiu0207/hbot/main/group.json'
-    req = urllib.request.Reque st(url, headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)'})
+    req = urllib.request.Request(url,headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)'})
     oper = urllib.request.urlopen(req)
     data = oper.read()
     file = open('group.json','wb')
@@ -122,8 +123,8 @@ async def help(msg):
 
 #def
 def get_token():
-    BZTOKEN = os.environ['BZTOKEN']
-    BZSECRET = os.environ['BZSECRET']
+    BZTOKEN = env['BZTOKEN']
+    BZSECRET = env['BZSECRET']
     data = {'grant_type':'client_credentials'}
     response = requests.post('https://apac.battle.net/oauth/token', data=data, auth=(BZTOKEN, BZSECRET),proxies=get_proxies())
     token=json.loads(response.text)['access_token']
@@ -154,7 +155,8 @@ async def on_ready():
 @bot.event
 async def on_command_error(ctx,error):
     await ctx.message.reply("錯誤:\n`"+str(error)+"`\n請檢查指令是否輸入錯誤！")
-
+global command_count
+command_count=0
 @bot.event
 async def on_command_completion(ctx):
     command_count+=1
@@ -201,7 +203,7 @@ def embed_bg(data:dict,lang):
     url=f'https://tw.api.blizzard.com/hearthstone/cards/{data["dbfId"]}?locale={bzlang}&gameMode=battlegrounds&access_token={token}'
     if data["type"]=="HERO":
         if 'battlegroundsBuddyDbfId' in data:
-            imgurl=json.loads(requests.request('GET',url,proxies=get_proxies())text)['battlegrounds']['image']
+            imgurl=json.loads(requests.request('GET',url,proxies=get_proxies()).text)['battlegrounds']['image']
             text+="\n夥伴dbfId:"+str(data['battlegroundsBuddyDbfId'])
             button=Button(style=ButtonStyle.success,label="查看夥伴",custom_id=str(data['battlegroundsBuddyDbfId']))
             button.callback=button_new_embed
@@ -661,7 +663,7 @@ async def deck(msg,deckcode=None,deckname=None,lang="zhTW"):
 
 
 
-DCTOKEN=os.environ['DISCORD_BOT_SECRET']
+DCTOKEN=env['DISCORD_BOT_SECRET']
 #loop
 if __name__=="__main__":
     keep_alive()
