@@ -666,5 +666,4 @@ async def deck(msg,deckcode=None,deckname=None,lang="zhTW"):
 DCTOKEN=env['DISCORD_BOT_SECRET']
 #loop
 if __name__=="__main__":
-    keep_alive()
     bot.run(DCTOKEN)
