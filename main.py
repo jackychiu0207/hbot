@@ -53,7 +53,9 @@ def openjson():
         return False
 getjson()
 openjson()
-env=json.load(open('.env'))
+try:
+    env=json.load(open('.env'))
+except:pass
 @bot.command()
 async def reloadjson(msg):
     try:
