@@ -1,44 +1,9 @@
-#proxy
-
-import requests
-import re
-import random
- 
-def get_proxies():
-    try:
-      proxy_ip = random.choice(proxy_list)
-      proxies={'http': f'{proxy_ip}', 'https': f'{proxy_ip}'}
-    except:proxies=None 
-    return proxies
- 
-def proxy(): 
-    response = requests.get("https://www.sslproxies.org/",proxies=get_proxies())
-    
-    proxy_ips = re.findall('\d+\.\d+\.\d+\.\d+:\d+', response.text)
-    
-    valid_ips = []
-    for ip in proxy_ips:
-        try:
-            result = requests.get('https://ip.seeip.org/jsonip?',
-    			       proxies={'http': ip, 'https': ip},
-    			       timeout=3)
-            valid_ips.append(ip)
-        except:
-            pass
-    global proxy_list
-    proxy_list=[]
-    for ip in valid_ips:
-        proxy_list.append(ip)
-proxy()
-
-
-
-#bot
 import discord
 from discord.ext import commands
 from discord.ui import Button,View,Select
 from discord import SelectOption
 from discord import ButtonStyle
+import requests
 import json
 from hearthstone.deckstrings import Deck
 from hearthstone.enums import FormatType
@@ -52,7 +17,6 @@ intents=discord.Intents.all()
 
 bot = commands.Bot(command_prefix="t!",help_command=None,intents=intents)
 
-env=json.load(open('.env'))
 
 classdict={"DEATHKNIGHT":"死亡騎士","DEMONHUNTER":"惡魔獵人","DREAM":"伊瑟拉","DRUID":"德魯伊","HUNTER":"獵人","INVALID":"未知/不適用職業","MAGE":"法師","NEUTRAL":"中立","PALADIN":"聖騎士","PRIEST":"牧師","ROGUE": 7,"SHAMAN":"薩滿","WARLOCK":"術士","WARRIOR":"戰士","WHIZBANG":"威茲幫"}
 
@@ -72,7 +36,7 @@ def getjson():
     file.write(data)
     file.close()
     url='https://raw.githubusercontent.com/jackychiu0207/hbot/main/group.json'
-    req = urllib.request.Request(url,headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)'})
+    req = urllib.request.Request(url, headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)'})
     oper = urllib.request.urlopen(req)
     data = oper.read()
     file = open('group.json','wb')
@@ -85,6 +49,7 @@ def openjson():
         cardlib=json.load(open('cards.json'))
         cardlibm=json.load(open('mercenaries.json'))
         group=json.load(open('group.json'))
+        env=json.load(open('.env'))
     except:
         return False
 getjson()
@@ -117,9 +82,7 @@ async def help(msg):
     embed.add_field(name="t!bg",value="空格請用下滑線\'_\'代替\n使用方法:\"t!bg 戰場卡牌 語言(選填)\"\n例子:`t!bg 餅乾大廚`", inline=False)
     embed.add_field(name="t!deck",value="使用方法:\"t!deck 牌組代碼 牌組名稱(選填) \"\n例子1(無套牌名稱):\n`t!deck AAEBAaIHDpoC+AfpEZfBAt/jArvvAuvwAoSmA6rLA4/OA/bWA4PkA72ABJWfBAi0AcQB7QL1uwLi3QPn3QOS5AP+7gMA`\n例子2(有套牌名稱):\n`t!deck AAEBAaIHDpoC+AfpEZfBAt/jArvvAuvwAoSmA6rLA4/OA/bWA4PkA72ABJWfBAi0AcQB7QL1uwLi3QPn3QOS5AP+7gMA 無限潛行`", inline=False)
     embed.add_field(name="t!reloadjson",value="直接輸入，機器人會更新資料庫。當找不到覺得存在的卡牌時，可以使用此指令。")
-    embed.add_field(name="t!proxy",value="直接輸入，機器人會更新ip。平常請誤使用，直到指令不生效")
     embed.add_field(name="t!stop",value="直接輸入，機器人會直接停止。只有在緊急狀況才可使用，勿隨意使用")
-    
     await msg.reply(embed=embed)
 
 
@@ -128,7 +91,7 @@ def get_token():
     BZTOKEN = env['BZTOKEN']
     BZSECRET = env['BZSECRET']
     data = {'grant_type':'client_credentials'}
-    response = requests.post('https://apac.battle.net/oauth/token', data=data, auth=(BZTOKEN, BZSECRET),proxies=get_proxies())
+    response = requests.post('https://apac.battle.net/oauth/token', data=data, auth=(BZTOKEN, BZSECRET))
     token=json.loads(response.text)['access_token']
     return token
 
@@ -159,7 +122,6 @@ async def on_command_error(ctx,error):
     await ctx.message.reply("錯誤:\n`"+str(error)+"`\n請檢查指令是否輸入錯誤！")
 
 
-
 #cmds
 def embed_n(data:dict,lang):
     title=data['name'][lang]
@@ -168,9 +130,9 @@ def embed_n(data:dict,lang):
     if 'flavor' in data:text+=change_text(data['flavor'][lang])
     imgurl=f"https://art.hearthstonejson.com/v1/render/latest/{lang}/512x/"+data["id"]+".png"
     cardview=f"https://playhearthstone.com/cards/"+str(data["dbfId"])
-    if requests.request('GET',imgurl,proxies=get_proxies()).status_code==404:
+    if requests.request('GET',imgurl).status_code==404:
         imgurl=f"https://art.hearthstonejson.com/v1/256x/"+data["id"]+".jpg"
-        if requests.request('GET',imgurl,proxies=get_proxies() ).status_code==404:
+        if requests.request('GET',imgurl).status_code==404:
             imgurl="https://cdn.discordapp.com/attachments/913009861967626310/935811318768885810/PlaceholderCard.png"
             text+="\n※此卡牌確實存在於爐石戰記中的某個角落，但沒有任何圖片"
     embed = discord.Embed(title=title,url=cardview,description=text, color=0xff0000)
@@ -198,7 +160,7 @@ def embed_bg(data:dict,lang):
     url=f'https://tw.api.blizzard.com/hearthstone/cards/{data["dbfId"]}?locale={bzlang}&gameMode=battlegrounds&access_token={token}'
     if data["type"]=="HERO":
         if 'battlegroundsBuddyDbfId' in data:
-            imgurl=json.loads(requests.request('GET',url,proxies=get_proxies()).text)['battlegrounds']['image']
+            imgurl=json.loads(requests.request('GET',url).text)['battlegrounds']['image']
             text+="\n夥伴dbfId:"+str(data['battlegroundsBuddyDbfId'])
             button=Button(style=ButtonStyle.success,label="查看夥伴",custom_id=str(data['battlegroundsBuddyDbfId']))
             button.callback=button_new_embed
@@ -208,13 +170,13 @@ def embed_bg(data:dict,lang):
         if "health" and "attack" in data:f"體質:{data['health']}/{data['health']}"
         if 'text' in data:text+="\n"+change_text(data["text"][lang])+"\n"
         if "battlegroundsPremiumDbfId" in data:
-            imgurl=json.loads(requests.request('GET',url,proxies=get_proxies()).text)['battlegrounds']['image']
+            imgurl=json.loads(requests.request('GET',url).text)['battlegrounds']['image']
             text+="\n金卡dbfId:"+str(data['battlegroundsPremiumDbfId'])
             button=Button(style=ButtonStyle.success,label="查看金卡",custom_id=str(data['battlegroundsPremiumDbfId']))
             button.callback=button_new_embed
             view.add_item(button)
         elif "battlegroundsNormalDbfId" in data:
-            imgurl=json.loads(requests.request('GET',url,proxies=get_proxies()).text)['battlegrounds']['imageGold']
+            imgurl=json.loads(requests.request('GET',url).text)['battlegrounds']['imageGold']
             text+="\n普卡dbfId:"+str(data['battlegroundsNormalDbfId'])
             button=Button(style=ButtonStyle.success,label="查看普卡",custom_id=str(data['battlegroundsNormalDbfId']))
             button.callback=button_new_embed
@@ -235,7 +197,7 @@ def embed_bg(data:dict,lang):
                             view.add_item(button)
     if requests.request('GET',imgurl).status_code==404:
         imgurl=f"https://art.hearthstonejson.com/v1/256x/"+data["id"]+".jpg"
-        if requests.request('GET',imgurl,proxies=get_proxies()).status_code==404:
+        if requests.request('GET',imgurl).status_code==404:
             imgurl="https://cdn.discordapp.com/attachments/913009861967626310/935811318768885810/PlaceholderCard.png"
             text+="\n※此卡牌確實存在於爐石戰記中的某個角落，但沒有任何圖片"
     embed = discord.Embed(title=title,url=cardview,description=text, color=0xff0000)
@@ -249,9 +211,9 @@ def embed_m(data:dict,lang):
     text=""
     imgurl=f"https://art.hearthstonejson.com/v1/render/latest/{lang}/512x/"+data["id"]+".png"
     cardview=f"https://playhearthstone.com/zh-tw/mercenaries/"+str(data["dbfId"])
-    if requests.request('GET',imgurl,proxies=get_proxies()).status_code==404:
+    if requests.request('GET',imgurl).status_code==404:
         imgurl=f"https://art.hearthstonejson.com/v1/256x/"+data["id"]+".jpg"
-        if requests.request('GET',imgurl,proxies=get_proxies()).status_code==404:
+        if requests.request('GET',imgurl).status_code==404:
             imgurl="https://cdn.discordapp.com/attachments/913009861967626310/935811318768885810/PlaceholderCard.png"
             text+="\n※此卡牌確實存在於爐石戰記中的某個角落，但沒有任何圖片"
     #傭兵子父卡牌功能
@@ -654,9 +616,6 @@ async def deck(msg,deckcode=None,deckname=None,lang="zhTW"):
         else:
             await msg.reply(f"{deckcode}\n# 若要使用此套牌，請先複製此訊息，然後在爐石戰記中建立一副新的套牌")
 
-@bot.command()
-async def proxy():
-  proxy()
 
 
 
