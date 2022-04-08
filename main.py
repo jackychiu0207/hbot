@@ -48,13 +48,12 @@ def openjson():
     try:
         cardlib=json.load(open('cards.json'))
         cardlibm=json.load(open('mercenaries.json'))
-        group=json.load(open('group.json'))
-        env=json.load(open('.env'))
+        group=json.load(open('group.json')
     except:
         return False
 getjson()
 openjson()
-
+env=json.load(open('.env'))
 @bot.command()
 async def reloadjson(msg):
     try:
