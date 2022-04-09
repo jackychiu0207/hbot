@@ -360,6 +360,7 @@ async def id(msg,cardid=None,lang="zhTW"):
         await msg.reply("※不推薦新手使用該指令\n該指令使用方法:\"t!id dbfId或id 語言(選填)\"\n例子1(使用dbfId):`t!id 38833`\n例子2(使用id):`t!id OG_272`")
     else:
         if lang in langlist:
+            await msg.reply("由於discord.py目前有問題，按鈕及選單功能可能無法正常使用")
             find=False
             if cardid.isdigit() is True:
                 for data in cardlib:
@@ -388,6 +389,7 @@ async def card(msg,cardname=None,lang="zhTW"):
         await msg.reply("空格請用下滑線\'_\'代替\n該指令使用方法:\"t!card 卡牌名稱 語言(選填)\"\n例子:`t!card 暮光召喚師`")
     else:
         if lang in langlist:
+            await msg.reply("由於discord.py目前有問題，按鈕及選單功能可能無法正常使用")
             cardname=cardname.replace('_',' ')
             find=[]
             for data in cardlib:
@@ -466,6 +468,7 @@ async def merc(msg,cardname=None,lang="zhTW"):
         await msg.reply("該指令使用方法:\"t!merc 傭兵、裝備、技能名稱 語言(選填)\"\n例子1(傭兵):`t!merc 餅乾大廚`\n例子2(裝備):`t!merc 養好的鍋子`\n例子3(技能):`t!merc 魚肉大餐`")
     else:
         if lang in langlist:
+            await msg.reply("由於discord.py目前有問題，按鈕及選單功能可能無法正常使用")
             cardname=cardname.replace('_',' ')
             find=[]
             for data in cardlib:
@@ -521,7 +524,8 @@ async def bg(msg,cardname=None,lang="zhTW"):
     if cardname==None:
         await msg.reply("該指令使用方法:\"t!bg 戰場卡牌 語言(選填)\"\n例子:`t!bg 餅乾大廚`")
     else:
-        if lang in langlist:
+        if lang in langlist
+            await msg.reply("由於discord.py目前有問題，按鈕及選單功能可能無法正常使用")
             cardname=cardname.replace('_',' ')
             find=[]
             for data in cardlib:
@@ -640,6 +644,7 @@ async def deck(msg,deckcode=None,deckname=None,lang="zhTW"):
         await msg.reply("該指令使用方法:\"t!deck 牌組代碼 牌組名稱(選填) 語言(選填)\"\n例子1(無套牌名稱):\n`t!deck AAEBAaIHDpoC+AfpEZfBAt/jArvvAuvwAoSmA6rLA4/OA/bWA4PkA72ABJWfBAi0AcQB7QL1uwLi3QPn3QOS5AP+7gMA`\n例子2(有套牌名稱):\n`t!deck AAEBAaIHDpoC+AfpEZfBAt/jArvvAuvwAoSmA6rLA4/OA/bWA4PkA72ABJWfBAi0AcQB7QL1uwLi3QPn3QOS5AP+7gMA 無限潛行`")
     else:
         if lang in langlist:
+            await msg.reply("由於discord.py目前有問題，按鈕及選單功能可能無法正常使用")
             embed,view=deck_embed(msg,deckcode,deckname,lang,0)
             await msg.reply(embed=embed,view=view)
             if deckname!=None:
