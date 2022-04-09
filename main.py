@@ -454,11 +454,11 @@ async def card(msg,cardname=None,lang="zhTW"):
                         if find[int(dict(interaction.data)['values'][0])]["set"]=="LETTUCE":
                             embed,view=embed_m(find[int(dict(interaction.data)['values'][0])],lang)
                             await interaction.response.defer(ephemeral=True, thinking=True)
-                            await interaction.followup.edit(content="",embed=embed,view=view)
+                            await interaction.followup.edit_messgae(interaction.messgae.id,content="",embed=embed,view=view)
                         elif find[int(dict(interaction.data)['values'][0])]["set"]=="BATTLEGROUNDS":
                             embed,view=embed_bg(find[int(dict(interaction.data)['values'][0])],lang)
                             await interaction.response.defer(ephemeral=True, thinking=True)
-                            await interaction.followup.edit(content="",embed=embed,view=view)
+                            await interaction.followup.edit_messgae(interaction.messgae.id,content="",embed=embed,view=view)
                         else:await interaction.response.edit_message(content="",embed=embed_n(find[int(dict(interaction.data)['values'][0])],lang),view=None)
                 select.callback=select_callback
                 view=View()
