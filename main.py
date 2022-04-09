@@ -363,7 +363,6 @@ async def id(msg,cardid=None,lang="zhTW"):
         await msg.reply("※不推薦新手使用該指令\n該指令使用方法:\"t!id dbfId或id 語言(選填)\"\n例子1(使用dbfId):`t!id 38833`\n例子2(使用id):`t!id OG_272`")
     else:
         if lang in langlist:
-            await msg.reply("由於discord.py目前有問題，按鈕及選單功能可能無法正常使用")
             find=False
             if cardid.isdigit() is True:
                 for data in cardlib:
@@ -392,7 +391,6 @@ async def card(msg,cardname=None,lang="zhTW"):
         await msg.reply("空格請用下滑線\'_\'代替\n該指令使用方法:\"t!card 卡牌名稱 語言(選填)\"\n例子:`t!card 暮光召喚師`")
     else:
         if lang in langlist:
-            await msg.reply("由於discord.py目前有問題，按鈕及選單功能可能無法正常使用")
             cardname=cardname.replace('_',' ')
             find=[]
             for data in cardlib:
@@ -450,7 +448,7 @@ async def card(msg,cardname=None,lang="zhTW"):
                                 await msg.author.send(embed=embed,view=view)
                             else:await msg.author.send(embed=embed_n(data,lang))
                     else:
-                        await interaction.response.defer(ephemeral=True, thinking=True)
+                        await interaction.response.defer()
                         if find[int(dict(interaction.data)['values'][0])]["set"]=="LETTUCE":
                             embed,view=embed_m(find[int(dict(interaction.data)['values'][0])],lang)
                             await interaction.followup.edit_message(interaction.message.id,content="",embed=embed,view=view)
@@ -472,7 +470,6 @@ async def merc(msg,cardname=None,lang="zhTW"):
         await msg.reply("該指令使用方法:\"t!merc 傭兵、裝備、技能名稱 語言(選填)\"\n例子1(傭兵):`t!merc 餅乾大廚`\n例子2(裝備):`t!merc 養好的鍋子`\n例子3(技能):`t!merc 魚肉大餐`")
     else:
         if lang in langlist:
-            await msg.reply("由於discord.py目前有問題，按鈕及選單功能可能無法正常使用")
             cardname=cardname.replace('_',' ')
             find=[]
             for data in cardlib:
@@ -515,8 +512,9 @@ async def merc(msg,cardname=None,lang="zhTW"):
                             embed,view=embed_m(data,lang)
                             await msg.author.send(embed=embed,view=view)
                     else:
+                        await interaction.response.defer()
                         embed,view=embed_m(find[int(dict(interaction.data)['values'][0])],lang)
-                        await interaction.response.edit_message(content="",embed=embed,view=view)
+                        await interaction.followup.edit_message(interaction.message.id,content="",embed=embed,view=view)
                 select.callback=select_callback
                 view=View()
                 view.add_item(select)
@@ -529,7 +527,6 @@ async def bg(msg,cardname=None,lang="zhTW"):
         await msg.reply("該指令使用方法:\"t!bg 戰場卡牌 語言(選填)\"\n例子:`t!bg 餅乾大廚`")
     else:
         if lang in langlist:
-            await msg.reply("由於discord.py目前有問題，按鈕及選單功能可能無法正常使用")
             cardname=cardname.replace('_',' ')
             find=[]
             for data in cardlib:
@@ -573,8 +570,9 @@ async def bg(msg,cardname=None,lang="zhTW"):
                             embed,view=embed_bg(data,lang)
                             await msg.author.send(embed=embed,view=view)
                     else:
+                        await interaction.response.defer()
                         embed,view=embed_bg(find[int(dict(interaction.data)['values'][0])],lang)
-                        await interaction.response.edit_message(content="",embed=embed,view=view)
+                        await interaction.followup.edit_message(interaction.message.id,content="",embed=embed,view=view)
                 select.callback=select_callback
                 view=View()
                 view.add_item(select)
@@ -625,12 +623,13 @@ def deck_embed(msg,deckcode,deckname,lang,m):
     embed.set_thumbnail(url="https://art.hearthstonejson.com/v1/orig/"+heroID+".png")
     embed.set_footer(text="所需魔塵:"+str(cost))
     async def advanced(interaction):
+        await interaction.response.defer()
         if dict(interaction.data)['custom_id']=="0":
             embed,view=deck_embed(msg,deckcode,deckname,lang,1)
-            await interaction.response.edit_message(embed=embed,view=view)
+            await interaction.followup.edit_message(interaction.message.id,embed=embed,view=view)
         elif dict(interaction.data)['custom_id']=="1":
             embed,view=deck_embed(msg,deckcode,deckname,lang,0)
-            await interaction.response.edit_message(embed=embed,view=view)
+            await interaction.followup.edit_message(interaction.message.id,embed=embed,view=view)
     view=View()
     if m==0:
         button=Button(style=ButtonStyle.red,label="顯示進階資訊",custom_id="0")
