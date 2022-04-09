@@ -1,3 +1,4 @@
+from tokenize import group
 import discord
 from discord.ext import commands
 from discord.ui import Button,View,Select
@@ -9,7 +10,7 @@ from hearthstone.deckstrings import Deck
 from hearthstone.enums import FormatType
 import urllib.request
 import os
-from webserver import keep_alive
+import wget
 
 
 intents=discord.Intents.all()
@@ -19,8 +20,8 @@ bot = commands.Bot(command_prefix="t!",help_command=None,intents=intents)
 
 
 classdict={"DEATHKNIGHT":"死亡騎士","DEMONHUNTER":"惡魔獵人","DREAM":"伊瑟拉","DRUID":"德魯伊","HUNTER":"獵人","INVALID":"未知/不適用職業","MAGE":"法師","NEUTRAL":"中立","PALADIN":"聖騎士","PRIEST":"牧師","ROGUE": 7,"SHAMAN":"薩滿","WARLOCK":"術士","WARRIOR":"戰士","WHIZBANG":"威茲幫"}
-
-def getjson():
+langlist=["deDE","enUS","esES","esMX","frFR","itIT","jaJP","koKR","plPL","ptBR","ruRU","thTH","zhCN","zhTW"]
+def getfile():
     url='https://api.hearthstonejson.com/v1/latest/all/cards.json'
     req = urllib.request.Request(url, headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)'})
     oper = urllib.request.urlopen(req)
@@ -35,15 +36,9 @@ def getjson():
     file = open('mercenaries.json','wb')
     file.write(data)
     file.close()
-    url='https://raw.githubusercontent.com/jackychiu0207/hbot/main/group.json'
-    req = urllib.request.Request(url, headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)'})
-    oper = urllib.request.urlopen(req)
-    data = oper.read()
-    file = open('group.json','wb')
-    file.write(data)
-    file.close()
+    wget.download('https://raw.githubusercontent.com/jackychiu0207/hbot/main/group.json',"group.json")
 
-def openjson():
+def openfile():
     global cardlib,cardlibm,group
     try:
         cardlib=json.load(open('cards.json'))
@@ -51,12 +46,12 @@ def openjson():
         group=json.load(open('group.json'))
     except:
         return False
-getjson()
-openjson()
+getfile()
+openfile()
 try:env=json.load(open('.env'))
 except:pass
 @bot.command()
-async def reloadjson(msg):
+async def reload(msg):
     try:
         cardlibm.close()
         cardlib.close()
@@ -66,8 +61,8 @@ async def reloadjson(msg):
         os.remove('group.json')
     except:
         pass
-    getjson()
-    if openjson() is not False:
+    getfile()
+    if openfile() is not False:
         await msg.reply("完成")
     else:
         await msg.reply("錯誤")
@@ -80,9 +75,9 @@ async def help(msg):
     embed.add_field(name="t!card",value="空格請用下滑線\'_\'代替\n使用方法:\"t!card 卡牌名稱 語言(選填)\"\n例子:`t!card 暮光召喚師`", inline=False)
     embed.add_field(name="t!merc",value="空格請用下滑線\'_\'代替\n使用方法:\"t!merc 傭兵、裝備、技能名稱 語言(選填)\"\n例子1(傭兵):`t!merc 餅乾大廚`\n例子2(裝備):`t!merc 養好的鍋子`\n例子3(技能):`t!merc 魚肉大餐`", inline=False)
     embed.add_field(name="t!bg",value="空格請用下滑線\'_\'代替\n使用方法:\"t!bg 戰場卡牌 語言(選填)\"\n例子:`t!bg 餅乾大廚`", inline=False)
-    embed.add_field(name="t!deck",value="使用方法:\"t!deck 牌組代碼 牌組名稱(選填) \"\n例子1(無套牌名稱):\n`t!deck AAEBAaIHDpoC+AfpEZfBAt/jArvvAuvwAoSmA6rLA4/OA/bWA4PkA72ABJWfBAi0AcQB7QL1uwLi3QPn3QOS5AP+7gMA`\n例子2(有套牌名稱):\n`t!deck AAEBAaIHDpoC+AfpEZfBAt/jArvvAuvwAoSmA6rLA4/OA/bWA4PkA72ABJWfBAi0AcQB7QL1uwLi3QPn3QOS5AP+7gMA 無限潛行`", inline=False)
-    embed.add_field(name="t!reloadjson",value="直接輸入，機器人會更新資料庫。當找不到覺得存在的卡牌時，可以使用此指令。")
-    embed.add_field(name="t!stop",value="直接輸入，機器人會直接停止。只有在緊急狀況才可使用，勿隨意使用")
+    embed.add_field(name="t!deck",value="使用方法:\"t!deck 牌組代碼 牌組名稱(選填) 語言(選填)\"\n例子1(無套牌名稱):\n`t!deck AAEBAaIHDpoC+AfpEZfBAt/jArvvAuvwAoSmA6rLA4/OA/bWA4PkA72ABJWfBAi0AcQB7QL1uwLi3QPn3QOS5AP+7gMA`\n例子2(有套牌名稱):\n`t!deck AAEBAaIHDpoC+AfpEZfBAt/jArvvAuvwAoSmA6rLA4/OA/bWA4PkA72ABJWfBAi0AcQB7QL1uwLi3QPn3QOS5AP+7gMA 無限潛行`", inline=False)
+    embed.add_field(name="t!reload",value="直接輸入，機器人會更新資料庫。當找不到覺得存在的卡牌時，可以使用此指令。", inline=False)
+    embed.add_field(name="t!stop",value="直接輸入，機器人會直接停止。只有在緊急狀況才可使用，勿隨意使用", inline=False)
     await msg.reply(embed=embed)
 
 
@@ -124,11 +119,7 @@ async def on_command_error(ctx,error):
 
 #cmds
 def embed_n(data:dict,lang:str):
-    if "_" in lang:lang.replace("_","")
-    try:
-        title=data['name'][lang]
-    except:
-        embed = discord.Embed(title="語系錯誤！",description="請檢察語系是否錯誤，全部的語系:`\nenUS\ndeDE\nesES\nesMX\nfrFR\nitIT\njaJP\nkoKR\nplPL\nptBR", color=0xff0000)
+    title=data['name'][lang]
     text=""
     if 'text' in data:text+=change_text(data["text"][lang])+"\n\n"
     if 'flavor' in data:text+=change_text(data['flavor'][lang])
@@ -368,81 +359,59 @@ async def id(msg,cardid=None,lang="zhTW"):
     if cardid==None:
         await msg.reply("※不推薦新手使用該指令\n該指令使用方法:\"t!id dbfId或id 語言(選填)\"\n例子1(使用dbfId):`t!id 38833`\n例子2(使用id):`t!id OG_272`")
     else:
-        find=False
-        if cardid.isdigit() is True:
-            for data in cardlib:
-                if data["dbfId"]==int(cardid):
-                    find=True
-                    break
-        else:
-            for data in cardlib:
-                if data["id"]==cardid:
-                    find=True
-                    break
-        if find is True:
-            if data["set"]=="LETTUCE":
-                embed,view=embed_m(data,lang)
-                await msg.reply(embed=embed,view=view)
-            elif data["set"]=="BATTLEGROUNDS":
-                embed,view=embed_bg(data,lang)
-                await msg.reply(embed=embed,view=view)
-            else:await msg.reply(embed=embed_n(data,lang))
-        else:await msg.reply("查無此卡!")
+        if lang in langlist:
+            find=False
+            if cardid.isdigit() is True:
+                for data in cardlib:
+                    if data["dbfId"]==int(cardid):
+                        find=True
+                        break
+            else:
+                for data in cardlib:
+                    if data["id"]==cardid:
+                        find=True
+                        break
+            if find is True:
+                if data["set"]=="LETTUCE":
+                    embed,view=embed_m(data,lang)
+                    await msg.reply(embed=embed,view=view)
+                elif data["set"]=="BATTLEGROUNDS":
+                    embed,view=embed_bg(data,lang)
+                    await msg.reply(embed=embed,view=view)
+                else:await msg.reply(embed=embed_n(data,lang))
+            else:await msg.reply("查無此卡!")
+        else:await msg.reply("語系錯誤!全部的語系:\n"+",".join(langlist))
 
 @bot.command()
 async def card(msg,cardname=None,lang="zhTW"):
     if cardname==None:
         await msg.reply("空格請用下滑線\'_\'代替\n該指令使用方法:\"t!card 卡牌名稱 語言(選填)\"\n例子:`t!card 暮光召喚師`")
     else:
-        cardname=cardname.replace('_',' ')
-        find=[]
-        for data in cardlib:
-            if "type" in data:
-                if data["type"]!="ENCHANTMENT":
-                    if cardname in data["name"][lang]:find.append(data)
-                    elif cardname in group:
-                        if group[cardname] in data["name"][lang]:
-                            find.append(data)
-                    elif 'text' in data:
-                        if cardname in data["text"][lang].replace("\n",""):find.append(data)
-        if len(find)==0:await msg.reply("查無卡牌！")
-        elif len(find)==1:
-            if find[0]["set"]=="LETTUCE":
-                embed,view=embed_m(find[0],lang)
-                await msg.reply(embed=embed,view=view)
-            elif find[0]["set"]=="BATTLEGROUNDS":
-                embed,view=embed_bg(find[0],lang)
-                await msg.reply(embed=embed,view=view)
-            else:await msg.reply(embed=embed_n(find[0],lang))
-        elif len(find)>24:
-            async def callback_allcards(interaction):
-              await interaction.response.edit_message(content="已發送至私人訊息",view=None)
-              for data in find:
-                    if data["set"]=="LETTUCE":
-                        embed,view=embed_m(data,lang)
-                        await msg.author.send(embed=embed,view=view)
-                    elif data["set"]=="BATTLEGROUNDS":
-                        embed,view=embed_bg(data,lang)
-                        await msg.author.send(embed=embed,view=view)
-                    else:await msg.author.send(embed=embed_n(data,lang))
-            button=Button(style=ButtonStyle.success,label="發送所有卡牌至私人訊息")
-            button.callback=callback_allcards
-            view=View()
-            view.add_item(button)
-            await msg.reply("由於數量過多，請更改關鍵字縮小範圍。",view=view)
-        else:
-            options=[]
-            options.append(SelectOption(label="全部發送到私人訊息",value="-1",description="可搭配 t!id 指令"))
-            for i,data in enumerate(find):
-                text=""
-                if 'text' in data:text=change_text(data["text"][lang]).replace("*","").replace("\n","").replace("[x]","")
-                if len(text)>95:text=text[0:94]+"..."
-                options.append(SelectOption(label=f'{data["name"][lang]}({data["dbfId"]},{data["id"]})',value=str(i),description=text))
-            select=Select(min_values=1,max_values=1,options=options)
-            async def select_callback(interaction):
-                if int(dict(interaction.data)['values'][0])==-1:
-                    await interaction.response.edit_message(content="已發送至私人訊息",view=None)
-                    for data in find:
+        if lang in langlist:
+            cardname=cardname.replace('_',' ')
+            find=[]
+            for data in cardlib:
+                if "type" in data:
+                    if data["type"]!="ENCHANTMENT":
+                        if cardname in data["name"][lang]:find.append(data)
+                        elif cardname in group:
+                            if group[cardname] in data["name"][lang]:
+                                find.append(data)
+                        elif 'text' in data:
+                            if cardname in data["text"][lang].replace("\n",""):find.append(data)
+            if len(find)==0:await msg.reply("查無卡牌！")
+            elif len(find)==1:
+                if find[0]["set"]=="LETTUCE":
+                    embed,view=embed_m(find[0],lang)
+                    await msg.reply(embed=embed,view=view)
+                elif find[0]["set"]=="BATTLEGROUNDS":
+                    embed,view=embed_bg(find[0],lang)
+                    await msg.reply(embed=embed,view=view)
+                else:await msg.reply(embed=embed_n(find[0],lang))
+            elif len(find)>24:
+                async def callback_allcards(interaction):
+                  await interaction.response.edit_message(content="已發送至私人訊息",view=None)
+                  for data in find:
                         if data["set"]=="LETTUCE":
                             embed,view=embed_m(data,lang)
                             await msg.author.send(embed=embed,view=view)
@@ -450,18 +419,44 @@ async def card(msg,cardname=None,lang="zhTW"):
                             embed,view=embed_bg(data,lang)
                             await msg.author.send(embed=embed,view=view)
                         else:await msg.author.send(embed=embed_n(data,lang))
-                else:
-                    if find[int(dict(interaction.data)['values'][0])]["set"]=="LETTUCE":
-                        embed,view=embed_m(find[int(dict(interaction.data)['values'][0])],lang)
-                        await interaction.response.edit_message(content="",embed=embed,view=view)
-                    elif find[int(dict(interaction.data)['values'][0])]["set"]=="BATTLEGROUNDS":
-                        embed,view=embed_bg(find[int(dict(interaction.data)['values'][0])],lang)
-                        await interaction.response.edit_message(content="",embed=embed,view=view)
-                    else:await interaction.response.edit_message(content="",embed=embed_n(find[int(dict(interaction.data)['values'][0])],lang),view=None)
-            select.callback=select_callback
-            view=View()
-            view.add_item(select)
-            await msg.reply("選擇你想找的卡牌",view=view)
+                button=Button(style=ButtonStyle.success,label="發送所有卡牌至私人訊息")
+                button.callback=callback_allcards
+                view=View()
+                view.add_item(button)
+                await msg.reply("由於數量過多，請更改關鍵字縮小範圍。",view=view)
+            else:
+                options=[]
+                options.append(SelectOption(label="全部發送到私人訊息",value="-1",description="可搭配 t!id 指令"))
+                for i,data in enumerate(find):
+                    text=""
+                    if 'text' in data:text=change_text(data["text"][lang]).replace("*","").replace("\n","").replace("[x]","")
+                    if len(text)>95:text=text[0:94]+"..."
+                    options.append(SelectOption(label=f'{data["name"][lang]}({data["dbfId"]},{data["id"]})',value=str(i),description=text))
+                select=Select(min_values=1,max_values=1,options=options)
+                async def select_callback(interaction):
+                    if int(dict(interaction.data)['values'][0])==-1:
+                        await interaction.response.edit_message(content="已發送至私人訊息",view=None)
+                        for data in find:
+                            if data["set"]=="LETTUCE":
+                                embed,view=embed_m(data,lang)
+                                await msg.author.send(embed=embed,view=view)
+                            elif data["set"]=="BATTLEGROUNDS":
+                                embed,view=embed_bg(data,lang)
+                                await msg.author.send(embed=embed,view=view)
+                            else:await msg.author.send(embed=embed_n(data,lang))
+                    else:
+                        if find[int(dict(interaction.data)['values'][0])]["set"]=="LETTUCE":
+                            embed,view=embed_m(find[int(dict(interaction.data)['values'][0])],lang)
+                            await interaction.response.edit_message(content="",embed=embed,view=view)
+                        elif find[int(dict(interaction.data)['values'][0])]["set"]=="BATTLEGROUNDS":
+                            embed,view=embed_bg(find[int(dict(interaction.data)['values'][0])],lang)
+                            await interaction.response.edit_message(content="",embed=embed,view=view)
+                        else:await interaction.response.edit_message(content="",embed=embed_n(find[int(dict(interaction.data)['values'][0])],lang),view=None)
+                select.callback=select_callback
+                view=View()
+                view.add_item(select)
+                await msg.reply("選擇你想找的卡牌",view=view)
+        else:await msg.reply("語系錯誤!全部的語系:\n"+",".join(langlist))
 
 
 
@@ -470,109 +465,113 @@ async def merc(msg,cardname=None,lang="zhTW"):
     if cardname==None:
         await msg.reply("該指令使用方法:\"t!merc 傭兵、裝備、技能名稱 語言(選填)\"\n例子1(傭兵):`t!merc 餅乾大廚`\n例子2(裝備):`t!merc 養好的鍋子`\n例子3(技能):`t!merc 魚肉大餐`")
     else:
-        cardname=cardname.replace('_',' ')
-        find=[]
-        for data in cardlib:
-            if "type" in data and "set" in data:
-                if data["type"]!="ENCHANTMENT" and data["set"]=="LETTUCE":
-                    if cardname in data["name"][lang]:find.append(data)
-                    elif cardname in group:
-                        if group[cardname] in data["name"][lang]:
-                            find.append(data)
-                    elif 'text' in data:
-                        if cardname in data["text"][lang].replace("\n",""):find.append(data)
-        if len(find)==0:await msg.reply("查無卡牌！")
-        elif len(find)==1:
-            embed,view=embed_m(find[0],lang)
-            await msg.reply(embed=embed,view=view)
-        elif len(find)>24:
-            async def callback_allcards(interaction):
-                await interaction.response.edit_message(content="已發送至私人訊息",view=None)
-                for data in find:
-                        embed,view=embed_m(data,lang)
-                        await msg.author.send(embed=embed,view=view)
-            button=Button(style=ButtonStyle.success,label="發送所有卡牌至私人訊息")
-            button.callback=callback_allcards
-            view=View()
-            view.add_item(button)
-            await msg.reply("由於數量過多，請更改關鍵字縮小範圍。",view=view)
-        else:
-            options=[]
-            options.append(SelectOption(label="全部發送到私人訊息",value="-1",description="可搭配 t!id 指令"))
-            for i,data in enumerate(find):
-                text=""
-                if 'text' in data:text=change_text(data["text"][lang]).replace("*","").replace("[x]","")
-                if len(text)>95:text=text[0:94]+"..."
-                options.append(SelectOption(label=f'{data["name"][lang]}({data["dbfId"]},{data["id"]})',value=str(i),description=text))
-            select=Select(min_values=1,max_values=1,options=options)
-            async def select_callback(interaction):
-                if int(dict(interaction.data)['values'][0])==-1:
-                    await interaction.response.edit_message(content="已發送至私人訊息",view=None)
-                    for data in find:
-                        embed,view=embed_m(data,lang)
-                        await msg.author.send(embed=embed,view=view)
-                else:
-                    embed,view=embed_m(find[int(dict(interaction.data)['values'][0])],lang)
-                    await interaction.response.edit_message(content="",embed=embed,view=view)
-            select.callback=select_callback
-            view=View()
-            view.add_item(select)
-            await msg.reply("選擇你想找的卡牌",view=view)
-
-@bot.command()
-async def bg(msg,cardname=None,lang="zhTW"):
-    if cardname==None:
-        await msg.reply("該指令使用方法:\"t!bg 戰場卡牌 語言(選填)\"\n例子:`t!bg 餅乾大廚`")
-    else:
-        cardname=cardname.replace('_',' ')
-        find=[]
-        for data in cardlib:
-            if "type" in data and "set" in data:
-                if data["type"]!="ENCHANTMENT":
-                    if "isBattlegroundsPoolMinion" in data or data["set"]=="BATTLEGROUNDS":
+        if lang in langlist:
+            cardname=cardname.replace('_',' ')
+            find=[]
+            for data in cardlib:
+                if "type" in data and "set" in data:
+                    if data["type"]!="ENCHANTMENT" and data["set"]=="LETTUCE":
                         if cardname in data["name"][lang]:find.append(data)
                         elif cardname in group:
                             if group[cardname] in data["name"][lang]:
                                 find.append(data)
                         elif 'text' in data:
                             if cardname in data["text"][lang].replace("\n",""):find.append(data)
-        if len(find)==0:await msg.reply("查無卡牌！")
-        elif len(find)==1:
-            embed,view=embed_bg(find[0],lang)
-            await msg.reply(embed=embed,view=view)
-        elif len(find)>24:
-            async def callback_allcards(interaction):
-                await interaction.response.edit_message(content="已發送至私人訊息",view=None)
-                for data in find:
-                        embed,view=embed_bg(data,lang)
-                        await msg.author.send(embed=embed,view=view)
-            button=Button(style=ButtonStyle.success,label="發送所有卡牌至私人訊息")
-            button.callback=callback_allcards
-            view=View()
-            view.add_item(button)
-            await msg.reply("由於數量過多，請更改關鍵字縮小範圍。",view=view)
-        else:
-            options=[]
-            options.append(SelectOption(label="全部發送到私人訊息",value="-1",description="可搭配 t!id 指令"))
-            for i,data in enumerate(find):
-                text=""
-                if 'text' in data:text=change_text(data["text"][lang]).replace("*","").replace("[x]","")
-                if len(text)>95:text=text[0:94]+"..."
-                options.append(SelectOption(label=f'{data["name"][lang]}({data["dbfId"]},{data["id"]})',value=str(i),description=text))
-            select=Select(min_values=1,max_values=1,options=options)
-            async def select_callback(interaction):
-                if int(dict(interaction.data)['values'][0])==-1:
+            if len(find)==0:await msg.reply("查無卡牌！")
+            elif len(find)==1:
+                embed,view=embed_m(find[0],lang)
+                await msg.reply(embed=embed,view=view)
+            elif len(find)>24:
+                async def callback_allcards(interaction):
                     await interaction.response.edit_message(content="已發送至私人訊息",view=None)
                     for data in find:
-                        embed,view=embed_bg(data,lang)
-                        await msg.author.send(embed=embed,view=view)
-                else:
-                    embed,view=embed_bg(find[int(dict(interaction.data)['values'][0])],lang)
-                    await interaction.response.edit_message(content="",embed=embed,view=view)
-            select.callback=select_callback
-            view=View()
-            view.add_item(select)
-            await msg.reply("選擇你想找的卡牌",view=view)
+                            embed,view=embed_m(data,lang)
+                            await msg.author.send(embed=embed,view=view)
+                button=Button(style=ButtonStyle.success,label="發送所有卡牌至私人訊息")
+                button.callback=callback_allcards
+                view=View()
+                view.add_item(button)
+                await msg.reply("由於數量過多，請更改關鍵字縮小範圍。",view=view)
+            else:
+                options=[]
+                options.append(SelectOption(label="全部發送到私人訊息",value="-1",description="可搭配 t!id 指令"))
+                for i,data in enumerate(find):
+                    text=""
+                    if 'text' in data:text=change_text(data["text"][lang]).replace("*","").replace("[x]","")
+                    if len(text)>95:text=text[0:94]+"..."
+                    options.append(SelectOption(label=f'{data["name"][lang]}({data["dbfId"]},{data["id"]})',value=str(i),description=text))
+                select=Select(min_values=1,max_values=1,options=options)
+                async def select_callback(interaction):
+                    if int(dict(interaction.data)['values'][0])==-1:
+                        await interaction.response.edit_message(content="已發送至私人訊息",view=None)
+                        for data in find:
+                            embed,view=embed_m(data,lang)
+                            await msg.author.send(embed=embed,view=view)
+                    else:
+                        embed,view=embed_m(find[int(dict(interaction.data)['values'][0])],lang)
+                        await interaction.response.edit_message(content="",embed=embed,view=view)
+                select.callback=select_callback
+                view=View()
+                view.add_item(select)
+                await msg.reply("選擇你想找的卡牌",view=view)
+        else:await msg.reply("語系錯誤!全部的語系:\n"+",".join(langlist))
+
+@bot.command()
+async def bg(msg,cardname=None,lang="zhTW"):
+    if cardname==None:
+        await msg.reply("該指令使用方法:\"t!bg 戰場卡牌 語言(選填)\"\n例子:`t!bg 餅乾大廚`")
+    else:
+        if lang in langlist:
+            cardname=cardname.replace('_',' ')
+            find=[]
+            for data in cardlib:
+                if "type" in data and "set" in data:
+                    if data["type"]!="ENCHANTMENT":
+                        if "isBattlegroundsPoolMinion" in data or data["set"]=="BATTLEGROUNDS":
+                            if cardname in data["name"][lang]:find.append(data)
+                            elif cardname in group:
+                                if group[cardname] in data["name"][lang]:
+                                    find.append(data)
+                            elif 'text' in data:
+                                if cardname in data["text"][lang].replace("\n",""):find.append(data)
+            if len(find)==0:await msg.reply("查無卡牌！")
+            elif len(find)==1:
+                embed,view=embed_bg(find[0],lang)
+                await msg.reply(embed=embed,view=view)
+            elif len(find)>24:
+                async def callback_allcards(interaction):
+                    await interaction.response.edit_message(content="已發送至私人訊息",view=None)
+                    for data in find:
+                            embed,view=embed_bg(data,lang)
+                            await msg.author.send(embed=embed,view=view)
+                button=Button(style=ButtonStyle.success,label="發送所有卡牌至私人訊息")
+                button.callback=callback_allcards
+                view=View()
+                view.add_item(button)
+                await msg.reply("由於數量過多，請更改關鍵字縮小範圍。",view=view)
+            else:
+                options=[]
+                options.append(SelectOption(label="全部發送到私人訊息",value="-1",description="可搭配 t!id 指令"))
+                for i,data in enumerate(find):
+                    text=""
+                    if 'text' in data:text=change_text(data["text"][lang]).replace("*","").replace("[x]","")
+                    if len(text)>95:text=text[0:94]+"..."
+                    options.append(SelectOption(label=f'{data["name"][lang]}({data["dbfId"]},{data["id"]})',value=str(i),description=text))
+                select=Select(min_values=1,max_values=1,options=options)
+                async def select_callback(interaction):
+                    if int(dict(interaction.data)['values'][0])==-1:
+                        await interaction.response.edit_message(content="已發送至私人訊息",view=None)
+                        for data in find:
+                            embed,view=embed_bg(data,lang)
+                            await msg.author.send(embed=embed,view=view)
+                    else:
+                        embed,view=embed_bg(find[int(dict(interaction.data)['values'][0])],lang)
+                        await interaction.response.edit_message(content="",embed=embed,view=view)
+                select.callback=select_callback
+                view=View()
+                view.add_item(select)
+                await msg.reply("選擇你想找的卡牌",view=view)
+        else:await msg.reply("語系錯誤!全部的語系:\n"+",".join(langlist))
 
 def deck_embed(msg,deckcode,deckname,lang,m):
     heroclass=""
@@ -638,14 +637,16 @@ def deck_embed(msg,deckcode,deckname,lang,m):
 @bot.command()
 async def deck(msg,deckcode=None,deckname=None,lang="zhTW"):
     if deckcode==None:
-        await msg.reply("該指令使用方法:\"t!deck 牌組代碼 牌組名稱(選填) \"\n例子1(無套牌名稱):\n`t!deck AAEBAaIHDpoC+AfpEZfBAt/jArvvAuvwAoSmA6rLA4/OA/bWA4PkA72ABJWfBAi0AcQB7QL1uwLi3QPn3QOS5AP+7gMA`\n例子2(有套牌名稱):\n`t!deck AAEBAaIHDpoC+AfpEZfBAt/jArvvAuvwAoSmA6rLA4/OA/bWA4PkA72ABJWfBAi0AcQB7QL1uwLi3QPn3QOS5AP+7gMA 無限潛行`")
+        await msg.reply("該指令使用方法:\"t!deck 牌組代碼 牌組名稱(選填) 語言(選填)\"\n例子1(無套牌名稱):\n`t!deck AAEBAaIHDpoC+AfpEZfBAt/jArvvAuvwAoSmA6rLA4/OA/bWA4PkA72ABJWfBAi0AcQB7QL1uwLi3QPn3QOS5AP+7gMA`\n例子2(有套牌名稱):\n`t!deck AAEBAaIHDpoC+AfpEZfBAt/jArvvAuvwAoSmA6rLA4/OA/bWA4PkA72ABJWfBAi0AcQB7QL1uwLi3QPn3QOS5AP+7gMA 無限潛行`")
     else:
-        embed,view=deck_embed(msg,deckcode,deckname,lang,0)
-        await msg.reply(embed=embed,view=view)
-        if deckname!=None:
-            await msg.reply(f"###{deckname}\n{deckcode}\n# 若要使用此套牌，請先複製此訊息，然後在爐石戰記中建立一副新的套牌")
-        else:
-            await msg.reply(f"{deckcode}\n# 若要使用此套牌，請先複製此訊息，然後在爐石戰記中建立一副新的套牌")
+        if lang in langlist:
+            embed,view=deck_embed(msg,deckcode,deckname,lang,0)
+            await msg.reply(embed=embed,view=view)
+            if deckname!=None:
+                await msg.reply(f"###{deckname}\n{deckcode}\n# 若要使用此套牌，請先複製此訊息，然後在爐石戰記中建立一副新的套牌")
+            else:
+                await msg.reply(f"{deckcode}\n# 若要使用此套牌，請先複製此訊息，然後在爐石戰記中建立一副新的套牌")
+        else:await msg.reply("語系錯誤!全部的語系:\n"+",".join(langlist))
 
 
 
