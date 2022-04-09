@@ -131,7 +131,7 @@ def embed_n(data:dict,lang):
     imgurl=f"https://art.hearthstonejson.com/v1/render/latest/{lang}/512x/"+data["id"]+".png"
     cardview=f"https://playhearthstone.com/cards/"+str(data["dbfId"])
     if requests.request('GET',imgurl).status_code==404:
-        imgurl=f"https://art.hearthstonejson.com/v1/256x/"+data["id"]+".jpg"
+        imgurl=f"https://art.hearthstonejson.com/v1/512x/"+data["id"]+".jpg"
         if requests.request('GET',imgurl).status_code==404:
             imgurl="https://cdn.discordapp.com/attachments/913009861967626310/935811318768885810/PlaceholderCard.png"
             text+="\n※此卡牌確實存在於爐石戰記中的某個角落，但沒有任何圖片"
@@ -160,7 +160,15 @@ def embed_bg(data:dict,lang):
     url=f'https://tw.api.blizzard.com/hearthstone/cards/{data["dbfId"]}?locale={bzlang}&gameMode=battlegrounds&access_token={token}'
     if data["type"]=="HERO":
         if 'battlegroundsBuddyDbfId' in data:
-            imgurl=json.loads(requests.request('GET',url).text)['battlegrounds']['image']
+            try:
+                imgurl=json.loads(requests.request('GET',url).text)['battlegrounds']['image']
+            except:
+                imgurl=f"https://art.hearthstonejson.com/v1/512x/"+data["id"]+".jpg"
+                if requests.request('GET',imgurl).status_code==404:
+                    imgurl=f"https://art.hearthstonejson.com/v1/512x/"+data["id"]+".jpg"
+                if requests.request('GET',imgurl).status_code==404:
+                imgurl="https://cdn.discordapp.com/attachments/913009861967626310/935811318768885810/PlaceholderCard.png"
+                text+="\n※此卡牌確實存在於爐石戰記中的某個角落，但沒有任何圖片"
             text+="\n夥伴dbfId:"+str(data['battlegroundsBuddyDbfId'])
             button=Button(style=ButtonStyle.success,label="查看夥伴",custom_id=str(data['battlegroundsBuddyDbfId']))
             button.callback=button_new_embed
@@ -196,7 +204,7 @@ def embed_bg(data:dict,lang):
                             button.callback=button_new_embed
                             view.add_item(button)
     if requests.request('GET',imgurl).status_code==404:
-        imgurl=f"https://art.hearthstonejson.com/v1/256x/"+data["id"]+".jpg"
+        imgurl=f"https://art.hearthstonejson.com/v1/512x/"+data["id"]+".jpg"
         if requests.request('GET',imgurl).status_code==404:
             imgurl="https://cdn.discordapp.com/attachments/913009861967626310/935811318768885810/PlaceholderCard.png"
             text+="\n※此卡牌確實存在於爐石戰記中的某個角落，但沒有任何圖片"
@@ -212,7 +220,7 @@ def embed_m(data:dict,lang):
     imgurl=f"https://art.hearthstonejson.com/v1/render/latest/{lang}/512x/"+data["id"]+".png"
     cardview=f"https://playhearthstone.com/zh-tw/mercenaries/"+str(data["dbfId"])
     if requests.request('GET',imgurl).status_code==404:
-        imgurl=f"https://art.hearthstonejson.com/v1/256x/"+data["id"]+".jpg"
+        imgurl=f"https://art.hearthstonejson.com/v1/512x/"+data["id"]+".jpg"
         if requests.request('GET',imgurl).status_code==404:
             imgurl="https://cdn.discordapp.com/attachments/913009861967626310/935811318768885810/PlaceholderCard.png"
             text+="\n※此卡牌確實存在於爐石戰記中的某個角落，但沒有任何圖片"
