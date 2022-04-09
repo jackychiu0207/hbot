@@ -455,7 +455,7 @@ async def card(msg,cardname=None,lang="zhTW"):
                         elif find[int(dict(interaction.data)['values'][0])]["set"]=="BATTLEGROUNDS":
                             embed,view=embed_bg(find[int(dict(interaction.data)['values'][0])],lang)
                             await interaction.followup.edit_message(interaction.message.id,content="",embed=embed,view=view)
-                        else:await interaction.response.edit_message(content="",embed=embed_n(find[int(dict(interaction.data)['values'][0])],lang),view=None)
+                        else:await interaction.followup.edit_message(interaction.message.id,content="",embed=embed_n(find[int(dict(interaction.data)['values'][0])],lang),view=None)
                 select.callback=select_callback
                 view=View()
                 view.add_item(select)
