@@ -144,7 +144,8 @@ def embed_bg(data:dict,lang):
         for data in cardlib:
             if data["dbfId"]==int(dict(interaction.data)['custom_id']):
                 embed,view=embed_bg(data,lang)
-                await interaction.response.edit_message(embed=embed,view=view)
+                await interaction.response.defer(ephemeral=True, thinking=True)
+                await interaction.followup.edit(embed=embed,view=view)
     view=View()
     title=data['name'][lang]
     text=""
@@ -243,12 +244,14 @@ def embed_m(data:dict,lang):
         for data in cardlib:
             if data["dbfId"]==int(dict(interaction.data)['values'][0]):
                 embed,view=embed_m(data,lang)
-                await interaction.response.edit_message(embed=embed,view=view)
+                await interaction.response.defer(ephemeral=True, thinking=True)
+                await interaction.followup.edit(embed=embed,view=view)
     async def button_new_embed(interaction):
         for data in cardlib:
             if data["dbfId"]==int(dict(interaction.data)['custom_id']):
                 embed,view=embed_m(data,lang)
-                await interaction.response.edit_message(embed=embed,view=view)
+                await interaction.response.defer(ephemeral=True, thinking=True)
+                await interaction.followup.edit(embed=embed,view=view)
     if data["type"]=="LETTUCE_ABILITY":
         if data["cost"]==0:
             if 'text' in data:text+=change_text(data["text"][lang])+"\n"
@@ -449,10 +452,13 @@ async def card(msg,cardname=None,lang="zhTW"):
                     else:
                         if find[int(dict(interaction.data)['values'][0])]["set"]=="LETTUCE":
                             embed,view=embed_m(find[int(dict(interaction.data)['values'][0])],lang)
-                            await interaction.response.edit_message(content="",embed=embed,view=view)
+                            await interaction.response.defer(ephemeral=True, thinking=True)
+                            await interaction.followup.edit(content="",embed=embed,view=view)
                         elif find[int(dict(interaction.data)['values'][0])]["set"]=="BATTLEGROUNDS":
                             embed,view=embed_bg(find[int(dict(interaction.data)['values'][0])],lang)
-                            await interaction.response.edit_message(content="",embed=embed,view=view)
+                           await interaction.response.defer(ephemeral=True, thinking=True)
+                            await interaction.followup.edit(content="",embed=embed,view=viewawait interaction.response.defer(ephemeral=True, thinking=True)
+                            await interaction.followup.edit(content="",embed=embed,view=view)await
                         else:await interaction.response.edit_message(content="",embed=embed_n(find[int(dict(interaction.data)['values'][0])],lang),view=None)
                 select.callback=select_callback
                 view=View()
