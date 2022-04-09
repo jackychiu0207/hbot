@@ -530,7 +530,7 @@ async def bg(msg,cardname=None,lang="zhTW"):
     if cardname==None:
         await msg.reply("該指令使用方法:\"t!bg 戰場卡牌 語言(選填)\"\n例子:`t!bg 餅乾大廚`")
     else:
-        if lang in langlist
+        if lang in langlist:
             await msg.reply("由於discord.py目前有問題，按鈕及選單功能可能無法正常使用")
             cardname=cardname.replace('_',' ')
             find=[]
