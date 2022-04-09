@@ -123,8 +123,12 @@ async def on_command_error(ctx,error):
 
 
 #cmds
-def embed_n(data:dict,lang):
-    title=data['name'][lang]
+def embed_n(data:dict,lang:str):
+    if "_" in lang:lang.replace("_","")
+    try:
+        title=data['name'][lang]
+    except:
+        embed = discord.Embed(title="語系錯誤！",description="請檢察語系是否錯誤，全部的語系:`\nenUS\ndeDE\nesES\nesMX\nfrFR\nitIT\njaJP\nkoKR\nplPL\nptBR", color=0xff0000)
     text=""
     if 'text' in data:text+=change_text(data["text"][lang])+"\n\n"
     if 'flavor' in data:text+=change_text(data['flavor'][lang])
@@ -153,6 +157,7 @@ def embed_bg(data:dict,lang):
     view=View()
     title=data['name'][lang]
     text=""
+    if 'text' in data:text+=change_text(data["text"][lang])+"\n\n"
     imgurl=f"https://art.hearthstonejson.com/v1/render/latest/{lang}/512x/"+data["id"]+".png"
     cardview=f"https://playhearthstone.com/battlegrounds/"+str(data["dbfId"])
     token=get_token()
@@ -219,6 +224,13 @@ def embed_bg(data:dict,lang):
                             button=Button(style=ButtonStyle.success,label="查看夥伴",custom_id=str(hero["dbfId"]))
                             button.callback=button_new_embed
                             view.add_item(button)
+    else:
+        imgurl=f"https://art.hearthstonejson.com/v1/render/latest/{lang}/512x/"+data["id"]+".jpg"
+        if requests.request('GET',imgurl).status_code==404:
+            imgurl=f"https://art.hearthstonejson.com/v1/512x/"+data["id"]+".jpg"
+            if requests.request('GET',imgurl).status_code==404:
+                imgurl="https://cdn.discordapp.com/attachments/913009861967626310/935811318768885810/PlaceholderCard.png"
+                text+="\n※此卡牌確實存在於爐石戰記中的某個角落，但沒有任何圖片"
     embed = discord.Embed(title=title,url=cardview,description=text, color=0xff0000)
     embed.set_image(url=imgurl)
     embed.set_footer(text=str(data["dbfId"])+","+data["id"])
