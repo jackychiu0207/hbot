@@ -36,6 +36,7 @@ def getfile():
     file = open('mercenaries.json','wb')
     file.write(data)
     file.close()
+    os.remove('group.json')
     wget.download('https://raw.githubusercontent.com/jackychiu0207/hbot/main/group.json',"group.json")
 
 def openfile():
@@ -456,7 +457,7 @@ async def card(msg,cardname=None,lang="zhTW"):
                             await interaction.followup.edit(content="",embed=embed,view=view)
                         elif find[int(dict(interaction.data)['values'][0])]["set"]=="BATTLEGROUNDS":
                             embed,view=embed_bg(find[int(dict(interaction.data)['values'][0])],lang)
-                           await interaction.response.defer(ephemeral=True, thinking=True)
+                            await interaction.response.defer(ephemeral=True, thinking=True)
                             await interaction.followup.edit(content="",embed=embed,view=viewawait interaction.response.defer(ephemeral=True, thinking=True)
                             await interaction.followup.edit(content="",embed=embed,view=view)await
                         else:await interaction.response.edit_message(content="",embed=embed_n(find[int(dict(interaction.data)['values'][0])],lang),view=None)
