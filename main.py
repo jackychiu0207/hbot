@@ -141,10 +141,11 @@ def embed_bg(data:dict,lang):
 #                embed,view=embed_bg(data,lang)
 #                await interaction.response.edit_message(embed=embed,view=view)
     async def button_new_embed(interaction):
+        await interaction.response.defer(ephemeral=True, thinking=True)
         for data in cardlib:
             if data["dbfId"]==int(dict(interaction.data)['custom_id']):
                 embed,view=embed_bg(data,lang)
-                await interaction.response.edit_message(embed=embed,view=view)
+                await interaction.followup.edit_message(interaction.message.id,embed=embed,view=view)
     view=View()
     title=data['name'][lang]
     text=""
@@ -240,15 +241,17 @@ def embed_m(data:dict,lang):
             text+="\n※此卡牌確實存在於爐石戰記中的某個角落，但沒有任何圖片"
     #傭兵子父卡牌功能
     async def select_new_embed(interaction):
+        await interaction.response.defer(ephemeral=True, thinking=True)
         for data in cardlib:
             if data["dbfId"]==int(dict(interaction.data)['values'][0]):
                 embed,view=embed_m(data,lang)
-                await interaction.response.edit_message(embed=embed,view=view)
+                await interaction.followup.edit_message(interaction.message.id,embed=embed,view=view)
     async def button_new_embed(interaction):
+        await interaction.response.defer(ephemeral=True, thinking=True)
         for data in cardlib:
             if data["dbfId"]==int(dict(interaction.data)['custom_id']):
                 embed,view=embed_m(data,lang)
-                await interaction.response.edit_message(embed=embed,view=view)
+                await interaction.followup.edit_message(interaction.message.id,embed=embed,view=view)
     if data["type"]=="LETTUCE_ABILITY":
         if data["cost"]==0:
             if 'text' in data:text+=change_text(data["text"][lang])+"\n"
@@ -360,6 +363,7 @@ async def id(msg,cardid=None,lang="zhTW"):
         await msg.reply("※不推薦新手使用該指令\n該指令使用方法:\"t!id dbfId或id 語言(選填)\"\n例子1(使用dbfId):`t!id 38833`\n例子2(使用id):`t!id OG_272`")
     else:
         if lang in langlist:
+            await msg.reply("由於discord.py目前有問題，按鈕及選單功能可能無法正常使用")
             find=False
             if cardid.isdigit() is True:
                 for data in cardlib:
@@ -388,6 +392,7 @@ async def card(msg,cardname=None,lang="zhTW"):
         await msg.reply("空格請用下滑線\'_\'代替\n該指令使用方法:\"t!card 卡牌名稱 語言(選填)\"\n例子:`t!card 暮光召喚師`")
     else:
         if lang in langlist:
+            await msg.reply("由於discord.py目前有問題，按鈕及選單功能可能無法正常使用")
             cardname=cardname.replace('_',' ')
             find=[]
             for data in cardlib:
@@ -445,12 +450,13 @@ async def card(msg,cardname=None,lang="zhTW"):
                                 await msg.author.send(embed=embed,view=view)
                             else:await msg.author.send(embed=embed_n(data,lang))
                     else:
+                        await interaction.response.defer(ephemeral=True, thinking=True)
                         if find[int(dict(interaction.data)['values'][0])]["set"]=="LETTUCE":
                             embed,view=embed_m(find[int(dict(interaction.data)['values'][0])],lang)
-                            await interaction.response.edit_message(content="",embed=embed,view=view)
+                            await interaction.followup.edit_message(interaction.message.id,content="",embed=embed,view=view)
                         elif find[int(dict(interaction.data)['values'][0])]["set"]=="BATTLEGROUNDS":
                             embed,view=embed_bg(find[int(dict(interaction.data)['values'][0])],lang)
-                            await interaction.response.edit_message(content="",embed=embed,view=view)
+                            await interaction.followup.edit_message(interaction.message.id,content="",embed=embed,view=view)
                         else:await interaction.response.edit_message(content="",embed=embed_n(find[int(dict(interaction.data)['values'][0])],lang),view=None)
                 select.callback=select_callback
                 view=View()
@@ -466,6 +472,7 @@ async def merc(msg,cardname=None,lang="zhTW"):
         await msg.reply("該指令使用方法:\"t!merc 傭兵、裝備、技能名稱 語言(選填)\"\n例子1(傭兵):`t!merc 餅乾大廚`\n例子2(裝備):`t!merc 養好的鍋子`\n例子3(技能):`t!merc 魚肉大餐`")
     else:
         if lang in langlist:
+            await msg.reply("由於discord.py目前有問題，按鈕及選單功能可能無法正常使用")
             cardname=cardname.replace('_',' ')
             find=[]
             for data in cardlib:
@@ -522,6 +529,7 @@ async def bg(msg,cardname=None,lang="zhTW"):
         await msg.reply("該指令使用方法:\"t!bg 戰場卡牌 語言(選填)\"\n例子:`t!bg 餅乾大廚`")
     else:
         if lang in langlist:
+            await msg.reply("由於discord.py目前有問題，按鈕及選單功能可能無法正常使用")
             cardname=cardname.replace('_',' ')
             find=[]
             for data in cardlib:
@@ -640,6 +648,7 @@ async def deck(msg,deckcode=None,deckname=None,lang="zhTW"):
         await msg.reply("該指令使用方法:\"t!deck 牌組代碼 牌組名稱(選填) 語言(選填)\"\n例子1(無套牌名稱):\n`t!deck AAEBAaIHDpoC+AfpEZfBAt/jArvvAuvwAoSmA6rLA4/OA/bWA4PkA72ABJWfBAi0AcQB7QL1uwLi3QPn3QOS5AP+7gMA`\n例子2(有套牌名稱):\n`t!deck AAEBAaIHDpoC+AfpEZfBAt/jArvvAuvwAoSmA6rLA4/OA/bWA4PkA72ABJWfBAi0AcQB7QL1uwLi3QPn3QOS5AP+7gMA 無限潛行`")
     else:
         if lang in langlist:
+            await msg.reply("由於discord.py目前有問題，按鈕及選單功能可能無法正常使用")
             embed,view=deck_embed(msg,deckcode,deckname,lang,0)
             await msg.reply(embed=embed,view=view)
             if deckname!=None:
@@ -647,6 +656,15 @@ async def deck(msg,deckcode=None,deckname=None,lang="zhTW"):
             else:
                 await msg.reply(f"{deckcode}\n# 若要使用此套牌，請先複製此訊息，然後在爐石戰記中建立一副新的套牌")
         else:await msg.reply("語系錯誤!全部的語系:\n"+",".join(langlist))
+
+
+
+
+
+DCTOKEN=env['DISCORD_BOT_SECRET']
+#loop
+if __name__=="__main__":
+    bot.run(DCTOKEN) 
 
 
 
