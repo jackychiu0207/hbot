@@ -241,13 +241,13 @@ def embed_m(data:dict,lang):
             text+="\n※此卡牌確實存在於爐石戰記中的某個角落，但沒有任何圖片"
     #傭兵子父卡牌功能
     async def select_new_embed(interaction):
-        
+        await interaction.response.defer()
         for data in cardlib:
             if data["dbfId"]==int(dict(interaction.data)['values'][0]):
                 embed,view=embed_m(data,lang)
                 await interaction.followup.edit_message(interaction.message.id,embed=embed,view=view)
     async def button_new_embed(interaction):
-        await interaction.response.defer(ephemeral=True, thinking=True)
+        await interaction.response.defer()
         for data in cardlib:
             if data["dbfId"]==int(dict(interaction.data)['custom_id']):
                 embed,view=embed_m(data,lang)
