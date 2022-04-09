@@ -146,7 +146,7 @@ def embed_bg(data:dict,lang):
             if data["dbfId"]==int(dict(interaction.data)['custom_id']):
                 embed,view=embed_bg(data,lang)
                 await interaction.response.defer(ephemeral=True, thinking=True)
-                await interaction.followup.edit(embed=embed,view=view)
+                await interaction.followup.edit_messgae(interaction.messgae.id,embed=embed,view=view)
     view=View()
     title=data['name'][lang]
     text=""
@@ -246,13 +246,13 @@ def embed_m(data:dict,lang):
             if data["dbfId"]==int(dict(interaction.data)['values'][0]):
                 embed,view=embed_m(data,lang)
                 await interaction.response.defer(ephemeral=True, thinking=True)
-                await interaction.followup.edit(embed=embed,view=view)
+                await interaction.followup.edit_messgae(interaction.messgae.id,embed=embed,view=view)
     async def button_new_embed(interaction):
         for data in cardlib:
             if data["dbfId"]==int(dict(interaction.data)['custom_id']):
                 embed,view=embed_m(data,lang)
                 await interaction.response.defer(ephemeral=True, thinking=True)
-                await interaction.followup.edit(embed=embed,view=view)
+                await interaction.followup.edit_messgae(interaction.messgae.id,embed=embed,view=view)
     if data["type"]=="LETTUCE_ABILITY":
         if data["cost"]==0:
             if 'text' in data:text+=change_text(data["text"][lang])+"\n"
