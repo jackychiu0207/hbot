@@ -459,8 +459,6 @@ async def card(msg,cardname=None,lang="zhTW"):
                             embed,view=embed_bg(find[int(dict(interaction.data)['values'][0])],lang)
                             await interaction.response.defer(ephemeral=True, thinking=True)
                             await interaction.followup.edit(content="",embed=embed,view=view)
-                            await interaction.response.defer(ephemeral=True, thinking=True)
-                            await interaction.followup.edit(content="",embed=embed,view=view)
                         else:await interaction.response.edit_message(content="",embed=embed_n(find[int(dict(interaction.data)['values'][0])],lang),view=None)
                 select.callback=select_callback
                 view=View()
