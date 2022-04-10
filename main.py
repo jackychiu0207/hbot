@@ -105,7 +105,7 @@ def change_text(text:str):
 #stop
 @bot.command()
 async def stop(msg,mode=0):
-    await msg.reply("stop!")'
+    await msg.reply("stop!")
     exit()
 #event
 @bot.event
