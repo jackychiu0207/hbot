@@ -10,7 +10,7 @@ from hearthstone.enums import FormatType
 import urllib.request
 import os
 import wget
-
+import sys
 
 intents=discord.Intents.all()
 
@@ -35,7 +35,9 @@ def getfile():
     file = open('mercenaries.json','wb')
     file.write(data)
     file.close()
-    os.remove('group.json')
+    try:
+        os.remove('group.json')
+    except:pass
     wget.download('https://raw.githubusercontent.com/jackychiu0207/hbot/main/group.json',"group.json")
 
 def openfile():
@@ -102,10 +104,13 @@ def change_text(text:str):
 
 #stop
 @bot.command()
-async def stop(msg):
+async def stop(msg,restart=1):
     await msg.reply("stop!")
-    exit()
-
+    if restart==1:
+        sys.stdout.flush()
+        os.execv(sys.argv[0], sys.argv)
+    elif restart==0:
+        exit()
 #event
 @bot.event
 async def on_ready():
@@ -654,15 +659,6 @@ async def deck(msg,deckcode=None,deckname=None,lang="zhTW"):
             else:
                 await msg.reply(f"{deckcode}\n# 若要使用此套牌，請先複製此訊息，然後在爐石戰記中建立一副新的套牌")
         else:await msg.reply("語系錯誤!全部的語系:\n"+",".join(langlist))
-
-
-
-
-
-DCTOKEN=env['DISCORD_BOT_SECRET']
-#loop
-if __name__=="__main__":
-    bot.run(DCTOKEN) 
 
 
 
