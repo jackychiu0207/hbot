@@ -113,7 +113,7 @@ async def stop(msg,mode=0):
         os.system('python3 update.py')
         sys.stdout.flush()
         os.execv(sys.argv[0], sys.argv)
-    elif mode==2"
+    elif mode==2:
         exit()
 #event
 @bot.event
