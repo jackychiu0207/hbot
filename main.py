@@ -266,13 +266,16 @@ def embed_m(data:dict,lang):
                                     for ownerdata in cardlib:
                                         if ownerdata["dbfId"]==h_data["defaultSkinDbfId"] and run is False:
                                             text+="此為 **"+ownerdata['name'][lang]+"**("+str(ownerdata['dbfId'])+","+str(ownerdata['id'])+") 的裝備。\n"
-                                            if len(e_data['tiers'])>1:text+="\n該裝備其他等級的dbfId:\n"
-                                            for otd in e_data['tiers']:
-                                                if otd["dbf_id"]!=data["dbfId"]:
-                                                    text+="等級"+str(otd["tier"])+":"+str(otd["dbf_id"])+"\n"
-                                                    button=Button(style=ButtonStyle.gray,label="查看等級"+str(otd["tier"]),custom_id=str(otd["dbf_id"]))
-                                                    button.callback=button_new_embed
-                                                    view.add_item(button)
+                                            if len(e_data['tiers'])>1:
+                                                text+="\n該裝備其他等級的dbfId:\n"
+                                                options_e=[]
+                                                for otd in e_data['tiers']:
+                                                    if otd["dbf_id"]!=data["dbfId"]:
+                                                        text+="等級"+str(otd["tier"])+":"+str(otd["dbf_id"])+"\n"
+                                                        options_e.append(SelectOption(label="等級"+str(otd["tier"]),value=str(otd["dbf_id"]),description=str(otd["dbf_id"])))
+                                                select=Select(placeholder="該技能其他等級",options=options_p,min_values=1,max_values=1)
+                                                select.callback=select_new_embed
+                                                view.add_item(select)
                                             button=Button(style=ButtonStyle.success,label="查看傭兵",custom_id=str(ownerdata['dbfId']))
                                             button.callback=button_new_embed
                                             view.add_item(button)
@@ -293,13 +296,16 @@ def embed_m(data:dict,lang):
                                             for ownerdata in cardlib:
                                                 if ownerdata["dbfId"]==h_data["defaultSkinDbfId"] and run is False:
                                                     text+="\n此為 **"+ownerdata['name'][lang]+"**("+str(ownerdata['dbfId'])+","+str(ownerdata['id'])+") 的技能。\n"
-                                                    if len(p_data['tiers'])>1:text+="\n該技能其他等級的dbfId:\n"
-                                                    for otd in p_data['tiers']:
-                                                        if otd["dbf_id"]!=data["dbfId"]:
-                                                            text+="等級"+str(otd["tier"])+":"+str(otd["dbf_id"])+"\n"
-                                                            button=Button(style=ButtonStyle.gray,label="查看等級"+str(otd["tier"]),custom_id=str(otd["dbf_id"]))
-                                                            button.callback=button_new_embed
-                                                            view.add_item(button)
+                                                    if len(p_data['tiers'])>1:
+                                                        options_p=[]
+                                                        text+="\n該技能其他等級的dbfId:\n"
+                                                        for otd in p_data['tiers']:
+                                                            if otd["dbf_id"]!=data["dbfId"]:
+                                                                text+="等級"+str(otd["tier"])+":"+str(otd["dbf_id"])+"\n"
+                                                                options_p.append(SelectOption(label="等級"+str(otd["tier"]),value=str(otd["dbf_id"]),description=str(otd["dbf_id"])))
+                                                        select=Select(placeholder="該技能其他等級",options=options_p,min_values=1,max_values=1)
+                                                        select.callback=select_new_embed
+                                                        view.add_item(select)
                                                     button=Button(style=ButtonStyle.success,label="查看傭兵",custom_id=str(ownerdata['dbfId']))
                                                     button.callback=button_new_embed
                                                     view.add_item(button)
