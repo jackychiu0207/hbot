@@ -105,16 +105,8 @@ def change_text(text:str):
 #stop
 @bot.command()
 async def stop(msg,mode=0):
-    await msg.reply("stop!")
-    if mode==0:
-        sys.stdout.flush()
-        os.execv(sys.argv[0], sys.argv)
-    elif mode==1:
-        os.system('python3 update.py')
-        sys.stdout.flush()
-        os.execv(sys.argv[0], sys.argv)
-    elif mode==2:
-        exit()
+    await msg.reply("stop!")'
+    exit()
 #event
 @bot.event
 async def on_ready():
