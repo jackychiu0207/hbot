@@ -273,7 +273,7 @@ def embed_m(data:dict,lang):
                                                     if otd["dbf_id"]!=data["dbfId"]:
                                                         text+="等級"+str(otd["tier"])+":"+str(otd["dbf_id"])+"\n"
                                                         options_e.append(SelectOption(label="等級"+str(otd["tier"]),value=str(otd["dbf_id"]),description=str(otd["dbf_id"])))
-                                                select=Select(placeholder="該技能其他等級",options=options_p,min_values=1,max_values=1)
+                                                select=Select(placeholder="該裝備其他等級",options=options_e,min_values=1,max_values=1)
                                                 select.callback=select_new_embed
                                                 view.add_item(select)
                                             button=Button(style=ButtonStyle.success,label="查看傭兵",custom_id=str(ownerdata['dbfId']))
