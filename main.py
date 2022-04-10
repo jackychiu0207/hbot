@@ -150,7 +150,6 @@ def embed_bg(data:dict,lang):
     view=View()
     title=data['name'][lang]
     text=""
-    if 'text' in data:text+=change_text(data["text"][lang])+"\n\n"
     imgurl=f"https://art.hearthstonejson.com/v1/render/latest/{lang}/512x/"+data["id"]+".png"
     cardview=f"https://playhearthstone.com/battlegrounds/"+str(data["dbfId"])
     token=get_token()
@@ -661,8 +660,6 @@ async def deck(msg,deckcode=None,deckname=None,lang="zhTW"):
             else:
                 await msg.reply(f"{deckcode}\n# 若要使用此套牌，請先複製此訊息，然後在爐石戰記中建立一副新的套牌")
         else:await msg.reply("語系錯誤!全部的語系:\n"+",".join(langlist))
-
-
 
 
 
