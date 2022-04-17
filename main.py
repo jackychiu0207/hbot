@@ -10,7 +10,6 @@ from hearthstone.enums import FormatType
 import urllib.request
 import os
 import wget
-import sys
 
 intents=discord.Intents.all()
 
@@ -369,6 +368,7 @@ async def id(msg,cardid=None,lang="zhTW"):
         await msg.reply("※不推薦新手使用該指令\n該指令使用方法:\"t!id dbfId或id 語言(選填)\"\n例子1(使用dbfId):`t!id 38833`\n例子2(使用id):`t!id OG_272`")
     else:
         if lang in langlist:
+            waitmsg=await msg.reply("正在問哈斯‧石釀……")
             find=False
             if cardid.isdigit() is True:
                 for data in cardlib:
@@ -389,6 +389,7 @@ async def id(msg,cardid=None,lang="zhTW"):
                     await msg.reply(embed=embed,view=view)
                 else:await msg.reply(embed=embed_n(data,lang))
             else:await msg.reply("查無此卡!")
+            await waitmsg.delete()
         else:await msg.reply("語系錯誤!全部的語系:\n"+",".join(langlist))
 
 @bot.command()
@@ -397,6 +398,7 @@ async def card(msg,cardname=None,lang="zhTW"):
         await msg.reply("空格請用下滑線\'_\'代替\n該指令使用方法:\"t!card 卡牌名稱 語言(選填)\"\n例子:`t!card 暮光召喚師`")
     else:
         if lang in langlist:
+            waitmsg=await msg.reply("正在問哈斯‧石釀……")
             cardname=cardname.replace('_',' ')
             find=[]
             for data in cardlib:
@@ -466,6 +468,7 @@ async def card(msg,cardname=None,lang="zhTW"):
                 view=View()
                 view.add_item(select)
                 await msg.reply("選擇你想找的卡牌",view=view)
+            await waitmsg.delete()
         else:await msg.reply("語系錯誤!全部的語系:\n"+",".join(langlist))
 
 
@@ -476,6 +479,7 @@ async def merc(msg,cardname=None,lang="zhTW"):
         await msg.reply("該指令使用方法:\"t!merc 傭兵、裝備、技能名稱 語言(選填)\"\n例子1(傭兵):`t!merc 餅乾大廚`\n例子2(裝備):`t!merc 養好的鍋子`\n例子3(技能):`t!merc 魚肉大餐`")
     else:
         if lang in langlist:
+            waitmsg=await msg.reply("正在問神秘陌生人……")
             cardname=cardname.replace('_',' ')
             find=[]
             for data in cardlib:
@@ -525,6 +529,7 @@ async def merc(msg,cardname=None,lang="zhTW"):
                 view=View()
                 view.add_item(select)
                 await msg.reply("選擇你想找的卡牌",view=view)
+            await waitmsg.delete()
         else:await msg.reply("語系錯誤!全部的語系:\n"+",".join(langlist))
 
 @bot.command()
@@ -533,6 +538,7 @@ async def bg(msg,cardname=None,lang="zhTW"):
         await msg.reply("該指令使用方法:\"t!bg 戰場卡牌 語言(選填)\"\n例子:`t!bg 餅乾大廚`")
     else:
         if lang in langlist:
+            waitmsg=await msg.reply("正在問鮑伯……")
             cardname=cardname.replace('_',' ')
             find=[]
             for data in cardlib:
@@ -583,6 +589,7 @@ async def bg(msg,cardname=None,lang="zhTW"):
                 view=View()
                 view.add_item(select)
                 await msg.reply("選擇你想找的卡牌",view=view)
+            await waitmsg.delete()
         else:await msg.reply("語系錯誤!全部的語系:\n"+",".join(langlist))
 
 def deck_embed(msg,deckcode,deckname,lang,m):
@@ -653,17 +660,19 @@ async def deck(msg,deckcode=None,deckname=None,lang="zhTW"):
         await msg.reply("該指令使用方法:\"t!deck 牌組代碼 牌組名稱(選填) 語言(選填)\"\n例子1(無套牌名稱):\n`t!deck AAEBAaIHDpoC+AfpEZfBAt/jArvvAuvwAoSmA6rLA4/OA/bWA4PkA72ABJWfBAi0AcQB7QL1uwLi3QPn3QOS5AP+7gMA`\n例子2(有套牌名稱):\n`t!deck AAEBAaIHDpoC+AfpEZfBAt/jArvvAuvwAoSmA6rLA4/OA/bWA4PkA72ABJWfBAi0AcQB7QL1uwLi3QPn3QOS5AP+7gMA 無限潛行`")
     else:
         if lang in langlist:
+            waitmsg=await msg.reply("正在問地精們……")
             embed,view=deck_embed(msg,deckcode,deckname,lang,0)
             await msg.reply(embed=embed,view=view)
             if deckname!=None:
                 await msg.reply(f"###{deckname}\n{deckcode}\n# 若要使用此套牌，請先複製此訊息，然後在爐石戰記中建立一副新的套牌")
             else:
                 await msg.reply(f"{deckcode}\n# 若要使用此套牌，請先複製此訊息，然後在爐石戰記中建立一副新的套牌")
+            await waitmsg.delete()
         else:await msg.reply("語系錯誤!全部的語系:\n"+",".join(langlist))
 
 
 
-DCTOKEN=env['DISCORD_BOT_SECRET']
+DCTOKEN=env['DCTOKEN']
 #loop
 if __name__=="__main__":
     bot.run(DCTOKEN)
