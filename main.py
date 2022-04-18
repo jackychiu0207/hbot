@@ -445,6 +445,7 @@ async def card(msg,cardname=None,lang="zhTW"):
                     options.append(SelectOption(label=f'{data["name"][lang]}({data["dbfId"]},{data["id"]})',value=str(i),description=text))
                 select=Select(min_values=1,max_values=1,options=options)
                 async def select_callback(interaction):
+                    waitmsg=await msg.reply("正在問哈斯‧石釀……")
                     if int(dict(interaction.data)['values'][0])==-1:
                         await interaction.response.edit_message(content="已發送至私人訊息",view=None)
                         for data in find:
@@ -464,6 +465,7 @@ async def card(msg,cardname=None,lang="zhTW"):
                             embed,view=embed_bg(find[int(dict(interaction.data)['values'][0])],lang)
                             await interaction.followup.edit_message(interaction.message.id,content="",embed=embed,view=view)
                         else:await interaction.followup.edit_message(interaction.message.id,content="",embed=embed_n(find[int(dict(interaction.data)['values'][0])],lang),view=None)
+                    await waitmsg.delete()
                 select.callback=select_callback
                 view=View()
                 view.add_item(select)
@@ -516,6 +518,7 @@ async def merc(msg,cardname=None,lang="zhTW"):
                     options.append(SelectOption(label=f'{data["name"][lang]}({data["dbfId"]},{data["id"]})',value=str(i),description=text))
                 select=Select(min_values=1,max_values=1,options=options)
                 async def select_callback(interaction):
+                    waitmsg=await msg.reply("正在問神秘陌生人……")
                     if int(dict(interaction.data)['values'][0])==-1:
                         await interaction.response.edit_message(content="已發送至私人訊息",view=None)
                         for data in find:
@@ -525,6 +528,7 @@ async def merc(msg,cardname=None,lang="zhTW"):
                         await interaction.response.defer()
                         embed,view=embed_m(find[int(dict(interaction.data)['values'][0])],lang)
                         await interaction.followup.edit_message(interaction.message.id,content="",embed=embed,view=view)
+                    await waitmsg.delete()
                 select.callback=select_callback
                 view=View()
                 view.add_item(select)
@@ -576,6 +580,7 @@ async def bg(msg,cardname=None,lang="zhTW"):
                     options.append(SelectOption(label=f'{data["name"][lang]}({data["dbfId"]},{data["id"]})',value=str(i),description=text))
                 select=Select(min_values=1,max_values=1,options=options)
                 async def select_callback(interaction):
+                    waitmsg=await msg.reply("正在問鮑伯……")
                     if int(dict(interaction.data)['values'][0])==-1:
                         await interaction.response.edit_message(content="已發送至私人訊息",view=None)
                         for data in find:
@@ -585,6 +590,7 @@ async def bg(msg,cardname=None,lang="zhTW"):
                         await interaction.response.defer()
                         embed,view=embed_bg(find[int(dict(interaction.data)['values'][0])],lang)
                         await interaction.followup.edit_message(interaction.message.id,content="",embed=embed,view=view)
+                    await waitmsg.delete()
                 select.callback=select_callback
                 view=View()
                 view.add_item(select)
