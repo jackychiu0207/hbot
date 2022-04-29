@@ -1,6 +1,6 @@
 from pydub import AudioSegment
 import discord
-from discord import Message
+from discord import File
 from discord.ext import commands
 from discord.ui import Button,View,Select
 from discord import SelectOption
@@ -123,7 +123,7 @@ async def get_audio(interaction):
     await interaction.response.defer()
     audioname=dict(interaction.data)['custom_id'].split(",")
     if len(audioname)==1:
-        await interaction.followup.send(file="audiofile/"+audioname[0].split(".")[0]+".wav")
+        await interaction.followup.send(file=File("audiofile/"+audioname[0].split(".")[0]+".wav"))
     else:
         out=AudioSegment.empty().silent(duration=100000)
         def detect_leading_silence(sound, silence_threshold=-50.0, chunk_size=10):
@@ -139,7 +139,7 @@ async def get_audio(interaction):
         duration = len(out)    
         out = out[start_trim:duration-end_trim]
         out.export("audio.wav",format="wav")
-        await interaction.followup.send(file="audio.wav")
+        await interaction.followup.send(file=File("audio.wav"))
 
 async def audiobtn_callback(interaction):
     await interaction.response.defer()
