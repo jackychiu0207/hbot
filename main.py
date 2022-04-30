@@ -125,7 +125,7 @@ async def on_command_error(ctx,error):
 
 async def get_audio(interaction):
     await interaction.response.defer()
-    audioname=audiolib[dict(interaction.data)['values'][0].split(",")[0]]["audio"][dict(interaction.data)['values'][0].split(",")[1]]
+    audioname=audiolib[int(dict(interaction.data)['values'][0].split(",")[0])]["audio"][dict(interaction.data)['values'][0].split(",")[1]]
     if len(audioname)==1:
         try:
             await interaction.followup.send(file=File("audiofile/"+audioname[0].split(".")[0]+".wav"))
