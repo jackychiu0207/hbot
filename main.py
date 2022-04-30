@@ -155,10 +155,10 @@ async def audiobtn_callback(interaction:discord.Interaction):
     await interaction.response.defer()
     view=View()
     options=[]
-    for data in audiolib:
+    for i,data in enumerate(audiolib):
         if data["dbfId"]==int(dict(interaction.data)['custom_id']):
             if "audio" in data:
-                for i,name in enumerate(data["audio"]):
+                for name in data["audio"]:
                     if "BASIC_PLAY" == name.upper():options.append(SelectOption(label="入場",description=name,value=str(i)+","+name))
                     elif "BASIC_ATTACK" == name.upper():options.append(SelectOption(label="攻擊",description=name,value=str(i)+","+name))
                     elif "BASIC_DEATH" == name.upper():options.append(SelectOption(label="死亡",description=name,value=str(i)+","+name))
