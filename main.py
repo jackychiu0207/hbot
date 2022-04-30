@@ -38,8 +38,10 @@ def getfile():
     file.close()
     try:
         os.remove('group.json')
+        os.remove('audio.json')
     except:pass
     wget.download('https://raw.githubusercontent.com/jackychiu0207/hbot/main/group.json',"group.json")
+    wget.download('https://raw.githubusercontent.com/Zero-to-Heroes/hs-reference-data/master/src/cards/cards_zhTW.json',"audio.json")
 
 def openfile():
     global cardlib,cardlibm,group,audiolib
@@ -60,9 +62,11 @@ async def reload(msg):
         cardlibm.close()
         cardlib.close()
         group.close()
+        audiolib.close()
         os.remove('cards.json')
         os.remove('mercenaries.json')
         os.remove('group.json')
+        os.remove('audio.json')
     except:
         pass
     getfile()
@@ -121,9 +125,12 @@ async def on_command_error(ctx,error):
 
 async def get_audio(interaction):
     await interaction.response.defer()
-    audioname=dict(interaction.data)['custom_id'].split(",")
+    audioname=dict(interaction.data)['values'][0].split(",")
     if len(audioname)==1:
-        await interaction.followup.send(file=File("audiofile/"+audioname[0].split(".")[0]+".wav"))
+        try:
+            await interaction.followup.send(file=File("audiofile/"+audioname[0].split(".")[0]+".wav"))
+        except:
+            await interaction.followup.send("尚無該語音檔案")
     else:
         out=AudioSegment.empty().silent(duration=100000)
         def detect_leading_silence(sound, silence_threshold=-50.0, chunk_size=10):
@@ -132,34 +139,89 @@ async def get_audio(interaction):
             while sound[trim_ms:trim_ms+chunk_size].dBFS < silence_threshold and trim_ms < len(sound):
                 trim_ms += chunk_size
             return trim_ms
-        for name in audioname:
-            out=out.overlay(AudioSegment.from_wav("audiofile/"+name.split(".")[0]+".wav"))
+        try:
+            for name in audioname:
+                out=out.overlay(AudioSegment.from_wav("audiofile/"+name.split(".")[0]+".wav"))
+        except:await interaction.followup.send("尚無該語音檔案")
         start_trim = detect_leading_silence(out)
         end_trim = detect_leading_silence(out.reverse())
         duration = len(out)    
         out = out[start_trim:duration-end_trim]
-        out.export("audio.wav",format="wav")
-        await interaction.followup.send(file=File("audio.wav"))
+        out.export(audioname[0].split(".")[0]+".wav",format="wav")
+        await interaction.followup.send(file=File(audioname[0].split(".")[0]+".wav"))
+        os.remove(audioname[0].split(".")[0]+".wav")
 
-async def audiobtn_callback(interaction):
+async def audiobtn_callback(interaction:discord.Interaction):
     await interaction.response.defer()
     view=View()
+    options=[]
     for data in audiolib:
         if data["dbfId"]==int(dict(interaction.data)['custom_id']):
             if "audio" in data:
-                if "BASIC_play" in data["audio"]:
-                    button=Button(style=ButtonStyle.success,label="入場語音",custom_id=",".join(data["audio"]["BASIC_play"]))
-                    button.callback=get_audio
-                    view.add_item(button)
-                if "BASIC_attack" in data["audio"]:
-                    button=Button(style=ButtonStyle.success,label="攻擊語音",custom_id=",".join(data["audio"]["BASIC_attack"]))
-                    button.callback=get_audio
-                    view.add_item(button)
-                if "BASIC_death" in data["audio"]:
-                    button=Button(style=ButtonStyle.success,label="死亡語音",custom_id=",".join(data["audio"]["BASIC_death"]))
-                    button.callback=get_audio
-                    view.add_item(button)
+                for name in data["audio"]:
+                    if "BASIC_play" == name:options.append(SelectOption(label="入場",description=name,value=",".join(data["audio"]["BASIC_play"])))
+                    elif "BASIC_attack" == name:options.append(SelectOption(label="攻擊",description=name,value=",".join(data["audio"]["BASIC_attack"])))
+                    elif "BASIC_death" == name:options.append(SelectOption(label="死亡",description=name,value=",".join(data["audio"]["BASIC_death"])))
+                    elif "CONCEDE" in name:options.append(SelectOption(label="投降",description=name,value=",".join(data["audio"][name])))
+                    elif "ERROR_FULL_MINIONS" in name:options.append(SelectOption(label="滿場",description=name,value=",".join(data["audio"][name])))
+                    elif "ERROR_GENERIC" in name:options.append(SelectOption(label="無法這麼做",description=name,value=",".join(data["audio"][name])))
+                    elif "ERROR_HAND_FULL" in name:options.append(SelectOption(label="爆牌",description=name,value=",".join(data["audio"][name])))
+                    elif "ERROR_I_ATTACKED" in name:options.append(SelectOption(label="我已經攻擊過了",description=name,value=",".join(data["audio"][name])))
+                    elif "ERROR_JUST_PLAYED" in name:options.append(SelectOption(label="手下還不能攻擊",description=name,value=",".join(data["audio"][name])))
+                    elif "ERROR_MINION_ATTACKED" in name:options.append(SelectOption(label="手下已經攻擊過了",description=name,value=",".join(data["audio"][name])))
+                    elif "ERROR_NEED_MANA" in name:options.append(SelectOption(label="我需要法力",description=name,value=",".join(data["audio"][name])))
+                    elif "ERROR_NEED_WEAPON" in name:options.append(SelectOption(label="我需要武器",description=name,value=",".join(data["audio"][name])))
+                    elif "ERROR_PLAY" in name:options.append(SelectOption(label="我無法打出這張牌",description=name,value=",".join(data["audio"][name])))
+                    elif "ERROR_STEALTH" in name:options.append(SelectOption(label="我無法指定潛行的目標",description=name,value=",".join(data["audio"][name])))
+                    elif "ERROR_TARGET" in name:options.append(SelectOption(label="我無法指定那個目標",description=name,value=",".join(data["audio"][name])))
+                    elif "ERROR_TAUNT" in name:options.append(SelectOption(label="必須先攻擊有嘲諷的手下",description=name,value=",".join(data["audio"][name])))
+                    elif "FIRE_FESTIVAL" in name:options.append(SelectOption(label="仲夏火焰節快樂",description=name,value=",".join(data["audio"][name])))
+                    elif "LUNAR_NEW_YEAR" in name:options.append(SelectOption(label="新春愉快",description=name,value=",".join(data["audio"][name])))
+                    elif "GREETINGS_RESPONSE" in name:options.append(SelectOption(label="你好(鏡像)",description=name,value=",".join(data["audio"][name])))
+                    elif "GREETINGS" in name:options.append(SelectOption(label="你好",description=name,value=",".join(data["audio"][name])))
+                    elif "HALLOWS_END" in name:options.append(SelectOption(label="萬鬼節快樂",description=name,value=",".join(data["audio"][name])))
+                    elif "LOW_CARDS" in name:options.append(SelectOption(label="我快沒有牌了",description=name,value=",".join(data["audio"][name])))
+                    elif "MIRROR_START" in name:options.append(SelectOption(label="開場(鏡像)",description=name,value=",".join(data["audio"][name])))
+                    elif "NOBLEGARDEN" in name:options.append(SelectOption(label="歡慶貴族花園節",description=name,value=",".join(data["audio"][name])))
+                    elif "NO_CARDS" in name:options.append(SelectOption(label="我沒有牌了",description=name,value=",".join(data["audio"][name])))
+                    elif "OOPS" in name:options.append(SelectOption(label="唉呀",description=name,value=",".join(data["audio"][name])))
+                    elif "PIRATE_DAY" in name:options.append(SelectOption(label="海盜節快樂",description=name,value=",".join(data["audio"][name])))
+                    elif "SORRY" in name:options.append(SelectOption(label="抱歉",description=name,value=",".join(data["audio"][name])))
+                    elif "START" in name:options.append(SelectOption(label="開場",description=name,value=",".join(data["audio"][name])))
+                    elif "THANKS" in name:options.append(SelectOption(label="謝謝",description=name,value=",".join(data["audio"][name])))
+                    elif "THINK1" in name:options.append(SelectOption(label="思考1",description=name,value=",".join(data["audio"][name])))
+                    elif "THINK2" in name:options.append(SelectOption(label="思考2",description=name,value=",".join(data["audio"][name])))
+                    elif "THINK3" in name:options.append(SelectOption(label="思考3",description=name,value=",".join(data["audio"][name])))
+                    elif "THREATEN" in name:options.append(SelectOption(label="威脅",description=name,value=",".join(data["audio"][name])))
+                    elif "TIMER" in name:options.append(SelectOption(label="時間快不夠了",description=name,value=",".join(data["audio"][name])))
+                    elif "WELL_PLAYED" in name:options.append(SelectOption(label="玩得不錯",description=name,value=",".join(data["audio"][name])))
+                    elif "WINTERVEIL_GREETINGS" in name:options.append(SelectOption(label="冬幕節快樂",description=name,value=",".join(data["audio"][name])))
+                    elif "WOW" in name:options.append(SelectOption(label="厲害",description=name,value=",".join(data["audio"][name])))
+                    elif "YEAR_06" in name:options.append(SelectOption(label="新年快樂",description=name,value=",".join(data["audio"][name])))
+                    else:options.append(SelectOption(label=name,description=name,value=",".join(data["audio"][name])))
+                if len(options)<=25:
+                    select=Select(placeholder="選擇語音",options=options,min_values=1,max_values=1)
+                    select.callback=get_audio
+                    view.add_item(select)
+                elif len(options)>25 and len(options)<=50:
+                    select1=Select(placeholder="選擇語音",options=options[:25],min_values=1,max_values=1)
+                    select2=Select(placeholder="選擇語音",options=options[25:],min_values=1,max_values=1)
+                    select1.callback=get_audio
+                    view.add_item(select1)
+                    select2.callback=get_audio
+                    view.add_item(select2)
+                elif len(options)>25 and len(options)<=50:
+                    select1=Select(placeholder="選擇語音",options=options[:25],min_values=1,max_values=1)
+                    select2=Select(placeholder="選擇語音",options=options[25:50],min_values=1,max_values=1)
+                    select3=Select(placeholder="選擇語音",options=options[50:],min_values=1,max_values=1)
+                    select1.callback=get_audio
+                    view.add_item(select1)
+                    select2.callback=get_audio
+                    view.add_item(select2)
+                    select3.callback=get_audio
+                    view.add_item(select3)
                 await interaction.followup.send("選擇語音",view=view)
+            else:await interaction.followup.send("抱歉，找不到任何語音：(")
     
 #cmds
 def embed_n(data:dict,lang:str):
@@ -178,10 +240,9 @@ def embed_n(data:dict,lang:str):
     embed = discord.Embed(title=title,url=cardview,description=text, color=0xff0000)
     embed.set_image(url=imgurl)
     embed.set_footer(text=str(data["dbfId"])+","+data["id"])
-    if data["type"]=="MINION":
-        audiobtn=Button(style=ButtonStyle.success,label="查看語音(繁中)",custom_id=str(data["dbfId"]))
-        audiobtn.callback=audiobtn_callback
-        view.add_item(audiobtn)
+    audiobtn=Button(style=ButtonStyle.success,label="查看語音(繁中)",custom_id=str(data["dbfId"]))
+    audiobtn.callback=audiobtn_callback
+    view.add_item(audiobtn)
     return embed,view
 def embed_bg(data:dict,lang):
 #    async def select_new_embed(interaction):
