@@ -158,80 +158,81 @@ async def audiobtn_callback(interaction:discord.Interaction):
     for i,data in enumerate(audiolib):
         if data["dbfId"]==int(dict(interaction.data)['custom_id']):
             if "audio" in data:
-                for name in data["audio"]:
-                    if "BASIC_PLAY" == name.upper():options.append(SelectOption(label="入場",description=name,value=str(i)+","+name))
-                    elif "" == name:options.append(SelectOption(label="被選中",description=name,value=str(i)+","+name))
-                    elif "BASIC_ATTACK" == name.upper():options.append(SelectOption(label="攻擊",description=name,value=str(i)+","+name))
-                    elif "BASIC_DEATH" == name.upper():options.append(SelectOption(label="死亡",description=name,value=str(i)+","+name))
-                    elif "CONCEDE" in name.upper():options.append(SelectOption(label="投降",description=name,value=str(i)+","+name))
-                    elif "ERROR_FULL_MINIONS" in name.upper():options.append(SelectOption(label="滿場",description=name,value=str(i)+","+name))
-                    elif "ERROR_GENERIC" in name.upper():options.append(SelectOption(label="無法這麼做",description=name,value=str(i)+","+name))
-                    elif "ERROR_HAND_FULL" in name.upper():options.append(SelectOption(label="爆牌",description=name,value=str(i)+","+name))
-                    elif "ERROR_I_ATTACKED" in name.upper():options.append(SelectOption(label="我已經攻擊過了",description=name,value=str(i)+","+name))
-                    elif "ERROR_JUST_PLAYED" in name.upper():options.append(SelectOption(label="那個手下還不能攻擊",description=name,value=str(i)+","+name))
-                    elif "ERROR_SUMMON_SICKNESS" in name.upper():options.append(SelectOption(label="那個手下還不能攻擊",description=name,value=str(i)+","+name))
-                    elif "ERROR_MINION_ATTACKED" in name.upper():options.append(SelectOption(label="手下已經攻擊過了",description=name,value=str(i)+","+name))
-                    elif "ERROR_NEED_MANA" in name.upper():options.append(SelectOption(label="我需要法力",description=name,value=str(i)+","+name))
-                    elif "ERROR_NEED_WEAPON" in name.upper():options.append(SelectOption(label="我需要武器",description=name,value=str(i)+","+name))
-                    elif "ERROR_PLAY" in name.upper():options.append(SelectOption(label="我無法打出這張牌",description=name,value=str(i)+","+name))
-                    elif "ERROR_STEALTH" in name.upper():options.append(SelectOption(label="我無法指定潛行的目標",description=name,value=str(i)+","+name))
-                    elif "PICKED" == name.upper():options.append(SelectOption(label="被選中",description=name,value=str(i)+","+name))
-                    elif "ERROR_TARGET" in name.upper():options.append(SelectOption(label="我無法指定那個目標",description=name,value=str(i)+","+name))
-                    elif "ERROR_TAUNT" in name.upper():options.append(SelectOption(label="必須先攻擊有嘲諷的手下",description=name,value=str(i)+","+name))
-                    elif "FIRE_FESTIVAL" in name.upper():options.append(SelectOption(label="仲夏火焰節快樂",description=name,value=str(i)+","+name))
-                    elif "LUNAR_NEW_YEAR" in name.upper():options.append(SelectOption(label="新春愉快",description=name,value=str(i)+","+name))
-                    elif "GREETINGS_RESPONSE" in name.upper():options.append(SelectOption(label="你好(鏡像)",description=name,value=str(i)+","+name))
-                    elif "GREETINGS" in name.upper():options.append(SelectOption(label="你好",description=name,value=str(i)+","+name))
-                    elif "HALLOWS_END" in name.upper():options.append(SelectOption(label="萬鬼節快樂",description=name,value=str(i)+","+name))
-                    elif "HALLOWEEN" in name.upper():options.append(SelectOption(label="萬鬼節快樂",description=name,value=str(i)+","+name))
-                    elif "LOW_CARDS" in name.upper():options.append(SelectOption(label="我快沒有牌了",description=name,value=str(i)+","+name))
-                    elif "LOWCARDS" in name.upper():options.append(SelectOption(label="我快沒有牌了",description=name,value=str(i)+","+name))
-                    elif "MIRROR_START" in name.upper():options.append(SelectOption(label="開場(鏡像)",description=name,value=str(i)+","+name))
-                    elif "NOBLEGARDEN" in name.upper():options.append(SelectOption(label="歡慶貴族花園節",description=name,value=str(i)+","+name))
-                    elif "NO_CARDS" in name.upper():options.append(SelectOption(label="我沒有牌了",description=name,value=str(i)+","+name))
-                    elif "NOCARDS" in name.upper():options.append(SelectOption(label="我沒有牌了",description=name,value=str(i)+","+name))
-                    elif "OOPS" in name.upper():options.append(SelectOption(label="唉呀",description=name,value=str(i)+","+name))
-                    elif "PIRATE_DAY" in name.upper():options.append(SelectOption(label="海盜節快樂",description=name,value=str(i)+","+name))
-                    elif "SORRY" in name.upper():options.append(SelectOption(label="抱歉",description=name,value=str(i)+","+name))
-                    elif "START" in name.upper():options.append(SelectOption(label="開場",description=name,value=str(i)+","+name))
-                    elif "THANKS" in name.upper():options.append(SelectOption(label="謝謝",description=name,value=str(i)+","+name))
-                    elif "THINK1" in name.upper():options.append(SelectOption(label="思考1",description=name,value=str(i)+","+name))
-                    elif "THINK2" in name.upper():options.append(SelectOption(label="思考2",description=name,value=str(i)+","+name))
-                    elif "THINK3" in name.upper():options.append(SelectOption(label="思考3",description=name,value=str(i)+","+name))
-                    elif "THINKING_1" in name.upper():options.append(SelectOption(label="思考1",description=name,value=str(i)+","+name))
-                    elif "THINKING_2" in name.upper():options.append(SelectOption(label="思考2",description=name,value=str(i)+","+name))
-                    elif "THINKING_3" in name.upper():options.append(SelectOption(label="思考3",description=name,value=str(i)+","+name))
-                    elif "THREATEN" in name.upper():options.append(SelectOption(label="威脅",description=name,value=str(i)+","+name))
-                    elif "TIME" in name.upper():options.append(SelectOption(label="時間快不夠了",description=name,value=str(i)+","+name))
-                    elif "WELL_PLAYED" in name.upper():options.append(SelectOption(label="玩得不錯",description=name,value=str(i)+","+name))
-                    elif "WINTERVEIL_GREETINGS" in name.upper():options.append(SelectOption(label="冬幕節快樂",description=name,value=str(i)+","+name))
-                    elif "HOLIDAYS" in name.upper():options.append(SelectOption(label="冬幕節快樂",description=name,value=str(i)+","+name))
-                    elif "WOW" in name.upper():options.append(SelectOption(label="厲害",description=name,value=str(i)+","+name))
-                    elif "YEAR" in name.upper():options.append(SelectOption(label="新年快樂",description=name,value=str(i)+","+name))
-                    else:options.append(SelectOption(label=name,description=name,value=str(i)+","+name))
-                if len(options)<=25:
-                    select=Select(placeholder="選擇語音",options=options,min_values=1,max_values=1)
-                    select.callback=get_audio
-                    view.add_item(select)
-                elif len(options)>25 and len(options)<=50:
-                    select1=Select(placeholder="選擇語音",options=options[:25],min_values=1,max_values=1)
-                    select2=Select(placeholder="選擇語音",options=options[25:],min_values=1,max_values=1)
-                    select1.callback=get_audio
-                    view.add_item(select1)
-                    select2.callback=get_audio
-                    view.add_item(select2)
-                elif len(options)>25 and len(options)<=50:
-                    select1=Select(placeholder="選擇語音",options=options[:25],min_values=1,max_values=1)
-                    select2=Select(placeholder="選擇語音",options=options[25:50],min_values=1,max_values=1)
-                    select3=Select(placeholder="選擇語音",options=options[50:],min_values=1,max_values=1)
-                    select1.callback=get_audio
-                    view.add_item(select1)
-                    select2.callback=get_audio
-                    view.add_item(select2)
-                    select3.callback=get_audio
-                    view.add_item(select3)
-                await interaction.followup.send("選擇語音",view=view)
-            if len(options)==0:await interaction.followup.send("抱歉，找不到任何語音：(")
+                if len(data["audio"])==0:await interaction.followup.send("抱歉，找不到任何語音：(")
+                else:
+                    for name in data["audio"]:
+                        if "BASIC_PLAY" == name.upper():options.append(SelectOption(label="入場",description=name,value=str(i)+","+name))
+                        elif "" == name:options.append(SelectOption(label="被選中",description=name,value=str(i)+","+name))
+                        elif "BASIC_ATTACK" == name.upper():options.append(SelectOption(label="攻擊",description=name,value=str(i)+","+name))
+                        elif "BASIC_DEATH" == name.upper():options.append(SelectOption(label="死亡",description=name,value=str(i)+","+name))
+                        elif "CONCEDE" in name.upper():options.append(SelectOption(label="投降",description=name,value=str(i)+","+name))
+                        elif "ERROR_FULL_MINIONS" in name.upper():options.append(SelectOption(label="滿場",description=name,value=str(i)+","+name))
+                        elif "ERROR_GENERIC" in name.upper():options.append(SelectOption(label="無法這麼做",description=name,value=str(i)+","+name))
+                        elif "ERROR_HAND_FULL" in name.upper():options.append(SelectOption(label="爆牌",description=name,value=str(i)+","+name))
+                        elif "ERROR_I_ATTACKED" in name.upper():options.append(SelectOption(label="我已經攻擊過了",description=name,value=str(i)+","+name))
+                        elif "ERROR_JUST_PLAYED" in name.upper():options.append(SelectOption(label="那個手下還不能攻擊",description=name,value=str(i)+","+name))
+                        elif "ERROR_SUMMON_SICKNESS" in name.upper():options.append(SelectOption(label="那個手下還不能攻擊",description=name,value=str(i)+","+name))
+                        elif "ERROR_MINION_ATTACKED" in name.upper():options.append(SelectOption(label="手下已經攻擊過了",description=name,value=str(i)+","+name))
+                        elif "ERROR_NEED_MANA" in name.upper():options.append(SelectOption(label="我需要法力",description=name,value=str(i)+","+name))
+                        elif "ERROR_NEED_WEAPON" in name.upper():options.append(SelectOption(label="我需要武器",description=name,value=str(i)+","+name))
+                        elif "ERROR_PLAY" in name.upper():options.append(SelectOption(label="我無法打出這張牌",description=name,value=str(i)+","+name))
+                        elif "ERROR_STEALTH" in name.upper():options.append(SelectOption(label="我無法指定潛行的目標",description=name,value=str(i)+","+name))
+                        elif "PICKED" == name.upper():options.append(SelectOption(label="被選中",description=name,value=str(i)+","+name))
+                        elif "ERROR_TARGET" in name.upper():options.append(SelectOption(label="我無法指定那個目標",description=name,value=str(i)+","+name))
+                        elif "ERROR_TAUNT" in name.upper():options.append(SelectOption(label="必須先攻擊有嘲諷的手下",description=name,value=str(i)+","+name))
+                        elif "FIRE_FESTIVAL" in name.upper():options.append(SelectOption(label="仲夏火焰節快樂",description=name,value=str(i)+","+name))
+                        elif "LUNAR_NEW_YEAR" in name.upper():options.append(SelectOption(label="新春愉快",description=name,value=str(i)+","+name))
+                        elif "GREETINGS_RESPONSE" in name.upper():options.append(SelectOption(label="你好(鏡像)",description=name,value=str(i)+","+name))
+                        elif "GREETINGS" in name.upper():options.append(SelectOption(label="你好",description=name,value=str(i)+","+name))
+                        elif "HALLOWS_END" in name.upper():options.append(SelectOption(label="萬鬼節快樂",description=name,value=str(i)+","+name))
+                        elif "HALLOWEEN" in name.upper():options.append(SelectOption(label="萬鬼節快樂",description=name,value=str(i)+","+name))
+                        elif "LOW_CARDS" in name.upper():options.append(SelectOption(label="我快沒有牌了",description=name,value=str(i)+","+name))
+                        elif "LOWCARDS" in name.upper():options.append(SelectOption(label="我快沒有牌了",description=name,value=str(i)+","+name))
+                        elif "MIRROR_START" in name.upper():options.append(SelectOption(label="開場(鏡像)",description=name,value=str(i)+","+name))
+                        elif "NOBLEGARDEN" in name.upper():options.append(SelectOption(label="歡慶貴族花園節",description=name,value=str(i)+","+name))
+                        elif "NO_CARDS" in name.upper():options.append(SelectOption(label="我沒有牌了",description=name,value=str(i)+","+name))
+                        elif "NOCARDS" in name.upper():options.append(SelectOption(label="我沒有牌了",description=name,value=str(i)+","+name))
+                        elif "OOPS" in name.upper():options.append(SelectOption(label="唉呀",description=name,value=str(i)+","+name))
+                        elif "PIRATE_DAY" in name.upper():options.append(SelectOption(label="海盜節快樂",description=name,value=str(i)+","+name))
+                        elif "SORRY" in name.upper():options.append(SelectOption(label="抱歉",description=name,value=str(i)+","+name))
+                        elif "START" in name.upper():options.append(SelectOption(label="開場",description=name,value=str(i)+","+name))
+                        elif "THANKS" in name.upper():options.append(SelectOption(label="謝謝",description=name,value=str(i)+","+name))
+                        elif "THINK1" in name.upper():options.append(SelectOption(label="思考1",description=name,value=str(i)+","+name))
+                        elif "THINK2" in name.upper():options.append(SelectOption(label="思考2",description=name,value=str(i)+","+name))
+                        elif "THINK3" in name.upper():options.append(SelectOption(label="思考3",description=name,value=str(i)+","+name))
+                        elif "THINKING_1" in name.upper():options.append(SelectOption(label="思考1",description=name,value=str(i)+","+name))
+                        elif "THINKING_2" in name.upper():options.append(SelectOption(label="思考2",description=name,value=str(i)+","+name))
+                        elif "THINKING_3" in name.upper():options.append(SelectOption(label="思考3",description=name,value=str(i)+","+name))
+                        elif "THREATEN" in name.upper():options.append(SelectOption(label="威脅",description=name,value=str(i)+","+name))
+                        elif "TIME" in name.upper():options.append(SelectOption(label="時間快不夠了",description=name,value=str(i)+","+name))
+                        elif "WELL_PLAYED" in name.upper():options.append(SelectOption(label="玩得不錯",description=name,value=str(i)+","+name))
+                        elif "WINTERVEIL_GREETINGS" in name.upper():options.append(SelectOption(label="冬幕節快樂",description=name,value=str(i)+","+name))
+                        elif "HOLIDAYS" in name.upper():options.append(SelectOption(label="冬幕節快樂",description=name,value=str(i)+","+name))
+                        elif "WOW" in name.upper():options.append(SelectOption(label="厲害",description=name,value=str(i)+","+name))
+                        elif "YEAR" in name.upper():options.append(SelectOption(label="新年快樂",description=name,value=str(i)+","+name))
+                        else:options.append(SelectOption(label=name,description=name,value=str(i)+","+name))
+                    if len(options)<=25:
+                        select=Select(placeholder="選擇語音",options=options,min_values=1,max_values=1)
+                        select.callback=get_audio
+                        view.add_item(select)
+                    elif len(options)>25 and len(options)<=50:
+                        select1=Select(placeholder="選擇語音",options=options[:25],min_values=1,max_values=1)
+                        select2=Select(placeholder="選擇語音",options=options[25:],min_values=1,max_values=1)
+                        select1.callback=get_audio
+                        view.add_item(select1)
+                        select2.callback=get_audio
+                        view.add_item(select2)
+                    elif len(options)>25 and len(options)<=50:
+                        select1=Select(placeholder="選擇語音",options=options[:25],min_values=1,max_values=1)
+                        select2=Select(placeholder="選擇語音",options=options[25:50],min_values=1,max_values=1)
+                        select3=Select(placeholder="選擇語音",options=options[50:],min_values=1,max_values=1)
+                        select1.callback=get_audio
+                        view.add_item(select1)
+                        select2.callback=get_audio
+                        view.add_item(select2)
+                        select3.callback=get_audio
+                        view.add_item(select3)
+                    await interaction.followup.send("選擇語音",view=view)
     
 #cmds
 def embed_n(data:dict,lang:str):
@@ -345,6 +346,9 @@ def embed_bg(data:dict,lang):
     embed = discord.Embed(title=title,url=cardview,description=text, color=0xff0000)
     embed.set_image(url=imgurl)
     embed.set_footer(text=str(data["dbfId"])+","+data["id"])
+    audiobtn=Button(style=ButtonStyle.success,label="查看語音(繁中)",custom_id=str(data["dbfId"]))
+    audiobtn.callback=audiobtn_callback
+    view.add_item(audiobtn)
     return embed,view
 
 def embed_m(data:dict,lang):
@@ -480,6 +484,9 @@ def embed_m(data:dict,lang):
     embed = discord.Embed(title=title,url=cardview,description=text, color=0xff0000)
     embed.set_image(url=imgurl)
     embed.set_footer(text=str(data["dbfId"])+","+data["id"])
+    audiobtn=Button(style=ButtonStyle.success,label="查看語音(繁中)",custom_id=str(data["dbfId"]))
+    audiobtn.callback=audiobtn_callback
+    view.add_item(audiobtn)
     return embed,view
 
 @bot.command()
