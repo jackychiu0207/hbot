@@ -142,14 +142,14 @@ async def get_audio(interaction):
         try:
             for name in audioname:
                 out=out.overlay(AudioSegment.from_wav("audiofile/"+name.split(".")[0]+".wav"))
+            start_trim = detect_leading_silence(out)
+            end_trim = detect_leading_silence(out.reverse())
+            duration = len(out)    
+            out = out[start_trim:duration-end_trim]
+            out.export(audioname[0].split(".")[0]+".wav",format="wav")
+            await interaction.followup.send(file=File(audioname[0].split(".")[0]+".wav"))
+            os.remove(audioname[0].split(".")[0]+".wav")
         except:await interaction.followup.send("尚無該語音檔案")
-        start_trim = detect_leading_silence(out)
-        end_trim = detect_leading_silence(out.reverse())
-        duration = len(out)    
-        out = out[start_trim:duration-end_trim]
-        out.export(audioname[0].split(".")[0]+".wav",format="wav")
-        await interaction.followup.send(file=File(audioname[0].split(".")[0]+".wav"))
-        os.remove(audioname[0].split(".")[0]+".wav")
 
 async def audiobtn_callback(interaction:discord.Interaction):
     await interaction.response.defer()
