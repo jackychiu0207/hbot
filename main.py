@@ -177,12 +177,14 @@ async def audiobtn_callback(interaction:discord.Interaction):
                         elif "ERROR_NEED_WEAPON" in name.upper():options.append(SelectOption(label="我需要武器",description=name,value=str(i)+","+name))
                         elif "ERROR_PLAY" in name.upper():options.append(SelectOption(label="我無法打出這張牌",description=name,value=str(i)+","+name))
                         elif "ERROR_STEALTH" in name.upper():options.append(SelectOption(label="我無法指定潛行的目標",description=name,value=str(i)+","+name))
-                        elif "PICKED" == name.upper():options.append(SelectOption(label="被選中",description=name,value=str(i)+","+name))
+                        elif "PICKED" in name.upper():options.append(SelectOption(label="被選中",description=name,value=str(i)+","+name))
                         elif "ERROR_TARGET" in name.upper():options.append(SelectOption(label="我無法指定那個目標",description=name,value=str(i)+","+name))
                         elif "ERROR_TAUNT" in name.upper():options.append(SelectOption(label="必須先攻擊有嘲諷的手下",description=name,value=str(i)+","+name))
                         elif "FIRE_FESTIVAL" in name.upper():options.append(SelectOption(label="仲夏火焰節快樂",description=name,value=str(i)+","+name))
                         elif "LUNAR_NEW_YEAR" in name.upper():options.append(SelectOption(label="新春愉快",description=name,value=str(i)+","+name))
                         elif "GREETINGS_RESPONSE" in name.upper():options.append(SelectOption(label="你好(鏡像)",description=name,value=str(i)+","+name))
+                        elif "MIRROR_GREETINGS" in name.upper():options.append(SelectOption(label="你好(鏡像)",description=name,value=str(i)+","+name))
+                        elif "WINTERVEIL_GREETINGS" in name.upper():options.append(SelectOption(label="冬幕節快樂",description=name,value=str(i)+","+name))
                         elif "GREETINGS" in name.upper():options.append(SelectOption(label="你好",description=name,value=str(i)+","+name))
                         elif "HALLOWS_END" in name.upper():options.append(SelectOption(label="萬鬼節快樂",description=name,value=str(i)+","+name))
                         elif "HALLOWEEN" in name.upper():options.append(SelectOption(label="萬鬼節快樂",description=name,value=str(i)+","+name))
@@ -203,10 +205,12 @@ async def audiobtn_callback(interaction:discord.Interaction):
                         elif "THINKING_1" in name.upper():options.append(SelectOption(label="思考1",description=name,value=str(i)+","+name))
                         elif "THINKING_2" in name.upper():options.append(SelectOption(label="思考2",description=name,value=str(i)+","+name))
                         elif "THINKING_3" in name.upper():options.append(SelectOption(label="思考3",description=name,value=str(i)+","+name))
+                        elif "THINKING_01" in name.upper():options.append(SelectOption(label="思考1",description=name,value=str(i)+","+name))
+                        elif "THINKING_02" in name.upper():options.append(SelectOption(label="思考2",description=name,value=str(i)+","+name))
+                        elif "THINKING_03" in name.upper():options.append(SelectOption(label="思考3",description=name,value=str(i)+","+name))
                         elif "THREATEN" in name.upper():options.append(SelectOption(label="威脅",description=name,value=str(i)+","+name))
                         elif "TIME" in name.upper():options.append(SelectOption(label="時間快不夠了",description=name,value=str(i)+","+name))
                         elif "WELL_PLAYED" in name.upper():options.append(SelectOption(label="玩得不錯",description=name,value=str(i)+","+name))
-                        elif "WINTERVEIL_GREETINGS" in name.upper():options.append(SelectOption(label="冬幕節快樂",description=name,value=str(i)+","+name))
                         elif "HOLIDAYS" in name.upper():options.append(SelectOption(label="冬幕節快樂",description=name,value=str(i)+","+name))
                         elif "WOW" in name.upper():options.append(SelectOption(label="厲害",description=name,value=str(i)+","+name))
                         elif "YEAR" in name.upper():options.append(SelectOption(label="新年快樂",description=name,value=str(i)+","+name))
@@ -547,23 +551,7 @@ async def card(msg,cardname=None,lang="zhTW"):
                 else:
                     embed,view=embed_n(find[0],lang)
                     await msg.reply(embed=embed,view=view)
-            elif len(find)>24:
-                async def callback_allcards(interaction):
-                  await interaction.response.edit_message(content="已發送至私人訊息",view=None)
-                  for data in find:
-                        if data["set"]=="LETTUCE":
-                            embed,view=embed_m(data,lang)
-                            await msg.author.send(embed=embed,view=view)
-                        elif data["set"]=="BATTLEGROUNDS":
-                            embed,view=embed_bg(data,lang)
-                            await msg.author.send(embed=embed,view=view)
-                        else:
-                            embed,view=embed_n(data,lang)
-                            await msg.author.send(embed=embed,view=view)
-                button=Button(style=ButtonStyle.success,label="發送所有卡牌至私人訊息")
-                button.callback=callback_allcards
-                view=View()
-                view.add_item(button)
+            elif len(find)>49:
                 await msg.reply("由於數量過多，請更改關鍵字縮小範圍。",view=view)
             else:
                 options=[]
@@ -573,7 +561,6 @@ async def card(msg,cardname=None,lang="zhTW"):
                     if 'text' in data:text=change_text(data["text"][lang]).replace("*","").replace("\n","").replace("[x]","")
                     if len(text)>95:text=text[0:94]+"..."
                     options.append(SelectOption(label=f'{data["name"][lang]}({data["dbfId"]},{data["id"]})',value=str(i),description=text))
-                select=Select(min_values=1,max_values=1,options=options)
                 async def select_callback(interaction):
                     if int(dict(interaction.data)['values'][0])==-1:
                         await interaction.response.edit_message(content="已發送至私人訊息",view=None)
@@ -598,9 +585,20 @@ async def card(msg,cardname=None,lang="zhTW"):
                         else:
                             embed,view=embed_n(find[int(dict(interaction.data)['values'][0])],lang)
                             await interaction.followup.edit_message(interaction.message.id,content="",embed=embed,view=view)
-                select.callback=select_callback
-                view=View()
-                view.add_item(select)
+                if len(options)<=25:
+                    select=Select(min_values=1,max_values=1,options=options)
+                    select.callback=select_callback
+                    view=View()
+                    view.add_item(select)
+                else:
+                    select1=Select(min_values=1,max_values=1,options=options[:25])
+                    select1.callback=select_callback
+                    view=View()
+                    view.add_item(select1)
+                    select2=Select(min_values=1,max_values=1,options=options[25:])
+                    select2.callback=select_callback
+                    view=View()
+                    view.add_item(select2)
                 await msg.reply("選擇你想找的卡牌",view=view)
         else:await msg.reply("語系錯誤!全部的語系:\n"+",".join(langlist))
 
@@ -627,16 +625,7 @@ async def merc(msg,cardname=None,lang="zhTW"):
             elif len(find)==1:
                 embed,view=embed_m(find[0],lang)
                 await msg.reply(embed=embed,view=view)
-            elif len(find)>24:
-                async def callback_allcards(interaction):
-                    await interaction.response.edit_message(content="已發送至私人訊息",view=None)
-                    for data in find:
-                            embed,view=embed_m(data,lang)
-                            await msg.author.send(embed=embed,view=view)
-                button=Button(style=ButtonStyle.success,label="發送所有卡牌至私人訊息")
-                button.callback=callback_allcards
-                view=View()
-                view.add_item(button)
+            elif len(find)>49:
                 await msg.reply("由於數量過多，請更改關鍵字縮小範圍。",view=view)
             else:
                 options=[]
@@ -646,7 +635,6 @@ async def merc(msg,cardname=None,lang="zhTW"):
                     if 'text' in data:text=change_text(data["text"][lang]).replace("*","").replace("[x]","")
                     if len(text)>95:text=text[0:94]+"..."
                     options.append(SelectOption(label=f'{data["name"][lang]}({data["dbfId"]},{data["id"]})',value=str(i),description=text))
-                select=Select(min_values=1,max_values=1,options=options)
                 async def select_callback(interaction):
                     if int(dict(interaction.data)['values'][0])==-1:
                         await interaction.response.edit_message(content="已發送至私人訊息",view=None)
@@ -657,9 +645,20 @@ async def merc(msg,cardname=None,lang="zhTW"):
                         await interaction.response.defer()
                         embed,view=embed_m(find[int(dict(interaction.data)['values'][0])],lang)
                         await interaction.followup.edit_message(interaction.message.id,content="",embed=embed,view=view)
-                select.callback=select_callback
-                view=View()
-                view.add_item(select)
+                if len(options)<=25:
+                    select=Select(min_values=1,max_values=1,options=options)
+                    select.callback=select_callback
+                    view=View()
+                    view.add_item(select)
+                else:
+                    select1=Select(min_values=1,max_values=1,options=options[:25])
+                    select1.callback=select_callback
+                    view=View()
+                    view.add_item(select1)
+                    select2=Select(min_values=1,max_values=1,options=options[25:])
+                    select2.callback=select_callback
+                    view=View()
+                    view.add_item(select2)
                 await msg.reply("選擇你想找的卡牌",view=view)
         else:await msg.reply("語系錯誤!全部的語系:\n"+",".join(langlist))
 
@@ -685,16 +684,7 @@ async def bg(msg,cardname=None,lang="zhTW"):
             elif len(find)==1:
                 embed,view=embed_bg(find[0],lang)
                 await msg.reply(embed=embed,view=view)
-            elif len(find)>24:
-                async def callback_allcards(interaction):
-                    await interaction.response.edit_message(content="已發送至私人訊息",view=None)
-                    for data in find:
-                            embed,view=embed_bg(data,lang)
-                            await msg.author.send(embed=embed,view=view)
-                button=Button(style=ButtonStyle.success,label="發送所有卡牌至私人訊息")
-                button.callback=callback_allcards
-                view=View()
-                view.add_item(button)
+            elif len(find)>49:
                 await msg.reply("由於數量過多，請更改關鍵字縮小範圍。",view=view)
             else:
                 options=[]
@@ -704,7 +694,6 @@ async def bg(msg,cardname=None,lang="zhTW"):
                     if 'text' in data:text=change_text(data["text"][lang]).replace("*","").replace("[x]","")
                     if len(text)>95:text=text[0:94]+"..."
                     options.append(SelectOption(label=f'{data["name"][lang]}({data["dbfId"]},{data["id"]})',value=str(i),description=text))
-                select=Select(min_values=1,max_values=1,options=options)
                 async def select_callback(interaction):
                     if int(dict(interaction.data)['values'][0])==-1:
                         await interaction.response.edit_message(content="已發送至私人訊息",view=None)
@@ -715,9 +704,20 @@ async def bg(msg,cardname=None,lang="zhTW"):
                         await interaction.response.defer()
                         embed,view=embed_bg(find[int(dict(interaction.data)['values'][0])],lang)
                         await interaction.followup.edit_message(interaction.message.id,content="",embed=embed,view=view)
-                select.callback=select_callback
-                view=View()
-                view.add_item(select)
+                if len(options)<=25:
+                    select=Select(min_values=1,max_values=1,options=options)
+                    select.callback=select_callback
+                    view=View()
+                    view.add_item(select)
+                else:
+                    select1=Select(min_values=1,max_values=1,options=options[:25])
+                    select1.callback=select_callback
+                    view=View()
+                    view.add_item(select1)
+                    select2=Select(min_values=1,max_values=1,options=options[25:])
+                    select2.callback=select_callback
+                    view=View()
+                    view.add_item(select2)
                 await msg.reply("選擇你想找的卡牌",view=view)
         else:await msg.reply("語系錯誤!全部的語系:\n"+",".join(langlist))
 
