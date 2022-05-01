@@ -531,6 +531,7 @@ async def card(msg,cardname=None,lang="zhTW"):
         if lang in langlist:
             cardname=cardname.replace('_',' ')
             find=[]
+            view=View()
             for data in cardlib:
                 if "type" in data:
                     if data["type"]!="ENCHANTMENT":
@@ -588,16 +589,13 @@ async def card(msg,cardname=None,lang="zhTW"):
                 if len(options)<=25:
                     select=Select(min_values=1,max_values=1,options=options)
                     select.callback=select_callback
-                    view=View()
                     view.add_item(select)
                 else:
                     select1=Select(min_values=1,max_values=1,options=options[:25])
                     select1.callback=select_callback
-                    view=View()
                     view.add_item(select1)
                     select2=Select(min_values=1,max_values=1,options=options[25:])
                     select2.callback=select_callback
-                    view=View()
                     view.add_item(select2)
                 await msg.reply("選擇你想找的卡牌",view=view)
         else:await msg.reply("語系錯誤!全部的語系:\n"+",".join(langlist))
@@ -612,6 +610,7 @@ async def merc(msg,cardname=None,lang="zhTW"):
         if lang in langlist:
             cardname=cardname.replace('_',' ')
             find=[]
+            view=View()
             for data in cardlib:
                 if "type" in data and "set" in data:
                     if data["type"]!="ENCHANTMENT" and data["set"]=="LETTUCE":
@@ -648,16 +647,13 @@ async def merc(msg,cardname=None,lang="zhTW"):
                 if len(options)<=25:
                     select=Select(min_values=1,max_values=1,options=options)
                     select.callback=select_callback
-                    view=View()
                     view.add_item(select)
                 else:
                     select1=Select(min_values=1,max_values=1,options=options[:25])
                     select1.callback=select_callback
-                    view=View()
                     view.add_item(select1)
                     select2=Select(min_values=1,max_values=1,options=options[25:])
                     select2.callback=select_callback
-                    view=View()
                     view.add_item(select2)
                 await msg.reply("選擇你想找的卡牌",view=view)
         else:await msg.reply("語系錯誤!全部的語系:\n"+",".join(langlist))
@@ -670,6 +666,7 @@ async def bg(msg,cardname=None,lang="zhTW"):
         if lang in langlist:
             cardname=cardname.replace('_',' ')
             find=[]
+            view=View()
             for data in cardlib:
                 if "type" in data and "set" in data:
                     if data["type"]!="ENCHANTMENT":
@@ -707,16 +704,13 @@ async def bg(msg,cardname=None,lang="zhTW"):
                 if len(options)<=25:
                     select=Select(min_values=1,max_values=1,options=options)
                     select.callback=select_callback
-                    view=View()
                     view.add_item(select)
                 else:
                     select1=Select(min_values=1,max_values=1,options=options[:25])
                     select1.callback=select_callback
-                    view=View()
                     view.add_item(select1)
                     select2=Select(min_values=1,max_values=1,options=options[25:])
                     select2.callback=select_callback
-                    view=View()
                     view.add_item(select2)
                 await msg.reply("選擇你想找的卡牌",view=view)
         else:await msg.reply("語系錯誤!全部的語系:\n"+",".join(langlist))
