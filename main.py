@@ -22,21 +22,21 @@ bot = commands.Bot(command_prefix="t!",help_command=None,intents=intents)
 classdict={"DEATHKNIGHT":"死亡騎士","DEMONHUNTER":"惡魔獵人","DREAM":"伊瑟拉","DRUID":"德魯伊","HUNTER":"獵人","INVALID":"未知/不適用職業","MAGE":"法師","NEUTRAL":"中立","PALADIN":"聖騎士","PRIEST":"牧師","ROGUE": 7,"SHAMAN":"薩滿","WARLOCK":"術士","WARRIOR":"戰士","WHIZBANG":"威茲幫"}
 langlist=["deDE","enUS","esES","esMX","frFR","itIT","jaJP","koKR","plPL","ptBR","ruRU","thTH","zhCN","zhTW"]
 def getfile():
-    url='https://api.hearthstonejson.com/v1/latest/all/cards.json'
-    req = urllib.request.Request(url, headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)'})
-    oper = urllib.request.urlopen(req)
-    data = oper.read()
-    file = open('cards.json','wb')
-    file.write(data)
-    file.close()
-    url='https://api.hearthstonejson.com/v1/latest/all/mercenaries.json'
-    req = urllib.request.Request(url, headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)'})
-    oper = urllib.request.urlopen(req)
-    data = oper.read()
-    file = open('mercenaries.json','wb')
-    file.write(data)
-    file.close()
     try:
+        url='https://api.hearthstonejson.com/v1/latest/all/cards.json'
+        req = urllib.request.Request(url, headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)'})
+        oper = urllib.request.urlopen(req)
+        data = oper.read()
+        file = open('cards.json','wb')
+        file.write(data)
+        file.close()
+        url='https://api.hearthstonejson.com/v1/latest/all/mercenaries.json'
+        req = urllib.request.Request(url, headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)'})
+        oper = urllib.request.urlopen(req)
+        data = oper.read()
+        file = open('mercenaries.json','wb')
+        file.write(data)
+        file.close()
         os.remove('group.json')
         os.remove('audio.json')
     except:pass
