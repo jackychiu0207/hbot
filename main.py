@@ -255,9 +255,10 @@ def embed_n(data:dict,lang:str):
     embed = discord.Embed(title=title,url=cardview,description=text, color=0xff0000)
     embed.set_image(url=imgurl)
     embed.set_footer(text=str(data["dbfId"])+","+data["id"])
-    audiobtn=Button(style=ButtonStyle.success,label="查看語音(繁中)",custom_id=str(data["dbfId"]))
-    audiobtn.callback=audiobtn_callback
-    view.add_item(audiobtn)
+    if data["type"]=="MINION" or data["type"]=="HERO":
+        audiobtn=Button(style=ButtonStyle.success,label="查看語音(繁中)",custom_id=str(data["dbfId"]))
+        audiobtn.callback=audiobtn_callback
+        view.add_item(audiobtn)
     return embed,view
 def embed_bg(data:dict,lang):
 #    async def select_new_embed(interaction):
@@ -350,9 +351,10 @@ def embed_bg(data:dict,lang):
     embed = discord.Embed(title=title,url=cardview,description=text, color=0xff0000)
     embed.set_image(url=imgurl)
     embed.set_footer(text=str(data["dbfId"])+","+data["id"])
-    audiobtn=Button(style=ButtonStyle.success,label="查看語音(繁中)",custom_id=str(data["dbfId"]))
-    audiobtn.callback=audiobtn_callback
-    view.add_item(audiobtn)
+    if data["type"]=="MINION" or data["type"]=="HERO":
+        audiobtn=Button(style=ButtonStyle.success,label="查看語音(繁中)",custom_id=str(data["dbfId"]))
+        audiobtn.callback=audiobtn_callback
+        view.add_item(audiobtn)
     return embed,view
 
 def embed_m(data:dict,lang):
@@ -488,9 +490,10 @@ def embed_m(data:dict,lang):
     embed = discord.Embed(title=title,url=cardview,description=text, color=0xff0000)
     embed.set_image(url=imgurl)
     embed.set_footer(text=str(data["dbfId"])+","+data["id"])
-    audiobtn=Button(style=ButtonStyle.success,label="查看語音(繁中)",custom_id=str(data["dbfId"]))
-    audiobtn.callback=audiobtn_callback
-    view.add_item(audiobtn)
+    if data["type"]=="MINION" or data["type"]=="HERO":
+        audiobtn=Button(style=ButtonStyle.success,label="查看語音(繁中)",custom_id=str(data["dbfId"]))
+        audiobtn.callback=audiobtn_callback
+        view.add_item(audiobtn)
     return embed,view
 
 @bot.command()
@@ -785,10 +788,6 @@ async def deck(msg,deckcode=None,deckname=None,lang="zhTW"):
         if lang in langlist:
             embed,view=deck_embed(msg,deckcode,deckname,lang,0)
             await msg.reply(embed=embed,view=view)
-            if deckname!=None:
-                await msg.reply(f"###{deckname}\n{deckcode}\n# 若要使用此套牌，請先複製此訊息，然後在爐石戰記中建立一副新的套牌")
-            else:
-                await msg.reply(f"{deckcode}\n# 若要使用此套牌，請先複製此訊息，然後在爐石戰記中建立一副新的套牌")
         else:await msg.reply("語系錯誤!全部的語系:\n"+",".join(langlist))
 
 
