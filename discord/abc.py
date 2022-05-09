@@ -25,6 +25,7 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 import copy
+import time
 import asyncio
 from datetime import datetime
 from typing import (
@@ -32,6 +33,7 @@ from typing import (
     AsyncIterator,
     Callable,
     Dict,
+    Iterable,
     List,
     Optional,
     TYPE_CHECKING,
@@ -81,7 +83,7 @@ if TYPE_CHECKING:
     from .channel import CategoryChannel
     from .embeds import Embed
     from .message import Message, MessageReference, PartialMessage
-    from .channel import TextChannel, DMChannel, GroupChannel, PartialMessageable
+    from .channel import TextChannel, DMChannel, GroupChannel, PartialMessageable, VoiceChannel
     from .threads import Thread
     from .enums import InviteTarget
     from .ui.view import View
@@ -95,7 +97,7 @@ if TYPE_CHECKING:
         SnowflakeList,
     )
 
-    PartialMessageableChannel = Union[TextChannel, Thread, DMChannel, PartialMessageable]
+    PartialMessageableChannel = Union[TextChannel, VoiceChannel, Thread, DMChannel, PartialMessageable]
     MessageableChannel = Union[PartialMessageableChannel, GroupChannel]
     SnowflakeTime = Union["Snowflake", datetime]
 
@@ -108,6 +110,69 @@ class _Undefined:
 
 
 _undefined: Any = _Undefined()
+
+
+async def _single_delete_strategy(messages: Iterable[Message], *, reason: Optional[str] = None):
+    for m in messages:
+        await m.delete()
+
+
+async def _purge_helper(
+    channel: Union[Thread, TextChannel, VoiceChannel],
+    *,
+    limit: Optional[int] = 100,
+    check: Callable[[Message], bool] = MISSING,
+    before: Optional[SnowflakeTime] = None,
+    after: Optional[SnowflakeTime] = None,
+    around: Optional[SnowflakeTime] = None,
+    oldest_first: Optional[bool] = False,
+    bulk: bool = True,
+    reason: Optional[str] = None,
+) -> List[Message]:
+    if check is MISSING:
+        check = lambda m: True
+
+    iterator = channel.history(limit=limit, before=before, after=after, oldest_first=oldest_first, around=around)
+    ret: List[Message] = []
+    count = 0
+
+    minimum_time = int((time.time() - 14 * 24 * 60 * 60) * 1000.0 - 1420070400000) << 22
+    strategy = channel.delete_messages if bulk else _single_delete_strategy
+
+    async for message in iterator:
+        if count == 100:
+            to_delete = ret[-100:]
+            await strategy(to_delete, reason=reason)
+            count = 0
+            await asyncio.sleep(1)
+
+        if not check(message):
+            continue
+
+        if message.id < minimum_time:
+            # older than 14 days old
+            if count == 1:
+                await ret[-1].delete()
+            elif count >= 2:
+                to_delete = ret[-count:]
+                await strategy(to_delete, reason=reason)
+
+            count = 0
+            strategy = _single_delete_strategy
+
+        count += 1
+        ret.append(message)
+
+    # Some messages remaining to poll
+    if count >= 2:
+        # more than 2 messages -> bulk delete
+        to_delete = ret[-count:]
+        await strategy(to_delete, reason=reason)
+    elif count == 1:
+        # delete a single message
+        await ret[-1].delete()
+
+    return ret
 
 
 @runtime_checkable
@@ -150,6 +215,8 @@ class User(Snowflake, Protocol):
         The user's discriminator.
     bot: :class:`bool`
         If the user is a bot account.
+    system: :class:`bool`
+        If the user is a system account.
     """
 
     __slots__ = ()
@@ -157,6 +224,7 @@ class User(Snowflake, Protocol):
     name: str
     discriminator: str
     bot: bool
+    system: bool
 
     @property
     def display_name(self) -> str:
@@ -171,6 +239,36 @@ class User(Snowflake, Protocol):
     @property
     def avatar(self) -> Optional[Asset]:
         """Optional[:class:`~discord.Asset`]: Returns an Asset that represents the user's avatar, if present."""
+        raise NotImplementedError
+
+    @property
+    def default_avatar(self) -> Asset:
+        """:class:`~discord.Asset`: Returns the default avatar for a given user. This is calculated by the user's discriminator."""
+        raise NotImplementedError
+
+    @property
+    def display_avatar(self) -> Asset:
+        """:class:`~discord.Asset`: Returns the user's display avatar.
+
+        For regular users this is just their default avatar or uploaded avatar.
+
+        .. versionadded:: 2.0
+        """
+        raise NotImplementedError
+
+    def mentioned_in(self, message: Message) -> bool:
+        """Checks if the user is mentioned in the specified message.
+
+        Parameters
+        -----------
+        message: :class:`~discord.Message`
+            The message to check if you're mentioned in.
+
+        Returns
+        -------
+        :class:`bool`
+            Indicates if the user is mentioned in the message.
+        """
         raise NotImplementedError
 
 
@@ -202,7 +300,7 @@ class _Overwrites:
     ROLE = 0
     MEMBER = 1
 
-    def __init__(self, data: PermissionOverwritePayload):
+    def __init__(self, data: PermissionOverwritePayload) -> None:
         self.id: int = int(data['id'])
         self.allow: int = int(data.get('allow', 0))
         self.deny: int = int(data.get('deny', 0))
@@ -232,6 +330,7 @@ class GuildChannel:
     - :class:`~discord.VoiceChannel`
     - :class:`~discord.CategoryChannel`
     - :class:`~discord.StageChannel`
+    - :class:`~discord.ForumChannel`
 
     This ABC must also implement :class:`~discord.abc.Snowflake`.
 
@@ -435,6 +534,14 @@ class GuildChannel:
     def mention(self) -> str:
         """:class:`str`: The string that allows you to mention the channel."""
         return f'<#{self.id}>'
+
+    @property
+    def jump_url(self) -> str:
+        """:class:`str`: Returns a URL that allows the client to jump to the channel.
+
+        .. versionadded:: 2.0
+        """
+        return f'https://discord.com/channels/{self.guild.id}/{self.id}'
 
     @property
     def created_at(self) -> datetime:
@@ -714,7 +821,7 @@ class GuildChannel:
         target: Union[Member, Role],
         *,
         reason: Optional[str] = ...,
-        **permissions: bool,
+        **permissions: Optional[bool],
     ) -> None:
         ...
 
@@ -724,7 +831,7 @@ class GuildChannel:
         *,
         overwrite: Any = _undefined,
         reason: Optional[str] = None,
-        **permissions: bool,
+        **permissions: Optional[bool],
     ) -> None:
         r"""|coro|
 
@@ -1170,11 +1277,13 @@ class GuildChannel:
 class Messageable:
     """An ABC that details the common operations on a model that can send messages.
 
-    The following implement this ABC:
+    The following classes implement this ABC:
 
     - :class:`~discord.TextChannel`
+    - :class:`~discord.VoiceChannel`
     - :class:`~discord.DMChannel`
     - :class:`~discord.GroupChannel`
+    - :class:`~discord.PartialMessageable`
     - :class:`~discord.User`
     - :class:`~discord.Member`
     - :class:`~discord.ext.commands.Context`
@@ -1311,6 +1420,10 @@ class Messageable:
             Indicates if the message should be sent using text-to-speech.
         embed: :class:`~discord.Embed`
             The rich embed for the content.
+        embeds: List[:class:`~discord.Embed`]
+            A list of embeds to upload. Must be a maximum of 10.
+
+            .. versionadded:: 2.0
         file: :class:`~discord.File`
             The file to upload.
         files: List[:class:`~discord.File`]
@@ -1346,8 +1459,6 @@ class Messageable:
             .. versionadded:: 1.6
         view: :class:`discord.ui.View`
             A Discord UI View to add to the message.
-        embeds: List[:class:`~discord.Embed`]
-            A list of embeds to upload. Must be a maximum of 10.
 
             .. versionadded:: 2.0
         stickers: Sequence[Union[:class:`~discord.GuildSticker`, :class:`~discord.StickerItem`]]
@@ -1366,7 +1477,7 @@ class Messageable:
         ~discord.Forbidden
             You do not have the proper permissions to send the message.
         ValueError
-            The ``files`` list is not of the appropriate size.
+            The ``files`` or ``embeds`` list is not of the appropriate size.
         TypeError
             You specified both ``file`` and ``files``,
             or you specified both ``embed`` and ``embeds``,
@@ -1433,32 +1544,30 @@ class Messageable:
             await ret.delete(delay=delete_after)
         return ret
 
-    async def trigger_typing(self) -> None:
-        """|coro|
-
-        Triggers a *typing* indicator to the destination.
-
-        *Typing* indicator will go away after 10 seconds, or after a message is sent.
-        """
-
-        channel = await self._get_channel()
-        await self._state.http.send_typing(channel.id)
-
     def typing(self) -> Typing:
-        """Returns an asynchronous context manager that allows you to type for an indefinite period of time.
-
-        This is useful for denoting long computations in your bot.
+        """Returns an asynchronous context manager that allows you to send a typing indicator to
+        the destination for an indefinite period of time, or 10 seconds if the context manager
+        is called using ``await``.
 
         Example Usage: ::
 
             async with channel.typing():
                 # simulate something heavy
-                await asyncio.sleep(10)
+                await asyncio.sleep(20)
 
-            await channel.send('done!')
+            await channel.send('Done!')
+
+        Example Usage: ::
+
+            await channel.typing()
+            # Do some computational magic for about 10 seconds
+            await channel.send('Done!')
 
         .. versionchanged:: 2.0
             This no longer works with the ``with`` syntax, ``async with`` must be used instead.
+
+        .. versionchanged:: 2.0
+            Added functionality to ``await`` the context manager to send a typing indicator for 10 seconds.
         """
         return Typing(self)
 
@@ -1706,6 +1815,8 @@ class Connectable(Protocol):
         timeout: float = 60.0,
         reconnect: bool = True,
         cls: Callable[[Client, Connectable], T] = MISSING,
+        self_deaf: bool = False,
+        self_mute: bool = False,
     ) -> T:
         """|coro|
 
@@ -1725,6 +1836,14 @@ class Connectable(Protocol):
         cls: Type[:class:`~discord.VoiceProtocol`]
             A type that subclasses :class:`~discord.VoiceProtocol` to connect with.
             Defaults to :class:`~discord.VoiceClient`.
+        self_mute: :class:`bool`
+            Indicates if the client should be self-muted.
+
+            .. versionadded: 2.0
+        self_deaf: :class:`bool`
+            Indicates if the client should be self-deafened.
+
+            .. versionadded: 2.0
 
         Raises
         -------
@@ -1761,7 +1880,7 @@ class Connectable(Protocol):
         state._add_voice_client(key_id, voice)
 
         try:
-            await voice.connect(timeout=timeout, reconnect=reconnect)
+            await voice.connect(timeout=timeout, reconnect=reconnect, self_deaf=self_deaf, self_mute=self_mute)
         except asyncio.TimeoutError:
             try:
                 await voice.disconnect(force=True)

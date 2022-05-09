@@ -303,7 +303,14 @@ class Attachment(Hashable):
         data = await self._http.get_from_cdn(url)
         return data
 
-    async def to_file(self, *, use_cached: bool = False, spoiler: bool = False) -> File:
+    async def to_file(
+        self,
+        *,
+        filename: Optional[str] = MISSING,
+        description: Optional[str] = MISSING,
+        use_cached: bool = False,
+        spoiler: bool = False,
+    ) -> File:
         """|coro|
 
         Converts the attachment into a :class:`File` suitable for sending via
@@ -313,6 +320,16 @@ class Attachment(Hashable):
 
         Parameters
         -----------
+        filename: Optional[:class:`str`]
+            The filename to use for the file. If not specified then the filename
+            of the attachment is used instead.
+
+            .. versionadded:: 2.0
+        description: Optional[:class:`str`]
+            The description to use for the file. If not specified then the
+            description of the attachment is used instead.
+
+            .. versionadded:: 2.0
         use_cached: :class:`bool`
             Whether to use :attr:`proxy_url` rather than :attr:`url` when downloading
             the attachment. This will allow attachments to be saved after deletion
@@ -343,7 +360,9 @@ class Attachment(Hashable):
         """
 
         data = await self.read(use_cached=use_cached)
-        return File(io.BytesIO(data), filename=self.filename, description=self.description, spoiler=spoiler)
+        file_filename = filename if filename is not MISSING else self.filename
+        file_description = description if description is not MISSING else self.description
+        return File(io.BytesIO(data), filename=file_filename, description=file_description, spoiler=spoiler)
 
     def to_dict(self) -> AttachmentPayload:
         result: AttachmentPayload = {
@@ -598,6 +617,7 @@ class PartialMessage(Hashable):
     the constructor itself, and the second is via the following:
 
     - :meth:`TextChannel.get_partial_message`
+    - :meth:`VoiceChannel.get_partial_message`
     - :meth:`Thread.get_partial_message`
     - :meth:`DMChannel.get_partial_message`
 
@@ -621,7 +641,7 @@ class PartialMessage(Hashable):
 
     Attributes
     -----------
-    channel: Union[:class:`PartialMessageable`, :class:`TextChannel`, :class:`Thread`, :class:`DMChannel`]
+    channel: Union[:class:`PartialMessageable`, :class:`TextChannel`, :class:`VoiceChannel`, :class:`Thread`, :class:`DMChannel`]
         The channel associated with this partial message.
     id: :class:`int`
         The message ID.
@@ -641,7 +661,9 @@ class PartialMessage(Hashable):
             ChannelType.public_thread,
             ChannelType.private_thread,
         ):
-            raise TypeError(f'Expected PartialMessageable, TextChannel, DMChannel or Thread not {type(channel)!r}')
+            raise TypeError(
+                f'expected PartialMessageable, TextChannel, VoiceChannel, DMChannel or Thread not {type(channel)!r}'
+            )
 
         self.channel: MessageableChannel = channel
         self._state: ConnectionState = channel._state
@@ -763,6 +785,7 @@ class PartialMessage(Hashable):
 
     async def edit(
         self,
+        *,
         content: Optional[str] = MISSING,
         embed: Optional[Embed] = MISSING,
         embeds: Sequence[Embed] = MISSING,
@@ -860,7 +883,11 @@ class PartialMessage(Hashable):
         message = Message(state=self._state, channel=self.channel, data=data)
 
         if view and not view.is_finished():
-            self._state.store_view(view, self.id)
+            interaction: Optional[MessageInteraction] = getattr(self, 'interaction', None)
+            if interaction is not None:
+                self._state.store_view(view, self.id, interaction_id=interaction.id)
+            else:
+                self._state.store_view(view, self.id)
 
         if delete_after is not None:
             await self.delete(delay=delete_after)
@@ -1241,7 +1268,7 @@ class Message(PartialMessage, Hashable):
         This is not stored long term within Discord's servers and is only used ephemerally.
     embeds: List[:class:`Embed`]
         A list of embeds the message has.
-    channel: Union[:class:`TextChannel`, :class:`Thread`, :class:`DMChannel`, :class:`GroupChannel`, :class:`PartialMessageable`]
+    channel: Union[:class:`TextChannel`, :class:`VoiceChannel`, :class:`Thread`, :class:`DMChannel`, :class:`GroupChannel`, :class:`PartialMessageable`]
         The :class:`TextChannel` or :class:`Thread` that the message was sent from.
         Could be a :class:`DMChannel` or :class:`GroupChannel` if it's a private message.
     reference: Optional[:class:`~discord.MessageReference`]
@@ -1373,7 +1400,8 @@ class Message(PartialMessage, Hashable):
         channel: MessageableChannel,
         data: MessagePayload,
     ) -> None:
-        super().__init__(channel=channel, id=int(data['id']))
+        self.channel: MessageableChannel = channel
+        self.id: int = int(data['id'])
         self._state: ConnectionState = state
         self.webhook_id: Optional[int] = utils._get_as_snowflake(data, 'webhook_id')
         self.reactions: List[Reaction] = [Reaction(message=self, data=d) for d in data.get('reactions', [])]
@@ -1381,7 +1409,6 @@ class Message(PartialMessage, Hashable):
         self.embeds: List[Embed] = [Embed.from_dict(a) for a in data['embeds']]
         self.application: Optional[MessageApplicationPayload] = data.get('application')
         self.activity: Optional[MessageActivityPayload] = data.get('activity')
-        self.channel: MessageableChannel = channel
         self._edited_timestamp: Optional[datetime.datetime] = utils.parse_time(data['edited_timestamp'])
         self.type: MessageType = try_enum(MessageType, data['type'])
         self.pinned: bool = data['pinned']
@@ -1395,7 +1422,7 @@ class Message(PartialMessage, Hashable):
 
         try:
             # if the channel doesn't have a guild attribute, we handle that
-            self.guild = channel.guild  # type: ignore
+            self.guild = channel.guild
         except AttributeError:
             self.guild = state._get_guild(utils._get_as_snowflake(data, 'guild_id'))
 
@@ -1810,7 +1837,9 @@ class Message(PartialMessage, Hashable):
                 return f'{self.author.name} just boosted the server **{self.content}** times! {self.guild} has achieved **Level 3!**'
 
         if self.type is MessageType.channel_follow_add:
-            return f'{self.author.name} has added {self.content} to this channel'
+            return (
+                f'{self.author.name} has added {self.content} to this channel. Its most important updates will show up here.'
+            )
 
         if self.type is MessageType.guild_stream:
             # the author will be a Member
@@ -1874,6 +1903,7 @@ class Message(PartialMessage, Hashable):
 
     async def edit(
         self,
+        *,
         content: Optional[str] = MISSING,
         embed: Optional[Embed] = MISSING,
         embeds: Sequence[Embed] = MISSING,

@@ -140,9 +140,11 @@ class Client:
     intents: :class:`Intents`
         The intents that you want to enable for the session. This is a way of
         disabling and enabling certain gateway events from triggering and being sent.
-        If not given, defaults to a regularly constructed :class:`Intents` class.
 
         .. versionadded:: 1.5
+
+        .. versionchanged:: 2.0
+            Parameter is now required.
     member_cache_flags: :class:`MemberCacheFlags`
         Allows for finer control over how the library caches members.
         If not given, defaults to cache as much as possible with the
@@ -203,7 +205,7 @@ class Client:
         The websocket gateway the client is currently connected to. Could be ``None``.
     """
 
-    def __init__(self, **options: Any) -> None:
+    def __init__(self, *, intents: Intents, **options: Any) -> None:
         self.loop: asyncio.AbstractEventLoop = _loop
         # self.ws is set in the connect method
         self.ws: DiscordWebSocket = None  # type: ignore
@@ -232,7 +234,7 @@ class Client:
         }
 
         self._enable_debug_events: bool = options.pop('enable_debug_events', False)
-        self._connection: ConnectionState = self._get_state(**options)
+        self._connection: ConnectionState = self._get_state(intents=intents, **options)
         self._connection.shard_count = self.shard_count
         self._closed: bool = False
         self._ready: asyncio.Event = MISSING
@@ -482,7 +484,6 @@ class Client:
         self.loop = loop
         self.http.loop = loop
         self._connection.loop = loop
-        await self._connection.async_setup()
 
         self._ready = asyncio.Event()
 
@@ -535,7 +536,8 @@ class Client:
 
         _log.info('logging in using static token')
 
-        await self._async_setup_hook()
+        if self.loop is _loop:
+            await self._async_setup_hook()
 
         data = await self.http.static_login(token.strip())
         self._connection.user = ClientUser(state=self._connection, data=data)
@@ -664,7 +666,7 @@ class Client:
         self._closed = False
         self._ready.clear()
         self._connection.clear()
-        self.http.recreate()
+        self.http.clear()
 
     async def start(self, token: str, *, reconnect: bool = True) -> None:
         """|coro|
@@ -805,7 +807,9 @@ class Client:
         """
         return self._connection.get_channel(id)  # type: ignore # The cache contains all channel types
 
-    def get_partial_messageable(self, id: int, *, type: Optional[ChannelType] = None) -> PartialMessageable:
+    def get_partial_messageable(
+        self, id: int, *, guild_id: Optional[int] = None, type: Optional[ChannelType] = None
+    ) -> PartialMessageable:
         """Returns a partial messageable with the given channel ID.
 
         This is useful if you have a channel_id but don't want to do an API call
@@ -817,6 +821,12 @@ class Client:
         -----------
         id: :class:`int`
             The channel ID to create a partial messageable for.
+        guild_id: Optional[:class:`int`]
+            The optional guild ID to create a partial messageable for.
+
+            This is not required to actually send messages, but it does allow the
+            :meth:`~discord.PartialMessageable.jump_url` and
+            :attr:`~discord.PartialMessageable.guild` properties to function properly.
         type: Optional[:class:`.ChannelType`]
             The underlying channel type for the partial messageable.
 
@@ -825,7 +835,7 @@ class Client:
         :class:`.PartialMessageable`
             The partial messageable
         """
-        return PartialMessageable(state=self._connection, id=id, type=type)
+        return PartialMessageable(state=self._connection, id=id, guild_id=guild_id, type=type)
 
     def get_stage_instance(self, id: int, /) -> Optional[StageInstance]:
         """Returns a stage instance with the given stage channel ID.
@@ -1191,7 +1201,7 @@ class Client:
     async def fetch_guilds(
         self,
         *,
-        limit: Optional[int] = 100,
+        limit: Optional[int] = 200,
         before: Optional[SnowflakeTime] = None,
         after: Optional[SnowflakeTime] = None,
     ) -> AsyncIterator[Guild]:
@@ -1227,7 +1237,12 @@ class Client:
             The number of guilds to retrieve.
             If ``None``, it retrieves every guild you have access to. Note, however,
             that this would make it a slow operation.
-            Defaults to ``100``.
+            Defaults to ``200``.
+
+            .. versionchanged:: 2.0
+
+                The default has been changed to 200.
+
         before: Union[:class:`.abc.Snowflake`, :class:`datetime.datetime`]
             Retrieves guilds before this date or object.
             If a datetime is provided, it is recommended to use a UTC aware datetime.
@@ -1256,7 +1271,7 @@ class Client:
                 if limit is not None:
                     limit -= len(data)
 
-                before = Object(id=int(data[-1]['id']))
+                before = Object(id=int(data[0]['id']))
 
             return data, before, limit
 
@@ -1268,7 +1283,7 @@ class Client:
                 if limit is not None:
                     limit -= len(data)
 
-                after = Object(id=int(data[0]['id']))
+                after = Object(id=int(data[-1]['id']))
 
             return data, after, limit
 
@@ -1278,22 +1293,23 @@ class Client:
             after = Object(id=time_snowflake(after, high=True))
 
         predicate: Optional[Callable[[GuildPayload], bool]] = None
-        strategy, state = _before_strategy, before
+        strategy, state = _after_strategy, after
+
+        if before:
+            strategy, state = _before_strategy, before
 
         if before and after:
             predicate = lambda m: int(m['id']) > after.id
-        elif after:
-            strategy, state = _after_strategy, after
 
         while True:
-            retrieve = min(100 if limit is None else limit, 100)
+            retrieve = min(200 if limit is None else limit, 200)
             if retrieve < 1:
                 return
 
             data, state, limit = await strategy(retrieve, state, limit)
 
             # Terminate loop on next iteration; there's no data left after this
-            if len(data) < 100:
+            if len(data) < 200:
                 limit = 0
 
             if predicate:
@@ -1387,7 +1403,7 @@ class Client:
         Bot accounts in more than 10 guilds are not allowed to create guilds.
 
         .. versionchanged:: 2.0
-            ``name`` and ``icon`` parameters are now keyword-only. The `region`` parameter has been removed.
+            ``name`` and ``icon`` parameters are now keyword-only. The ``region`` parameter has been removed.
 
         .. versionchanged:: 2.0
             This function will now raise :exc:`ValueError` instead of

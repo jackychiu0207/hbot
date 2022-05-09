@@ -1,10 +1,8 @@
 from pydub import AudioSegment
 import discord
-from discord import File
 from discord.ext import commands
-from discord.ui import Button,View,Select
-from discord import SelectOption
-from discord import ButtonStyle
+from discord.ui import View,Button,TextInput,Button,Select
+from discord import SelectOption,ButtonStyle,File,Interaction
 import requests
 import json
 from hearthstone.deckstrings import Deck
@@ -12,6 +10,9 @@ from hearthstone.enums import FormatType
 import urllib.request
 import os
 import wget
+from data import *
+import random
+
 
 intents=discord.Intents.all()
 
@@ -19,7 +20,6 @@ intents=discord.Intents.all()
 bot = commands.Bot(command_prefix="t!",help_command=None,intents=intents)
 
 
-classdict={"DEATHKNIGHT":"死亡騎士","DEMONHUNTER":"惡魔獵人","DREAM":"伊瑟拉","DRUID":"德魯伊","HUNTER":"獵人","INVALID":"未知/不適用職業","MAGE":"法師","NEUTRAL":"中立","PALADIN":"聖騎士","PRIEST":"牧師","ROGUE": 7,"SHAMAN":"薩滿","WARLOCK":"術士","WARRIOR":"戰士","WHIZBANG":"威茲幫"}
 langlist=["deDE","enUS","esES","esMX","frFR","itIT","jaJP","koKR","plPL","ptBR","ruRU","thTH","zhCN","zhTW"]
 def getfile():
     try:
@@ -78,7 +78,7 @@ async def reload(msg):
 #help command
 @bot.command()
 async def help(msg):
-    embed = discord.Embed(title="指令列表",description="指令中語言參數皆為選填，常見zhTW(預設)、zhCN、enUS …\n",color=0xff0000)
+    embed = discord.Embed(title="指令列表",description="有任何問題請聯繫 窮困潦島's 毫窄?#7494\n指令中語言參數皆為選填，常見zhTW(預設)、zhCN、enUS …\n",color=0xff0000)
     embed.add_field(name="t!id",value="※不推薦新手使用該指令\n使用方法:\"t!id dbfId或id 語言(選填)\"\n例子1(使用dbfId):`t!id 38833`\n例子2(使用id):`t!id OG_272`\n\n", inline=False)
     embed.add_field(name="t!card",value="空格請用下滑線\'_\'代替\n使用方法:\"t!card 卡牌名稱 語言(選填)\"\n例子:`t!card 暮光召喚師`", inline=False)
     embed.add_field(name="t!merc",value="空格請用下滑線\'_\'代替\n使用方法:\"t!merc 傭兵、裝備、技能名稱 語言(選填)\"\n例子1(傭兵):`t!merc 餅乾大廚`\n例子2(裝備):`t!merc 養好的鍋子`\n例子3(技能):`t!merc 魚肉大餐`", inline=False)
@@ -119,9 +119,9 @@ async def on_ready():
     print('BOT IS ONLINE!')
     await bot.change_presence(status=discord.Status.online, activity=discord.Game("召喚惡魔!"))
     
-@bot.event
-async def on_command_error(ctx,error):
-    await ctx.message.reply("錯誤:\n`"+str(error)+"`\n請檢查指令是否輸入錯誤！")
+#@bot.event
+#async def on_command_error(ctx,error):
+#    await ctx.message.reply("錯誤:\n`"+str(error)+"`\n請檢查指令是否輸入錯誤！\n或請聯繫 窮困潦島's 毫窄?#7494")
 
 async def get_audio(interaction):
     await interaction.response.defer()
@@ -733,7 +733,7 @@ def deck_embed(msg,deckcode,deckname,lang,m):
         if deckhero=="" and deck.heroes[0]==data["dbfId"]:
             deckhero=data["name"][lang]
             heroID=data["id"]
-            heroclass=classdict[data['cardClass']]
+            heroclass=classes[data['cardClass']]
         for i,cardid in enumerate(unfind):
             if cardid[0]==data["dbfId"]:
                 card=data.copy()
@@ -789,6 +789,8 @@ async def deck(msg,deckcode=None,deckname=None,lang="zhTW"):
             embed,view=deck_embed(msg,deckcode,deckname,lang,0)
             await msg.reply(embed=embed,view=view)
         else:await msg.reply("語系錯誤!全部的語系:\n"+",".join(langlist))
+
+
 
 
 
