@@ -11,7 +11,6 @@ import urllib.request
 import os
 import wget
 from data import *
-import random
 
 
 intents=discord.Intents.all()
