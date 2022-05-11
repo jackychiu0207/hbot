@@ -20,27 +20,6 @@ bot = commands.Bot(command_prefix="t!",help_command=None,intents=intents)
 
 
 langlist=["deDE","enUS","esES","esMX","frFR","itIT","jaJP","koKR","plPL","ptBR","ruRU","thTH","zhCN","zhTW"]
-def getfile():
-    try:
-        url='https://api.hearthstonejson.com/v1/latest/all/cards.json'
-        req = urllib.request.Request(url, headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)'})
-        oper = urllib.request.urlopen(req)
-        data = oper.read()
-        file = open('cards.json','wb')
-        file.write(data)
-        file.close()
-        url='https://api.hearthstonejson.com/v1/latest/all/mercenaries.json'
-        req = urllib.request.Request(url, headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)'})
-        oper = urllib.request.urlopen(req)
-        data = oper.read()
-        file = open('mercenaries.json','wb')
-        file.write(data)
-        file.close()
-        os.remove('group.json')
-        os.remove('audio.json')
-    except:pass
-    wget.download('https://raw.githubusercontent.com/jackychiu0207/hbot/main/group.json',"group.json")
-    wget.download('https://raw.githubusercontent.com/Zero-to-Heroes/hs-reference-data/master/src/cards/cards_zhTW.json',"audio.json")
 
 def openfile():
     global cardlib,cardlibm,group,audiolib
@@ -51,10 +30,8 @@ def openfile():
         audiolib=json.load(open('audio.json'))
     except:
         return False
-getfile()
 openfile()
-try:env=json.load(open('.env'))
-except:pass
+env=json.load(open('.env'))
 @bot.command()
 async def reload(msg):
     try:
@@ -62,13 +39,8 @@ async def reload(msg):
         cardlib.close()
         group.close()
         audiolib.close()
-        os.remove('cards.json')
-        os.remove('mercenaries.json')
-        os.remove('group.json')
-        os.remove('audio.json')
     except:
         pass
-    getfile()
     if openfile() is not False:
         await msg.reply("完成")
     else:
