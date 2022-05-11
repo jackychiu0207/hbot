@@ -508,7 +508,7 @@ async def card(msg,cardname=None,lang="zhTW"):
             view=View()
             for data in cardlib:
                 if "type" in data:
-                    if data["type"]!="ENCHANTMENT":
+                    if data["type"]!="ENCHANTMENT" and lang in data["name"]:
                         if cardname in data["name"][lang]:find.append(data)
                         elif cardname in group:
                             if group[cardname] in data["name"][lang]:
@@ -587,7 +587,7 @@ async def merc(msg,cardname=None,lang="zhTW"):
             view=View()
             for data in cardlib:
                 if "type" in data and "set" in data:
-                    if data["type"]!="ENCHANTMENT" and data["set"]=="LETTUCE":
+                    if data["type"]!="ENCHANTMENT" and data["set"]=="LETTUCE" and lang in data["name"]:
                         if cardname in data["name"][lang]:find.append(data)
                         elif cardname in group:
                             if group[cardname] in data["name"][lang]:
@@ -643,7 +643,7 @@ async def bg(msg,cardname=None,lang="zhTW"):
             view=View()
             for data in cardlib:
                 if "type" in data and "set" in data:
-                    if data["type"]!="ENCHANTMENT":
+                    if data["type"]!="ENCHANTMENT" and lang in data["name"]:
                         if "isBattlegroundsPoolMinion" in data or data["set"]=="BATTLEGROUNDS":
                             if cardname in data["name"][lang]:find.append(data)
                             elif cardname in group:
