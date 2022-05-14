@@ -7,9 +7,7 @@ import requests
 import json
 from hearthstone.deckstrings import Deck
 from hearthstone.enums import FormatType
-import urllib.request
 import os
-import wget
 from data import *
 
 
@@ -90,9 +88,9 @@ async def on_ready():
     print('BOT IS ONLINE!')
     await bot.change_presence(status=discord.Status.online, activity=discord.Game("召喚惡魔!"))
     
-#@bot.event
-#async def on_command_error(ctx,error):
-#    await ctx.message.reply("錯誤:\n`"+str(error)+"`\n請檢查指令是否輸入錯誤！\n或請聯繫 窮困潦島's 毫窄?#7494")
+@bot.event
+async def on_command_error(ctx,error):
+    await ctx.message.reply("錯誤:\n`"+str(error)+"`\n請檢查指令是否輸入錯誤！\n或請聯繫 窮困潦島's 毫窄?#7494")
 
 async def get_audio(interaction):
     await interaction.response.defer()
