@@ -2,7 +2,7 @@ from pydub import AudioSegment
 import discord
 from discord.ext import commands
 from discord.ui import View,Button,TextInput,Button,Select
-from discord import SelectOption,ButtonStyle,File,Interaction
+from discord import SelectOption,ButtonStyle,File
 import requests
 import json
 from hearthstone.deckstrings import Deck
@@ -17,18 +17,17 @@ intents=discord.Intents.all()
 bot = commands.Bot(command_prefix="t!",help_command=None,intents=intents)
 
 
-langlist=["deDE","enUS","esES","esMX","frFR","itIT","jaJP","koKR","plPL","ptBR","ruRU","thTH","zhCN","zhTW"]
-
 def openfile():
-    global cardlib,cardlibm,group,audiolib
+    global cardlib,cardlibm,group,audiolib,merctreasures
     try:
         cardlib=json.load(open('cards.json'))
         cardlibm=json.load(open('mercenaries.json'))
         group=json.load(open('group.json'))
         audiolib=json.load(open('audio.json'))
+        merctreasures=json.load(open('merctreasures.json'))
     except:
         return False
-openfile()
+print(openfile())
 env=json.load(open('.env'))
 @bot.command()
 async def reload(msg):
@@ -68,7 +67,7 @@ def get_token():
     return token
 
 def change_text(text:str):
-    tlist=[['\n',''],['<b>','**'],['</b>','**'],['<i>','*'],['</i>','*'],["。","。\n"],['****',""],['[x]','']]
+    tlist=[['\n',''],['<b>',''],['</b>',''],['<i>',''],['</i>',''],['[x]','']]
     for txt in tlist:
         if txt[0] in text:text=text.replace(txt[0],txt[1])
     return text
@@ -90,10 +89,14 @@ async def on_ready():
     
 @bot.event
 async def on_command_error(ctx,error):
-    await ctx.message.reply("錯誤:\n`"+str(error)+"`\n請檢查指令是否輸入錯誤！\n或請聯繫 窮困潦島's 毫窄?#7494")
+    await ctx.message.reply("錯誤:\n`"+str(error)+"`\n請檢查指令是否輸入錯誤，或請聯繫`窮困潦島's 毫窄?#7494`")
+
+@bot.event
+async def on_reaction_add(reaction:discord.Reaction,user:discord.User):
+    if reaction.emoji==bot.get_emoji(979293379986858024) and reaction.message.author==bot.user:await reaction.message.delete()
 
 async def get_audio(interaction):
-    await interaction.response.defer()
+    await interaction.response.defer(thinking=True)
     audioname=audiolib[int(dict(interaction.data)['values'][0].split(",")[0])]["audio"][dict(interaction.data)['values'][0].split(",")[1]]
     if len(audioname)==1:
         try:
@@ -119,15 +122,16 @@ async def get_audio(interaction):
             await interaction.followup.send(file=File(audioname[0].split(".")[0]+".wav"))
             os.remove(audioname[0].split(".")[0]+".wav")
         except:await interaction.followup.send("尚無該語音檔案")
+        
 
 async def audiobtn_callback(interaction:discord.Interaction):
-    await interaction.response.defer()
+    await interaction.response.defer(ephemeral=True,thinking=True)
     view=View()
     options=[]
     for i,data in enumerate(audiolib):
         if data["dbfId"]==int(dict(interaction.data)['custom_id']):
             if "audio" in data:
-                if len(data["audio"])==0:await interaction.followup.send("抱歉，找不到任何語音：(")
+                if len(data["audio"])==0:await interaction.followup.send("抱歉，找不到任何語音：(",ephemeral=True)
                 else:
                     for name in data["audio"]:
                         if "BASIC_PLAY" == name.upper():options.append(SelectOption(label="入場",description=name,value=str(i)+","+name))
@@ -205,15 +209,16 @@ async def audiobtn_callback(interaction:discord.Interaction):
                         view.add_item(select2)
                         select3.callback=get_audio
                         view.add_item(select3)
-                    await interaction.followup.send("選擇語音",view=view)
+                    await interaction.user.send("選擇語音",view=view)
+                    await interaction.followup.send("請至私人訊息選擇",ephemeral=True)
     
 #cmds
 def embed_n(data:dict,lang:str):
     title=data['name'][lang]
     text=""
     view=View()
-    if 'text' in data:text+=change_text(data["text"][lang])+"\n\n"
-    if 'flavor' in data:text+=change_text(data['flavor'][lang])
+    if 'text' in data:text+=data["text"][lang]+"\n\n"
+    if 'flavor' in data:text+=data['flavor'][lang]
     imgurl=f"https://art.hearthstonejson.com/v1/render/latest/{lang}/512x/"+data["id"]+".png"
     cardview=f"https://playhearthstone.com/cards/"+str(data["dbfId"])
     if requests.request('GET',imgurl).status_code==404:
@@ -225,7 +230,7 @@ def embed_n(data:dict,lang:str):
     embed.set_image(url=imgurl)
     embed.set_footer(text=str(data["dbfId"])+","+data["id"])
     if data["type"]=="MINION" or data["type"]=="HERO":
-        audiobtn=Button(style=ButtonStyle.success,label="查看語音(繁中)",custom_id=str(data["dbfId"]))
+        audiobtn=Button(style=ButtonStyle.success,label="查看語音(繁體中文)",custom_id=str(data["dbfId"]))
         audiobtn.callback=audiobtn_callback
         view.add_item(audiobtn)
     return embed,view
@@ -267,7 +272,7 @@ def embed_bg(data:dict,lang):
     elif data["type"]=="MINION":
         if "techLevel" in data:text+=f"旅店等級{data['techLevel']}"
         if "health" and "attack" in data:f"體質:{data['health']}/{data['health']}"
-        if 'text' in data:text+="\n"+change_text(data["text"][lang])+"\n"
+        if 'text' in data:text+="\n"+data["text"][lang]+"\n"
         if "battlegroundsPremiumDbfId" in data:
             try:
                 imgurl=json.loads(requests.request('GET',url).text)['battlegrounds']['image']
@@ -321,7 +326,7 @@ def embed_bg(data:dict,lang):
     embed.set_image(url=imgurl)
     embed.set_footer(text=str(data["dbfId"])+","+data["id"])
     if data["type"]=="MINION" or data["type"]=="HERO":
-        audiobtn=Button(style=ButtonStyle.success,label="查看語音(繁中)",custom_id=str(data["dbfId"]))
+        audiobtn=Button(style=ButtonStyle.success,label="查看語音(繁體中文)",custom_id=str(data["dbfId"]))
         audiobtn.callback=audiobtn_callback
         view.add_item(audiobtn)
     return embed,view
@@ -352,7 +357,7 @@ def embed_m(data:dict,lang):
                 await interaction.followup.edit_message(interaction.message.id,embed=embed,view=view)
     if data["type"]=="LETTUCE_ABILITY":
         if data["cost"]==0:
-            if 'text' in data:text+=change_text(data["text"][lang])+"\n"
+            if 'text' in data:text+=data["text"][lang]+"\n"
             run=False
             for h_data in cardlibm:
                 if "equipment" in h_data:
@@ -380,7 +385,7 @@ def embed_m(data:dict,lang):
         elif data["cost"]!=0:
             if "cost" in data:text+="速度:"+str(data['cost'])
             if "mercenariesAbilityCooldown" in data:text+=" 冷卻時間:"+str(data['mercenariesAbilityCooldown'])
-            if text in data:text+="\n"+change_text(data["text"][lang])+"\n"
+            if "text" in data:text+="\n"+data["text"][lang]+"\n"
             run=False
             for h_data in cardlibm:
                 if "specializations" in h_data:
@@ -408,12 +413,13 @@ def embed_m(data:dict,lang):
                                                     view.add_item(button)
                                                     run=True
         else:
-            if text in data:text+=change_text(data['text'][lang])
+            if text in data:text+=data['text'][lang]
     elif data["type"]=="MINION":
-        if 'text' in data:text+=change_text(data['text'][lang])
+        if 'text' in data:text+=data['text'][lang]
+        treasureslist=[]
         for h_data in cardlibm:
             if data["dbfId"] in h_data["skinDbfIds"]:
-                text+="(下方可選擇查看造型、裝備、技能)\n"
+                text+="(下方可選擇查看造型、裝備、技能、寶藏)\n"
                 if "skinDbfIds" in h_data:
                     skins=[]
                     for i,skin in enumerate(h_data["skinDbfIds"],1):
@@ -430,37 +436,45 @@ def embed_m(data:dict,lang):
                                 for c_data in cardlib:
                                     if tiers["dbf_id"] == c_data["dbfId"]:
                                         if tiers['tier']==1:text+=f"裝備{str(i)}等級1:{c_data['name'][lang]}({c_data['dbfId']})\n"
-                                        d=change_text(c_data['text'][lang]).replace('*','').replace('\n','')
+                                        d=change_text(c_data['text'][lang])
                                         if len(d)>80:d=d[0:75]+"..."
                                         options_e.append(SelectOption(label=f"{c_data['name'][lang]}(裝備{str(i)}等級{tiers['tier']})\n",value=str(c_data['dbfId']),description=d))
                         select_e=Select(placeholder="選擇要查看的裝備",options=options_e,min_values=1,max_values=1)
                         select_e.callback=select_new_embed
                         view.add_item(select_e)
-                        if "specializations" in h_data:
-                            if len(h_data["specializations"])>0:
-                                if "abilities" in h_data["specializations"][0]:
-                                    if len(h_data["specializations"][0]["abilities"])>=1:
-                                        options_p=[]
-                                        text+="**該傭兵技能:**\n"
-                                        for i,p_data in enumerate(h_data["specializations"][0]["abilities"],1):
-                                            if "tiers" in p_data: 
-                                                for tiers in p_data["tiers"]:
-                                                    for c_data in cardlib:
-                                                        if tiers["dbf_id"] == c_data["dbfId"]:
-                                                             if tiers['tier']==1:text+=f"技能{str(i)}等級1:{c_data['name'][lang]}({c_data['dbfId']})\n"
-                                                             d=change_text(c_data['text'][lang]).replace('*','').replace('\n','')
-                                                             if len(d)>80:d=d[0:75]+"..."
-                                                             options_p.append(SelectOption(label=f"{c_data['name'][lang]}(技能{str(i)}等級{tiers['tier']})\n",value=str(c_data['dbfId']),description=d))
-                                        select_p=Select(placeholder="選擇要查看的技能",options=options_p,min_values=1,max_values=1)
-                                        select_p.callback=select_new_embed
-                                        view.add_item(select_p)
+                if "specializations" in h_data:
+                    if len(h_data["specializations"])>0:
+                        if "abilities" in h_data["specializations"][0]:
+                            if len(h_data["specializations"][0]["abilities"])>=1:
+                                options_p=[]
+                                text+="**該傭兵技能:**\n"
+                                for i,p_data in enumerate(h_data["specializations"][0]["abilities"],1):
+                                    if "tiers" in p_data: 
+                                        for tiers in p_data["tiers"]:
+                                            for c_data in cardlib:
+                                                if tiers["dbf_id"] == c_data["dbfId"]:
+                                                     if tiers['tier']==1:text+=f"技能{str(i)}等級1:{c_data['name'][lang]}({c_data['dbfId']})\n"
+                                                     d=change_text(c_data['text'][lang])
+                                                     if len(d)>80:d=d[0:75]+"..."
+                                                     options_p.append(SelectOption(label=f"{c_data['name'][lang]}(技能{str(i)}等級{tiers['tier']})\n",value=str(c_data['dbfId']),description=d))
+                                select_p=Select(placeholder="選擇要查看的技能",options=options_p,min_values=1,max_values=1)
+                                select_p.callback=select_new_embed
+                                view.add_item(select_p)
+
+                async def treasurebtn_callbak(interaction:discord.Interaction):
+                    for treasure in merctreasures:
+                        if h_data['defaultSkinDbfId'] in treasure['mercenaryCardIds']:
+                            treasureslist.append(treasure['cardId'])
+
+                treasurebtn=Button(style=ButtonStyle.success,label="查看可用寶藏")
+                treasurebtn.callback=treasurebtn_callbak
     else:
-        text=change_text(data["text"][lang])
+        text=data["text"][lang]
     embed = discord.Embed(title=title,url=cardview,description=text, color=0xff0000)
     embed.set_image(url=imgurl)
     embed.set_footer(text=str(data["dbfId"])+","+data["id"])
     if data["type"]=="MINION" or data["type"]=="HERO":
-        audiobtn=Button(style=ButtonStyle.success,label="查看語音(繁中)",custom_id=str(data["dbfId"]))
+        audiobtn=Button(style=ButtonStyle.success,label="查看語音(繁體中文)",custom_id=str(data["dbfId"]))
         audiobtn.callback=audiobtn_callback
         view.add_item(audiobtn)
     return embed,view
@@ -531,10 +545,10 @@ async def card(msg,cardname=None,lang="zhTW"):
                 options.append(SelectOption(label="全部發送到私人訊息",value="-1",description="可搭配 t!id 指令"))
                 for i,data in enumerate(find):
                     text=""
-                    if 'text' in data:text=change_text(data["text"][lang]).replace("*","").replace("\n","").replace("[x]","")
+                    if 'text' in data:text=change_text(data["text"][lang])
                     if len(text)>95:text=text[0:94]+"..."
                     options.append(SelectOption(label=f'{data["name"][lang]}({data["dbfId"]},{data["id"]})',value=str(i),description=text))
-                async def select_callback(interaction):
+                async def select_callback(interaction:discord.Interaction):
                     if int(dict(interaction.data)['values'][0])==-1:
                         await interaction.response.edit_message(content="已發送至私人訊息",view=None)
                         for data in find:
@@ -603,7 +617,7 @@ async def merc(msg,cardname=None,lang="zhTW"):
                 options.append(SelectOption(label="全部發送到私人訊息",value="-1",description="可搭配 t!id 指令"))
                 for i,data in enumerate(find):
                     text=""
-                    if 'text' in data:text=change_text(data["text"][lang]).replace("*","").replace("[x]","")
+                    if 'text' in data:text=change_text(data["text"][lang])
                     if len(text)>95:text=text[0:94]+"..."
                     options.append(SelectOption(label=f'{data["name"][lang]}({data["dbfId"]},{data["id"]})',value=str(i),description=text))
                 async def select_callback(interaction):
@@ -660,7 +674,7 @@ async def bg(msg,cardname=None,lang="zhTW"):
                 options.append(SelectOption(label="全部發送到私人訊息",value="-1",description="可搭配 t!id 指令"))
                 for i,data in enumerate(find):
                     text=""
-                    if 'text' in data:text=change_text(data["text"][lang]).replace("*","").replace("[x]","")
+                    if 'text' in data:text=change_text(data["text"][lang])
                     if len(text)>95:text=text[0:94]+"..."
                     options.append(SelectOption(label=f'{data["name"][lang]}({data["dbfId"]},{data["id"]})',value=str(i),description=text))
                 async def select_callback(interaction):
@@ -725,7 +739,7 @@ def deck_embed(msg,deckcode,deckname,lang,m):
             elif data["rarity"]=="RARE":cost+=100*data["count"]
             elif data["rarity"]=="EPIC":cost+=400*data["count"]
             elif data["rarity"]=="LEGENDARY":cost+=1600*data["count"]
-    if deckname is None:title=msg.author.name+" 的套牌"
+    if deckname is None:title=msg.author.display_name+" 的套牌"
     else:title=deckname
     embed=discord.Embed(title=title, description=f'{mode} 職業:{heroclass}(英雄:{deckhero})\n共{str(count)}張牌\n\n'+txt,url=f'https://playhearthstone.com/zh-tw/deckbuilder?deckcode={deckcode}',color=0xff0000)
     embed.set_thumbnail(url="https://art.hearthstonejson.com/v1/orig/"+heroID+".png")
@@ -759,7 +773,57 @@ async def deck(msg,deckcode=None,deckname=None,lang="zhTW"):
             await msg.reply(embed=embed,view=view)
         else:await msg.reply("語系錯誤!全部的語系:\n"+",".join(langlist))
 
-
+#@bot.command()
+#async def builddeck(msg,lang="zhTW"):
+#    async def deckimport_callbak(interaction:discord.Interaction):
+#        await interaction.response.defer()
+#        print(interaction)
+#        deckcode=dict(interaction.data)['values'][0]
+#        heroclass=""
+#        deckname=msg.author.display_name+" 的套牌"
+#        deck = Deck.from_deckstring(deckcode)
+#        if deck.format==FormatType.FT_WILD:mode="開放模式(wild)"
+#        elif deck.format==FormatType.FT_STANDARD:mode="標準模式(standard)"
+#        elif deck.format==FormatType.FT_CLASSIC:mode="經典模式(classic)"
+#        else: mode="其他模式(other)"
+#        unfind=deck.cards.copy()
+#        find=[]
+#        deckhero=""
+#        heroID=""
+#        for data in cardlib:
+#            if deckhero=="" and deck.heroes[0]==data["dbfId"]:
+#                deckhero=data["name"][lang]
+#                heroID=data["id"]
+#                heroclass=classes[data['cardClass']]
+#            for i,cardid in enumerate(unfind):
+#                if cardid[0]==data["dbfId"]:
+#                    card=data.copy()
+#                    card.update({"count":cardid[1]})
+#                    find.append(card)
+#                    del unfind[i]
+#                    break
+#        txt=""
+#        count=0
+#        cost=0
+#        find.sort(key=lambda x:x["cost"])
+#        for data in find:
+#            txt+=str(data["count"]) +" × " +"("+str(data["cost"])+") **"+ data["name"][lang]+ "** (" + str(data["dbfId"])+","+data["id"]+")\n"
+#            count+=data["count"]
+#            if "CORE"!=data["set"] and "rarity" in data:
+#                if data["rarity"]=="COMMON":cost+=40*data["count"]
+#                elif data["rarity"]=="RARE":cost+=100*data["count"]
+#                elif data["rarity"]=="EPIC":cost+=400*data["count"]
+#                elif data["rarity"]=="LEGENDARY":cost+=1600*data["count"]
+#        embed=discord.Embed(title=deckname, description=f'{mode} 職業:{heroclass}(英雄:{deckhero})\n共{str(count)}張牌\n\n'+txt,url=f'https://playhearthstone.com/zh-tw/deckbuilder?deckcode={deckcode}',color=0xff0000)
+#        embed.set_thumbnail(url="https://art.hearthstonejson.com/v1/orig/"+heroID+".png")
+#        embed.set_footer(text="所需魔塵:"+str(cost))
+#        await interaction.followup.edit_message(interaction.message.id,embed=embed,view=view)
+#    view=View()
+#    deckimport=TextInput(label="從現有牌組匯入")
+#    deckimport.callback=deckimport_callbak
+#    view.add_item(deckimport)
+#    newdeckbtn=Button(label="建立新的空牌組")
+#    await msg.reply("",view=view)
 
 
 

@@ -1,1 +1,0 @@
-adb push ./ /storage/emulated/0/hbot-main/
