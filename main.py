@@ -89,11 +89,11 @@ async def on_ready():
     
 @bot.event
 async def on_command_error(ctx,error):
-    await ctx.message.reply("錯誤:\n`"+str(error)+"`\n請檢查指令是否輸入錯誤，或請聯繫`窮困潦島's 毫窄?#7494`")
+    await ctx.message.reply("錯誤:\n`"+str(error)+"`\n請檢查指令是否輸入錯誤，或請聯繫`窮困潦島's 毫窄?#7494`\n如果想刪除這個訊息，可以給這個訊息添加表情符號:❌(`:x:`)")
 
 @bot.event
 async def on_reaction_add(reaction:discord.Reaction,user:discord.User):
-    if reaction.emoji==bot.get_emoji(979293379986858024) and reaction.message.author==bot.user:await reaction.message.delete()
+    if str(reaction.emoji)=="❌" and reaction.message.author==bot.user:await reaction.message.delete()
 
 async def get_audio(interaction):
     await interaction.response.defer(thinking=True)
@@ -316,12 +316,16 @@ def embed_bg(data:dict,lang):
                             button.callback=button_new_embed
                             view.add_item(button)
     else:
-        imgurl=f"https://art.hearthstonejson.com/v1/render/latest/{lang}/512x/"+data["id"]+".jpg"
-        if requests.request('GET',imgurl).status_code==404:
-            imgurl=f"https://art.hearthstonejson.com/v1/512x/"+data["id"]+".jpg"
+        if 'text' in data:text=data["text"][lang]+"\n"
+        try:
+            imgurl=json.loads(requests.request('GET',url).text)['battlegrounds']['image']
+        except:
+            imgurl=f"https://art.hearthstonejson.com/v1/render/latest/{lang}/512x/"+data["id"]+".jpg"
             if requests.request('GET',imgurl).status_code==404:
-                imgurl="https://cdn.discordapp.com/attachments/913009861967626310/935811318768885810/PlaceholderCard.png"
-                text+="\n※此卡牌確實存在於爐石戰記中的某個角落，但沒有任何圖片"
+                imgurl=f"https://art.hearthstonejson.com/v1/512x/"+data["id"]+".jpg"
+                if requests.request('GET',imgurl).status_code==404:
+                    imgurl="https://cdn.discordapp.com/attachments/913009861967626310/935811318768885810/PlaceholderCard.png"
+                    text+="\n※此卡牌確實存在於爐石戰記中的某個角落，但沒有任何圖片"
     embed = discord.Embed(title=title,url=cardview,description=text, color=0xff0000)
     embed.set_image(url=imgurl)
     embed.set_footer(text=str(data["dbfId"])+","+data["id"])
@@ -413,7 +417,7 @@ def embed_m(data:dict,lang):
                                                     view.add_item(button)
                                                     run=True
         else:
-            if text in data:text+=data['text'][lang]
+            if "text" in data:text+=data['text'][lang]
     elif data["type"]=="MINION":
         if 'text' in data:text+=data['text'][lang]
         treasureslist=[]
