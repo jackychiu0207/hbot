@@ -120,12 +120,18 @@ class CogMeta(type):
         By default, it's the same value as :attr:`description`.
 
         .. versionadded:: 2.0
+    group_nsfw: :class:`bool`
+        Whether the application command group is NSFW. This is only applicable for :class:`GroupCog` instances.
+        By default, it's ``False``.
+
+        .. versionadded:: 2.0
     """
 
     __cog_name__: str
     __cog_description__: str
     __cog_group_name__: str
     __cog_group_description__: str
+    __cog_group_nsfw__: bool
     __cog_settings__: Dict[str, Any]
     __cog_commands__: List[Command[Any, ..., Any]]
     __cog_app_commands__: List[Union[app_commands.Group, app_commands.Command[Any, ..., Any]]]
@@ -154,6 +160,7 @@ class CogMeta(type):
         attrs['__cog_settings__'] = kwargs.pop('command_attrs', {})
         attrs['__cog_name__'] = cog_name
         attrs['__cog_group_name__'] = group_name
+        attrs['__cog_group_nsfw__'] = kwargs.pop('group_nsfw', False)
 
         description = kwargs.pop('description', None)
         if description is None:
@@ -268,6 +275,7 @@ class Cog(metaclass=CogMeta):
             group = app_commands.Group(
                 name=cls.__cog_group_name__,
                 description=cls.__cog_group_description__,
+                nsfw=cls.__cog_group_nsfw__,
                 parent=None,
                 guild_ids=getattr(cls, '__discord_app_commands_default_guilds__', None),
                 guild_only=getattr(cls, '__discord_app_commands_guild_only__', False),
@@ -289,17 +297,19 @@ class Cog(metaclass=CogMeta):
                 # Update our parent's reference to our self
                 parent.remove_command(command.name)  # type: ignore
                 parent.add_command(command)  # type: ignore
-            elif self.__cog_app_commands_group__:
-                if hasattr(command, '__commands_is_hybrid__') and command.parent is None:
-                    parent = self.__cog_app_commands_group__
-                    app_command: Optional[Union[app_commands.Group, app_commands.Command[Self, ..., Any]]] = getattr(
-                        command, 'app_command', None
-                    )
-                    if app_command:
-                        app_command = app_command._copy_with(parent=parent, binding=self)
+
+            if hasattr(command, '__commands_is_hybrid__') and parent is None:
+                app_command: Optional[Union[app_commands.Group, app_commands.Command[Self, ..., Any]]] = getattr(
+                    command, 'app_command', None
+                )
+                if app_command:
+                    group_parent = self.__cog_app_commands_group__
+                    app_command = app_command._copy_with(parent=group_parent, binding=self)
+                    # The type checker does not see the app_command attribute even though it exists
+                    command.app_command = app_command  # type: ignore
+
+                    if self.__cog_app_commands_group__:
                         children.append(app_command)
-                        # The type checker does not see the app_command attribute even though it exists
-                        command.app_command = app_command  # type: ignore
 
         for command in cls.__cog_app_commands__:
             copy = command._copy_with(parent=self.__cog_app_commands_group__, binding=self)
