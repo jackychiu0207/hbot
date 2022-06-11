@@ -136,7 +136,7 @@ async def get_audio(interaction):
 
 async def audiobtn_callback(interaction:discord.Interaction):
     await interaction.response.defer(ephemeral=True,thinking=True)
-    view=View(timeout=600)
+    view=View(timeout=3600)
     options=[]
     for i,data in enumerate(cardlib2):
         if data["dbfId"]==int(dict(interaction.data)['custom_id']):
@@ -177,7 +177,7 @@ def embed_n(data:dict,lang:str):
                 await interaction.followup.edit_message(interaction.message.id,embed=embed,view=view)
     title=data['name'][lang]
     text=""
-    view=View(timeout=600)
+    view=View(timeout=3600)
     if 'text' in data:text+=data["text"][lang]+"\n\n"
     if 'flavor' in data:text+=data['flavor'][lang]
     imgurl=f"https://art.hearthstonejson.com/v1/render/latest/{lang}/512x/"+data["id"]+".png"
@@ -274,7 +274,7 @@ def embed_bg(data:dict,lang):
             if data["dbfId"]==int(dict(interaction.data)['custom_id']):
                 embed,view=embed_bg(data,lang)
                 await interaction.followup.edit_message(interaction.message.id,embed=embed,view=view)
-    view=View(timeout=600)
+    view=View(timeout=3600)
     title=data['name'][lang]
     text=""
     imgurl=f"https://art.hearthstonejson.com/v1/render/latest/{lang}/512x/"+data["id"]+".png"
@@ -430,7 +430,7 @@ def embed_bg(data:dict,lang):
     return embed,view
 
 def embed_m(data:dict,lang):
-    view=View(timeout=600)
+    view=View(timeout=3600)
     title=data['name'][lang]
     text=""
     imgurl=f"https://art.hearthstonejson.com/v1/render/latest/{lang}/512x/"+data["id"]+".png"
@@ -681,7 +681,7 @@ async def card(msg,cardname=None,lang="zhTW"):
         if lang in langlist:
             cardname=cardname.replace('_',' ')
             find=[]
-            view=View(timeout=600)
+            view=View(timeout=3600)
             for data in cardlib:
                 if "type" in data:
                     if data["type"]!="ENCHANTMENT" and lang in data["name"]:
@@ -690,7 +690,7 @@ async def card(msg,cardname=None,lang="zhTW"):
                             if group[cardname] in data["name"][lang]:
                                 find.append(data)
                         elif 'text' in data:
-                            if cardname in data["text"][lang].replace("\n",""):find.append(data)
+                            if cardname in change_text(data["text"][lang]):find.append(data)
             if len(find)==0:await msg.reply("查無卡牌！")
             elif len(find)==1:
                 if find[0]["set"]=="LETTUCE":
@@ -760,7 +760,7 @@ async def merc(msg,cardname=None,lang="zhTW"):
         if lang in langlist:
             cardname=cardname.replace('_',' ')
             find=[]
-            view=View(timeout=600)
+            view=View(timeout=3600)
             for data in cardlib:
                 if "type" in data and "set" in data:
                     if data["type"]!="ENCHANTMENT" and data["set"]=="LETTUCE" and lang in data["name"]:
@@ -769,7 +769,7 @@ async def merc(msg,cardname=None,lang="zhTW"):
                             if group[cardname] in data["name"][lang]:
                                 find.append(data)
                         elif 'text' in data:
-                            if cardname in data["text"][lang].replace("\n",""):find.append(data)
+                            if cardname in change_text(data["text"][lang]):find.append(data)
             if len(find)==0:await msg.reply("查無卡牌！")
             elif len(find)==1:
                 embed,view=embed_m(find[0],lang)
@@ -816,7 +816,7 @@ async def bg(msg,cardname=None,lang="zhTW"):
         if lang in langlist:
             cardname=cardname.replace('_',' ')
             find=[]
-            view=View(timeout=600)
+            view=View(timeout=3600)
             for data in cardlib:
                 if "type" in data and "set" in data:
                     if data["type"]!="ENCHANTMENT" and lang in data["name"]:
@@ -826,7 +826,7 @@ async def bg(msg,cardname=None,lang="zhTW"):
                                 if group[cardname] in data["name"][lang]:
                                     find.append(data)
                             elif 'text' in data:
-                                if cardname in data["text"][lang].replace("\n",""):find.append(data)
+                                if cardname in change_text(data["text"][lang]):find.append(data)
             if len(find)==0:await msg.reply("查無卡牌！")
             elif len(find)==1:
                 embed,view=embed_bg(find[0],lang)
@@ -916,7 +916,7 @@ def deck_embed(msg,deckcode,deckname,lang,m):
         elif dict(interaction.data)['custom_id']=="1":
             embed,view=deck_embed(msg,deckcode,deckname,lang,0)
             await interaction.followup.edit_message(interaction.message.id,embed=embed,view=view)
-    view=View(timeout=600)
+    view=View(timeout=3600)
     if m==0:
         button=Button(style=ButtonStyle.red,label="顯示進階資訊",custom_id="0")
     elif m==1:
