@@ -1,16 +1,18 @@
-from pydub import AudioSegment
-import wget
-import discord
-from discord.ext import commands
-from discord.ui import View,Button,TextInput,Button,Select
-from discord import SelectOption,ButtonStyle,File
-import requests
 import json
+import os
+from re import L
+
+import requests
+import wget
 from hearthstone.deckstrings import Deck
 from hearthstone.enums import FormatType
-import os
-from data import *
+from pydub import AudioSegment
 
+import discord
+from data import *
+from discord import ButtonStyle, File, SelectOption
+from discord.ext import commands
+from discord.ui import Button, Select, TextInput, View
 
 intents=discord.Intents.all()
 
@@ -19,16 +21,17 @@ bot = commands.Bot(command_prefix="t!",help_command=None,intents=intents)
 
 
 def openfile():
-    global cardlib,cardlibm,group,audiolib,merctreasures
+    global cardlib,cardlibm,group,cardlib2,merctreasures,wikipage
     try:
         cardlib=json.load(open('cards.json'))
         cardlibm=json.load(open('mercenaries.json'))
         group=json.load(open('group.json'))
-        audiolib=json.load(open('audio.json'))
+        cardlib2=json.load(open('cards2.json'))
         merctreasures=json.load(open('merctreasures.json'))
+        wikipage=json.load(open('wikipage.json'))
     except:
         return False
-print(openfile())
+openfile()
 env=json.load(open('.env'))
 @bot.command()
 async def reload(msg):
@@ -36,7 +39,8 @@ async def reload(msg):
         cardlibm.close()
         cardlib.close()
         group.close()
-        audiolib.close()
+        cardlib2.close()
+        wikipage.close()
     except:
         pass
     if openfile() is not False:
@@ -96,9 +100,14 @@ async def on_command_error(ctx,error):
 async def on_reaction_add(reaction:discord.Reaction,user:discord.User):
     if str(reaction.emoji)=="❌" and reaction.message.author==bot.user:await reaction.message.delete()
 
+def get_wikipage(dbfId:int):
+    for page in wikipage:
+        if page['dbfId']==dbfId:
+            return page['page']
+
 async def get_audio(interaction):
     await interaction.response.defer(thinking=True)
-    audioname=audiolib[int(dict(interaction.data)['values'][0].split(",")[0])]["audio"][dict(interaction.data)['values'][0].split(",")[1]]
+    audioname=cardlib2[int(dict(interaction.data)['values'][0].split(",")[0])]["audio"][dict(interaction.data)['values'][0].split(",")[1]]
     if len(audioname)==1:
         try:
             await interaction.followup.send(file=File("audiofile/"+audioname[0].split(".")[0]+".wav"))
@@ -127,49 +136,52 @@ async def get_audio(interaction):
 
 async def audiobtn_callback(interaction:discord.Interaction):
     await interaction.response.defer(ephemeral=True,thinking=True)
-    view=View()
+    view=View(timeout=600)
     options=[]
-    for i,data in enumerate(audiolib):
+    for i,data in enumerate(cardlib2):
         if data["dbfId"]==int(dict(interaction.data)['custom_id']):
-            if "audio" in data:
-                if len(data["audio"])==0:await interaction.followup.send("抱歉，找不到任何語音：(",ephemeral=True)
-                else:
-                    for name in data["audio"]:
-                        if name=="":options.append(SelectOption(label="(空的)",value=str(i)+","+name))
-                        else:options.append(SelectOption(label=name,value=str(i)+","+name))
-                    if len(options)<=25:
-                        select=Select(placeholder="選擇語音",options=options,min_values=1,max_values=1)
-                        select.callback=get_audio
-                        view.add_item(select)
-                    elif len(options)>25 and len(options)<=50:
-                        select1=Select(placeholder="選擇語音",options=options[:25],min_values=1,max_values=1)
-                        select2=Select(placeholder="選擇語音",options=options[25:],min_values=1,max_values=1)
-                        select1.callback=get_audio
-                        view.add_item(select1)
-                        select2.callback=get_audio
-                        view.add_item(select2)
-                    elif len(options)>25 and len(options)<=50:
-                        select1=Select(placeholder="選擇語音",options=options[:25],min_values=1,max_values=1)
-                        select2=Select(placeholder="選擇語音",options=options[25:50],min_values=1,max_values=1)
-                        select3=Select(placeholder="選擇語音",options=options[50:],min_values=1,max_values=1)
-                        select1.callback=get_audio
-                        view.add_item(select1)
-                        select2.callback=get_audio
-                        view.add_item(select2)
-                        select3.callback=get_audio
-                        view.add_item(select3)
-                    await interaction.user.send("選擇語音",view=view)
-                    await interaction.followup.send("請至私人訊息選擇",ephemeral=True)
+            for name in data["audio"]:
+                if name=="":options.append(SelectOption(label="(空的)",value=str(i)+","+name))
+                else:options.append(SelectOption(label=name,value=str(i)+","+name))
+            if len(options)<=25:
+                select=Select(placeholder="選擇語音",options=options,min_values=1,max_values=1)
+                select.callback=get_audio
+                view.add_item(select)
+            elif len(options)>25 and len(options)<=50:
+                select1=Select(placeholder="選擇語音",options=options[:25],min_values=1,max_values=1)
+                select2=Select(placeholder="選擇語音",options=options[25:],min_values=1,max_values=1)
+                select1.callback=get_audio
+                view.add_item(select1)
+                select2.callback=get_audio
+                view.add_item(select2)
+            elif len(options)>50 and len(options)<=75:
+                select1=Select(placeholder="選擇語音",options=options[:25],min_values=1,max_values=1)
+                select2=Select(placeholder="選擇語音",options=options[25:50],min_values=1,max_values=1)
+                select3=Select(placeholder="選擇語音",options=options[50:],min_values=1,max_values=1)
+                select1.callback=get_audio
+                view.add_item(select1)
+                select2.callback=get_audio
+                view.add_item(select2)
+                select3.callback=get_audio
+                view.add_item(select3)
+            await interaction.user.send("選擇語音",view=view)
+            await interaction.followup.send("請至私人訊息選擇",ephemeral=True)
     
 #cmds
 def embed_n(data:dict,lang:str):
+    async def select_new_embed(interaction):
+        await interaction.response.defer()
+        for data in cardlib:
+            if data["dbfId"]==int(dict(interaction.data)['values'][0]):
+                embed,view=embed_n(data,lang)
+                await interaction.followup.edit_message(interaction.message.id,embed=embed,view=view)
     title=data['name'][lang]
     text=""
-    view=View()
+    view=View(timeout=600)
     if 'text' in data:text+=data["text"][lang]+"\n\n"
     if 'flavor' in data:text+=data['flavor'][lang]
     imgurl=f"https://art.hearthstonejson.com/v1/render/latest/{lang}/512x/"+data["id"]+".png"
-    cardview=f"https://playhearthstone.com/cards/"+str(data["dbfId"])
+    cardview=get_wikipage(data["dbfId"])
     if requests.request('GET',imgurl).status_code==404:
         imgurl=f"https://art.hearthstonejson.com/v1/512x/"+data["id"]+".jpg"
         if requests.request('GET',imgurl).status_code==404:
@@ -178,24 +190,91 @@ def embed_n(data:dict,lang:str):
     embed = discord.Embed(title=title,url=cardview,description=text, color=0xff0000)
     embed.set_image(url=imgurl)
     embed.set_footer(text=str(data["dbfId"])+","+data["id"])
-    if data["type"]=="MINION" or data["type"]=="HERO":
-        audiobtn=Button(style=ButtonStyle.success,label="查看語音(繁體中文)",custom_id=str(data["dbfId"]))
-        audiobtn.callback=audiobtn_callback
-        view.add_item(audiobtn)
+    related_options=[]
+    for data2 in cardlib2:
+        if data2["dbfId"]==data["dbfId"]:
+            if "audio" in data2:
+                if len(data2["audio"])>0:
+                    audiobtn=Button(style=ButtonStyle.success,label="查看語音(繁體中文)",custom_id=str(data["dbfId"]))
+                    audiobtn.callback=audiobtn_callback
+                    view.add_item(audiobtn)
+            if "relatedCardDbfIds" in data2:
+                if len(data2["relatedCardDbfIds"])>0:
+                    for card in cardlib:
+                        if card["dbfId"] in data2["relatedCardDbfIds"]:
+                            try:
+                                if card["name"][lang]=="":label="(空的)"
+                                else:label=card["name"][lang]
+                            except:label="(空的)"
+                            try:
+                                if card["text"][lang]=="":description="(空的)"
+                                else:description=change_text(card["text"][lang])
+                            except:description="(空的)"
+                            related_options.append(SelectOption(label=f'{label}({card["dbfId"]},{card["id"]})',description=description,value=card["dbfId"]))
+        if "relatedCardDbfIds" in data2:
+            if len(data2["relatedCardDbfIds"])>0:
+                if data["dbfId"] in data2["relatedCardDbfIds"]:
+                    for card in cardlib:
+                        if card["dbfId"] == data2["dbfId"]:
+                            try:
+                                if card["name"][lang]=="":label="(空的)"
+                                else:label=card["name"][lang]
+                            except:label="(空的)"
+                            try:
+                                if card["text"][lang]=="":description="(空的)"
+                                else:description=change_text(card["text"][lang])
+                            except:description="(空的)"
+                            related_options.append(SelectOption(label=f'{label}({data2["dbfId"]},{data2["id"]})',description=description,value=data2["dbfId"]))
+    if len(related_options)>0:
+        if len(related_options)<=25:
+            select=Select(placeholder="選擇相關卡牌",options=related_options,min_values=1,max_values=1)
+            select.callback=select_new_embed
+            view.add_item(select)
+        elif len(related_options)>25 and len(related_options)<=50:
+            select1=Select(placeholder="選擇相關卡牌",options=related_options[:25],min_values=1,max_values=1)
+            select2=Select(placeholder="選擇相關卡牌",options=related_options[25:],min_values=1,max_values=1)
+            select1.callback=select_new_embed
+            view.add_item(select1)
+            select2.callback=select_new_embed
+            view.add_item(select2)
+        elif len(related_options)>50 and len(related_options)<=75:
+            select1=Select(placeholder="選擇相關卡牌",options=related_options[:25],min_values=1,max_values=1)
+            select2=Select(placeholder="選擇相關卡牌",options=related_options[25:50],min_values=1,max_values=1)
+            select3=Select(placeholder="選擇相關卡牌",options=related_options[50:],min_values=1,max_values=1)
+            select1.callback=select_new_embed
+            view.add_item(select1)
+            select2.callback=select_new_embed
+            view.add_item(select2)
+            select3.callback=select_new_embed
+            view.add_item(select3)
+        elif len(related_options)>75 and len(related_options)<=100:
+            select1=Select(placeholder="選擇相關卡牌",options=related_options[:25],min_values=1,max_values=1)
+            select2=Select(placeholder="選擇相關卡牌",options=related_options[25:50],min_values=1,max_values=1)
+            select3=Select(placeholder="選擇相關卡牌",options=related_options[50:75],min_values=1,max_values=1)
+            select4=Select(placeholder="選擇相關卡牌",options=related_options[75:],min_values=1,max_values=1)
+            select1.callback=select_new_embed
+            view.add_item(select1)
+            select2.callback=select_new_embed
+            view.add_item(select2)
+            select3.callback=select_new_embed
+            view.add_item(select3)
+            select4.callback=select_new_embed
+            view.add_item(select4)
     return embed,view
 def embed_bg(data:dict,lang):
-#    async def select_new_embed(interaction):
-#        for data in cardlib:
-#            if data["dbfId"]==int(dict(interaction.data)['values'][0]):
-#                embed,view=embed_bg(data,lang)
-#                await interaction.response.edit_message(embed=embed,view=view)
+    async def select_new_embed(interaction:discord.Interaction):
+        await interaction.response.defer()
+        for data in cardlib:
+            if data["dbfId"]==int(dict(interaction.data)['values'][0]):
+                embed,view=embed_bg(data,lang)
+                await interaction.followup.edit_message(interaction.message.id,embed=embed,view=view)
     async def button_new_embed(interaction):
         await interaction.response.defer()
         for data in cardlib:
             if data["dbfId"]==int(dict(interaction.data)['custom_id']):
                 embed,view=embed_bg(data,lang)
                 await interaction.followup.edit_message(interaction.message.id,embed=embed,view=view)
-    view=View()
+    view=View(timeout=600)
     title=data['name'][lang]
     text=""
     imgurl=f"https://art.hearthstonejson.com/v1/render/latest/{lang}/512x/"+data["id"]+".png"
@@ -278,18 +357,84 @@ def embed_bg(data:dict,lang):
     embed = discord.Embed(title=title,url=cardview,description=text, color=0xff0000)
     embed.set_image(url=imgurl)
     embed.set_footer(text=str(data["dbfId"])+","+data["id"])
-    if data["type"]=="MINION" or data["type"]=="HERO":
-        audiobtn=Button(style=ButtonStyle.success,label="查看語音(繁體中文)",custom_id=str(data["dbfId"]))
-        audiobtn.callback=audiobtn_callback
-        view.add_item(audiobtn)
+    related_options=[]
+    for data2 in cardlib2:
+        if data2["dbfId"]==data["dbfId"]:
+            if "audio" in data2:
+                if len(data2["audio"])>0:
+                    audiobtn=Button(style=ButtonStyle.success,label="查看語音(繁體中文)",custom_id=str(data["dbfId"]))
+                    audiobtn.callback=audiobtn_callback
+                    view.add_item(audiobtn)
+            if "relatedCardDbfIds" in data2:
+                if len(data2["relatedCardDbfIds"])>0:
+                    for card in cardlib:
+                        if card["dbfId"] in data2["relatedCardDbfIds"]:
+                            try:
+                                if card["name"][lang]=="":label="(空的)"
+                                else:label=card["name"][lang]
+                            except:label="(空的)"
+                            try:
+                                if card["text"][lang]=="":description="(空的)"
+                                else:description=change_text(card["text"][lang])
+                            except:description="(空的)"
+                            related_options.append(SelectOption(label=f'{label}({card["dbfId"]},{card["id"]})',description=description,value=card["dbfId"]))
+        if "relatedCardDbfIds" in data2:
+            if len(data2["relatedCardDbfIds"])>0:
+                if data["dbfId"] in data2["relatedCardDbfIds"]:
+                    for card in cardlib:
+                        if card["dbfId"] == data2["dbfId"]:
+                            try:
+                                if card["name"][lang]=="":label="(空的)"
+                                else:label=card["name"][lang]
+                            except:label="(空的)"
+                            try:
+                                if card["text"][lang]=="":description="(空的)"
+                                else:description=change_text(card["text"][lang])
+                            except:description="(空的)"
+                            related_options.append(SelectOption(label=f'{label}({data2["dbfId"]},{data2["id"]})',description=description,value=data2["dbfId"]))
+    if len(related_options)>0:
+        if len(related_options)<=25:
+            select=Select(placeholder="選擇相關卡牌",options=related_options,min_values=1,max_values=1)
+            select.callback=select_new_embed
+            view.add_item(select)
+        elif len(related_options)>25 and len(related_options)<=50:
+            select1=Select(placeholder="選擇相關卡牌",options=related_options[:25],min_values=1,max_values=1)
+            select2=Select(placeholder="選擇相關卡牌",options=related_options[25:],min_values=1,max_values=1)
+            select1.callback=select_new_embed
+            view.add_item(select1)
+            select2.callback=select_new_embed
+            view.add_item(select2)
+        elif len(related_options)>50 and len(related_options)<=75:
+            select1=Select(placeholder="選擇相關卡牌",options=related_options[:25],min_values=1,max_values=1)
+            select2=Select(placeholder="選擇相關卡牌",options=related_options[25:50],min_values=1,max_values=1)
+            select3=Select(placeholder="選擇相關卡牌",options=related_options[50:],min_values=1,max_values=1)
+            select1.callback=select_new_embed
+            view.add_item(select1)
+            select2.callback=select_new_embed
+            view.add_item(select2)
+            select3.callback=select_new_embed
+            view.add_item(select3)
+        elif len(related_options)>75 and len(related_options)<=100:
+            select1=Select(placeholder="選擇相關卡牌",options=related_options[:25],min_values=1,max_values=1)
+            select2=Select(placeholder="選擇相關卡牌",options=related_options[25:50],min_values=1,max_values=1)
+            select3=Select(placeholder="選擇相關卡牌",options=related_options[50:75],min_values=1,max_values=1)
+            select4=Select(placeholder="選擇相關卡牌",options=related_options[75:],min_values=1,max_values=1)
+            select1.callback=select_new_embed
+            view.add_item(select1)
+            select2.callback=select_new_embed
+            view.add_item(select2)
+            select3.callback=select_new_embed
+            view.add_item(select3)
+            select4.callback=select_new_embed
+            view.add_item(select4)
     return embed,view
 
 def embed_m(data:dict,lang):
-    view=View()
+    view=View(timeout=600)
     title=data['name'][lang]
     text=""
     imgurl=f"https://art.hearthstonejson.com/v1/render/latest/{lang}/512x/"+data["id"]+".png"
-    cardview=f"https://playhearthstone.com/zh-tw/mercenaries/"+str(data["dbfId"])
+    cardview=get_wikipage(data["dbfId"])
     if requests.request('GET',imgurl).status_code==404:
         imgurl=f"https://art.hearthstonejson.com/v1/512x/"+data["id"]+".jpg"
         if requests.request('GET',imgurl).status_code==404:
@@ -426,10 +571,76 @@ def embed_m(data:dict,lang):
     embed = discord.Embed(title=title,url=cardview,description=text, color=0xff0000)
     embed.set_image(url=imgurl)
     embed.set_footer(text=str(data["dbfId"])+","+data["id"])
-    if data["type"]=="MINION" or data["type"]=="HERO":
-        audiobtn=Button(style=ButtonStyle.success,label="查看語音(繁體中文)",custom_id=str(data["dbfId"]))
-        audiobtn.callback=audiobtn_callback
-        view.add_item(audiobtn)
+    related_options=[]
+    for data2 in cardlib2:
+        if data2["dbfId"]==data["dbfId"]:
+            if "audio" in data2:
+                if len(data2["audio"])>0:
+                    audiobtn=Button(style=ButtonStyle.success,label="查看語音(繁體中文)",custom_id=str(data["dbfId"]))
+                    audiobtn.callback=audiobtn_callback
+                    view.add_item(audiobtn)
+            if "relatedCardDbfIds" in data2:
+                if len(data2["relatedCardDbfIds"])>0:
+                    for card in cardlib:
+                        if card["dbfId"] in data2["relatedCardDbfIds"]:
+                            try:
+                                if card["name"][lang]=="":label="(空的)"
+                                else:label=card["name"][lang]
+                            except:label="(空的)"
+                            try:
+                                if card["text"][lang]=="":description="(空的)"
+                                else:description=change_text(card["text"][lang])
+                            except:description="(空的)"
+                            related_options.append(SelectOption(label=f'{label}({card["dbfId"]},{card["id"]})',description=description,value=card["dbfId"]))
+        if "relatedCardDbfIds" in data2:
+            if len(data2["relatedCardDbfIds"])>0:
+                if data["dbfId"] in data2["relatedCardDbfIds"]:
+                    for card in cardlib:
+                        if card["dbfId"] == data2["dbfId"]:
+                            try:
+                                if card["name"][lang]=="":label="(空的)"
+                                else:label=card["name"][lang]
+                            except:label="(空的)"
+                            try:
+                                if card["text"][lang]=="":description="(空的)"
+                                else:description=change_text(card["text"][lang])
+                            except:description="(空的)"
+                            related_options.append(SelectOption(label=f'{label}({data2["dbfId"]},{data2["id"]})',description=description,value=data2["dbfId"]))
+    if len(related_options)>0:
+        if len(related_options)<=25:
+            select=Select(placeholder="選擇相關卡牌",options=related_options,min_values=1,max_values=1)
+            select.callback=select_new_embed
+            view.add_item(select)
+        elif len(related_options)>25 and len(related_options)<=50:
+            select1=Select(placeholder="選擇相關卡牌",options=related_options[:25],min_values=1,max_values=1)
+            select2=Select(placeholder="選擇相關卡牌",options=related_options[25:],min_values=1,max_values=1)
+            select1.callback=select_new_embed
+            view.add_item(select1)
+            select2.callback=select_new_embed
+            view.add_item(select2)
+        elif len(related_options)>50 and len(related_options)<=75:
+            select1=Select(placeholder="選擇相關卡牌",options=related_options[:25],min_values=1,max_values=1)
+            select2=Select(placeholder="選擇相關卡牌",options=related_options[25:50],min_values=1,max_values=1)
+            select3=Select(placeholder="選擇相關卡牌",options=related_options[50:],min_values=1,max_values=1)
+            select1.callback=select_new_embed
+            view.add_item(select1)
+            select2.callback=select_new_embed
+            view.add_item(select2)
+            select3.callback=select_new_embed
+            view.add_item(select3)
+        elif len(related_options)>75 and len(related_options)<=100:
+            select1=Select(placeholder="選擇相關卡牌",options=related_options[:25],min_values=1,max_values=1)
+            select2=Select(placeholder="選擇相關卡牌",options=related_options[25:50],min_values=1,max_values=1)
+            select3=Select(placeholder="選擇相關卡牌",options=related_options[50:75],min_values=1,max_values=1)
+            select4=Select(placeholder="選擇相關卡牌",options=related_options[75:],min_values=1,max_values=1)
+            select1.callback=select_new_embed
+            view.add_item(select1)
+            select2.callback=select_new_embed
+            view.add_item(select2)
+            select3.callback=select_new_embed
+            view.add_item(select3)
+            select4.callback=select_new_embed
+            view.add_item(select4)
     return embed,view
 
 @bot.command()
@@ -470,7 +681,7 @@ async def card(msg,cardname=None,lang="zhTW"):
         if lang in langlist:
             cardname=cardname.replace('_',' ')
             find=[]
-            view=View()
+            view=View(timeout=600)
             for data in cardlib:
                 if "type" in data:
                     if data["type"]!="ENCHANTMENT" and lang in data["name"]:
@@ -549,7 +760,7 @@ async def merc(msg,cardname=None,lang="zhTW"):
         if lang in langlist:
             cardname=cardname.replace('_',' ')
             find=[]
-            view=View()
+            view=View(timeout=600)
             for data in cardlib:
                 if "type" in data and "set" in data:
                     if data["type"]!="ENCHANTMENT" and data["set"]=="LETTUCE" and lang in data["name"]:
@@ -605,7 +816,7 @@ async def bg(msg,cardname=None,lang="zhTW"):
         if lang in langlist:
             cardname=cardname.replace('_',' ')
             find=[]
-            view=View()
+            view=View(timeout=600)
             for data in cardlib:
                 if "type" in data and "set" in data:
                     if data["type"]!="ENCHANTMENT" and lang in data["name"]:
@@ -705,7 +916,7 @@ def deck_embed(msg,deckcode,deckname,lang,m):
         elif dict(interaction.data)['custom_id']=="1":
             embed,view=deck_embed(msg,deckcode,deckname,lang,0)
             await interaction.followup.edit_message(interaction.message.id,embed=embed,view=view)
-    view=View()
+    view=View(timeout=600)
     if m==0:
         button=Button(style=ButtonStyle.red,label="顯示進階資訊",custom_id="0")
     elif m==1:
@@ -725,59 +936,6 @@ async def deck(msg,deckcode=None,deckname=None,lang="zhTW"):
             embed,view=deck_embed(msg,deckcode,deckname,lang,0)
             await msg.reply(embed=embed,view=view)
         else:await msg.reply("語系錯誤!全部的語系:\n"+",".join(langlist))
-
-#@bot.command()
-#async def builddeck(msg,lang="zhTW"):
-#    async def deckimport_callbak(interaction:discord.Interaction):
-#        await interaction.response.defer()
-#        print(interaction)
-#        deckcode=dict(interaction.data)['values'][0]
-#        heroclass=""
-#        deckname=msg.author.display_name+" 的套牌"
-#        deck = Deck.from_deckstring(deckcode)
-#        if deck.format==FormatType.FT_WILD:mode="開放模式(wild)"
-#        elif deck.format==FormatType.FT_STANDARD:mode="標準模式(standard)"
-#        elif deck.format==FormatType.FT_CLASSIC:mode="經典模式(classic)"
-#        else: mode="其他模式(other)"
-#        unfind=deck.cards.copy()
-#        find=[]
-#        deckhero=""
-#        heroID=""
-#        for data in cardlib:
-#            if deckhero=="" and deck.heroes[0]==data["dbfId"]:
-#                deckhero=data["name"][lang]
-#                heroID=data["id"]
-#                heroclass=classes[data['cardClass']]
-#            for i,cardid in enumerate(unfind):
-#                if cardid[0]==data["dbfId"]:
-#                    card=data.copy()
-#                    card.update({"count":cardid[1]})
-#                    find.append(card)
-#                    del unfind[i]
-#                    break
-#        txt=""
-#        count=0
-#        cost=0
-#        find.sort(key=lambda x:x["cost"])
-#        for data in find:
-#            txt+=str(data["count"]) +" × " +"("+str(data["cost"])+") **"+ data["name"][lang]+ "** (" + str(data["dbfId"])+","+data["id"]+")\n"
-#            count+=data["count"]
-#            if "CORE"!=data["set"] and "rarity" in data:
-#                if data["rarity"]=="COMMON":cost+=40*data["count"]
-#                elif data["rarity"]=="RARE":cost+=100*data["count"]
-#                elif data["rarity"]=="EPIC":cost+=400*data["count"]
-#                elif data["rarity"]=="LEGENDARY":cost+=1600*data["count"]
-#        embed=discord.Embed(title=deckname, description=f'{mode} 職業:{heroclass}(英雄:{deckhero})\n共{str(count)}張牌\n\n'+txt,url=f'https://playhearthstone.com/zh-tw/deckbuilder?deckcode={deckcode}',color=0xff0000)
-#        embed.set_thumbnail(url="https://art.hearthstonejson.com/v1/orig/"+heroID+".png")
-#        embed.set_footer(text="所需魔塵:"+str(cost))
-#        await interaction.followup.edit_message(interaction.message.id,embed=embed,view=view)
-#    view=View()
-#    deckimport=TextInput(label="從現有牌組匯入")
-#    deckimport.callback=deckimport_callbak
-#    view.add_item(deckimport)
-#    newdeckbtn=Button(label="建立新的空牌組")
-#    await msg.reply("",view=view)
-
 
 
 DCTOKEN=env['DCTOKEN']
