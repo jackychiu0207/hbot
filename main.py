@@ -1,9 +1,7 @@
 import json
 import os
-from re import L
 
 import requests
-import wget
 from hearthstone.deckstrings import Deck
 from hearthstone.enums import FormatType
 from pydub import AudioSegment
@@ -94,7 +92,7 @@ async def on_ready():
     
 @bot.event
 async def on_command_error(ctx,error):
-    await ctx.message.reply("錯誤:\n`"+str(error)+"`\n請檢查指令是否輸入錯誤，或請聯繫`窮困潦島's 毫窄?#7494`\n如果想刪除這個訊息，可以給這個訊息添加表情符號:❌(`:x:`)")
+    await ctx.message.reply("錯誤:\n`"+str(error)+"`\n請檢查指令是否輸入錯誤，或請、聯繫`窮困潦島's 毫窄?#7494`\n如果想刪除這個訊息，可以給這個訊息添加表情符號 ❌ (`:x:`)")
 
 @bot.event
 async def on_reaction_add(reaction:discord.Reaction,user:discord.User):
@@ -136,7 +134,7 @@ async def get_audio(interaction):
 
 async def audiobtn_callback(interaction:discord.Interaction):
     await interaction.response.defer(ephemeral=True,thinking=True)
-    view=View(timeout=3600)
+    view=View(timeout=43200)
     options=[]
     for i,data in enumerate(cardlib2):
         if data["dbfId"]==int(dict(interaction.data)['custom_id']):
@@ -177,7 +175,7 @@ def embed_n(data:dict,lang:str):
                 await interaction.followup.edit_message(interaction.message.id,embed=embed,view=view)
     title=data['name'][lang]
     text=""
-    view=View(timeout=3600)
+    view=View(timeout=43200)
     if 'text' in data:text+=data["text"][lang]+"\n\n"
     if 'flavor' in data:text+=data['flavor'][lang]
     imgurl=f"https://art.hearthstonejson.com/v1/render/latest/{lang}/512x/"+data["id"]+".png"
@@ -274,7 +272,7 @@ def embed_bg(data:dict,lang):
             if data["dbfId"]==int(dict(interaction.data)['custom_id']):
                 embed,view=embed_bg(data,lang)
                 await interaction.followup.edit_message(interaction.message.id,embed=embed,view=view)
-    view=View(timeout=3600)
+    view=View(timeout=43200)
     title=data['name'][lang]
     text=""
     imgurl=f"https://art.hearthstonejson.com/v1/render/latest/{lang}/512x/"+data["id"]+".png"
@@ -430,7 +428,7 @@ def embed_bg(data:dict,lang):
     return embed,view
 
 def embed_m(data:dict,lang):
-    view=View(timeout=3600)
+    view=View(timeout=43200)
     title=data['name'][lang]
     text=""
     imgurl=f"https://art.hearthstonejson.com/v1/render/latest/{lang}/512x/"+data["id"]+".png"
@@ -681,7 +679,7 @@ async def card(msg,cardname=None,lang="zhTW"):
         if lang in langlist:
             cardname=cardname.replace('_',' ')
             find=[]
-            view=View(timeout=3600)
+            view=View(timeout=43200)
             for data in cardlib:
                 if "type" in data:
                     if data["type"]!="ENCHANTMENT" and lang in data["name"]:
@@ -760,7 +758,7 @@ async def merc(msg,cardname=None,lang="zhTW"):
         if lang in langlist:
             cardname=cardname.replace('_',' ')
             find=[]
-            view=View(timeout=3600)
+            view=View(timeout=43200)
             for data in cardlib:
                 if "type" in data and "set" in data:
                     if data["type"]!="ENCHANTMENT" and data["set"]=="LETTUCE" and lang in data["name"]:
@@ -816,7 +814,7 @@ async def bg(msg,cardname=None,lang="zhTW"):
         if lang in langlist:
             cardname=cardname.replace('_',' ')
             find=[]
-            view=View(timeout=3600)
+            view=View(timeout=43200)
             for data in cardlib:
                 if "type" in data and "set" in data:
                     if data["type"]!="ENCHANTMENT" and lang in data["name"]:
@@ -916,7 +914,7 @@ def deck_embed(msg,deckcode,deckname,lang,m):
         elif dict(interaction.data)['custom_id']=="1":
             embed,view=deck_embed(msg,deckcode,deckname,lang,0)
             await interaction.followup.edit_message(interaction.message.id,embed=embed,view=view)
-    view=View(timeout=3600)
+    view=View(timeout=43200)
     if m==0:
         button=Button(style=ButtonStyle.red,label="顯示進階資訊",custom_id="0")
     elif m==1:
