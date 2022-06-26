@@ -56,7 +56,7 @@ async def help(msg):
     embed.add_field(name="t!bg",value="空格請用下滑線\'_\'代替\n使用方法:\"t!bg 戰場卡牌 語言(選填)\"\n例子:`t!bg 餅乾大廚`", inline=False)
     embed.add_field(name="t!deck",value="使用方法:\"t!deck 牌組代碼 牌組名稱(選填) 語言(選填)\"\n例子1(無套牌名稱):\n`t!deck AAEBAaIHDpoC+AfpEZfBAt/jArvvAuvwAoSmA6rLA4/OA/bWA4PkA72ABJWfBAi0AcQB7QL1uwLi3QPn3QOS5AP+7gMA`\n例子2(有套牌名稱):\n`t!deck AAEBAaIHDpoC+AfpEZfBAt/jArvvAuvwAoSmA6rLA4/OA/bWA4PkA72ABJWfBAi0AcQB7QL1uwLi3QPn3QOS5AP+7gMA 無限潛行`", inline=False)
     embed.add_field(name="t!reload",value="直接輸入，機器人會更新資料庫。當找不到覺得存在的卡牌時，可以使用此指令。", inline=False)
-    embed.add_field(name="t!stop",value="直接輸入，機器人會直接停止。只有在緊急狀況才可使用，勿隨意使用", inline=False)
+    embed.add_field(name="t!shorter",value="使用方法：\"t!shorter 標題 內容\"，能縮短長文"
     await msg.reply(embed=embed)
 
 
@@ -935,6 +935,21 @@ async def deck(msg,deckcode=None,deckname=None,lang="zhTW"):
             await msg.reply(embed=embed,view=view)
         else:await msg.reply("語系錯誤!全部的語系:\n"+",".join(langlist))
 
+@bot.command()
+async def shorter(msg,title=None,text=None):
+    async def btncallback(interaction):
+        await interaction.response.send_message(text,ephemeral=True)
+    if title is None or text is None:
+        await msg.reply("該指令使用方法：\"t!shorter 標題 內容\"")
+    if len(title)>20:
+        await msg.reply("標題不能超過20字")
+    else:
+        view=View(timeout=43200)
+        button=Button(label="點擊以查看文字")
+        button.callback=btncallback
+        view.add_item(button)
+        await msg.channel.send(f'<@{msg.author.id}> 發表了{len(text)}長文，標題是：\n{title}',view=view)
+        await msg.message.delete()
 
 DCTOKEN=env['DCTOKEN']
 #loop
